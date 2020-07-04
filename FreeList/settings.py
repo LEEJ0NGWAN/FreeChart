@@ -35,7 +35,7 @@ ALLOWED_HOSTS = ['*']
 
 # Application definition
 
-INSTALLED_APPS = [
+DJANGO_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -44,6 +44,18 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.humanize',
 ]
+
+EXTERNAL_APPS = [
+    'rest_framework',
+    'rest_framework.authtoken',
+]
+
+PROJECT_APPS = [
+    'account',
+    'common',
+]
+
+INSTALLED_APPS = DJANGO_APPS + EXTERNAL_APPS + PROJECT_APPS
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -166,4 +178,4 @@ REST_FRAMEWORK = {
 SESSION_COOKIE_AGE = 52560000
 
 # TODO: 유저부분 CRUD
-# AUTH_USER_MODEL = 'account.User'
+AUTH_USER_MODEL = 'account.User'
