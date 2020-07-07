@@ -70,3 +70,46 @@ def serialize(value, **kwargs):
         serialize(element, **kwargs)
         for element in value
     ]
+
+@serialize.of(collections.Mapping)
+def serialize(value, **kwargs):
+    result = collections.OrderedDict()
+    for key, value in value.items():
+        result[key] = serialize(value, **kwargs)
+    return result
+
+
+@serialize.of(datetime.datetime)
+@serialize.of(datetime.date)
+def serialize(value, **kwargs):
+    return value.isoformat()
+
+
+@serialize.of(datetime.date)
+def serialize(value, **kwargs):
+    return value.isoformat()
+
+
+@serialize.of(datetime.time)
+def serialize(value, **kwargs):
+    return value.replace(microsecond=0).isoformat()
+
+
+@serialize.of(uuid.UUID)
+def serialize(value, **kwargs):
+    return str(value)
+
+
+@serialize.of(SimpleLazyObject)
+def serialize(obj, **kwargs):
+    return serialize(obj._wrapped, **kwargs)
+
+@serialize.of(User)
+def serialize(user, **kwargs):
+    result = {
+        'id': user.id,
+        'email': user.email,
+        'name': user.name,
+        'email_verified': user.email_verified
+    }
+    return serialize(result, **kwargs)
