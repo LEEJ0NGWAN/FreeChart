@@ -118,3 +118,4 @@ def serialize(user, **kwargs):
     }
 
     return serialize(result, **kwargs)
+
