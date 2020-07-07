@@ -1,14 +1,16 @@
+import uuid
+import datetime
 import collections
 from itertools import chain
 from threading import current_thread
-from threading import Thread
+from threading import Thread as _Thread
 from typequery import GenericMethod
 from django.db import connection
 from django.contrib.contenttypes.models import ContentType
 from django.utils.functional import SimpleLazyObject
-from FreeList.account.models import User
+from account.models import User
 
-class Thread(threading.Thread):
+class Thread(_Thread):
     def __init__(self, group=None, target=None, name=None,
                  args=(), kwargs=None):
         super().__init__(group, target, name, args, kwargs)
@@ -114,4 +116,5 @@ def serialize(user, **kwargs):
         'name': user.name,
         'email_verified': user.email_verified
     }
+
     return serialize(result, **kwargs)
