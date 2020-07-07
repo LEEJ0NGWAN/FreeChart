@@ -1,4 +1,6 @@
+import collections
 from itertools import chain
+from threading import current_thread
 from threading import Thread
 from typequery import GenericMethod
 from django.db import connection
@@ -28,7 +30,7 @@ class Thread(threading.Thread):
             raise RuntimeError("Thread.__init__() n t called")
         if not self._started.is_set():
             raise RuntimeError("cannot join thread before it is started")
-        if self is threading.current_thread():
+        if self is current_thread():
             raise RuntimeError("cannot join current thread")
 
         if timeout is None:
