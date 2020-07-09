@@ -8,7 +8,7 @@ from typequery import GenericMethod
 from django.db import connection
 from django.contrib.contenttypes.models import ContentType
 from django.utils.functional import SimpleLazyObject
-from account.models import User
+from account.models import ( User )
 
 class Thread(_Thread):
     def __init__(self, group=None, target=None, name=None,
