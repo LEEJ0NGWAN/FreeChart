@@ -2,13 +2,13 @@ import uuid
 import datetime
 import collections
 from itertools import chain
+from functools import singledispatch
 from threading import current_thread
 from threading import Thread as _Thread
-from typequery import GenericMethod
 from django.db import connection
 from django.contrib.contenttypes.models import ContentType
 from django.utils.functional import SimpleLazyObject
-from account.models import ( User )
+from account.models import User
 
 class Thread(_Thread):
     def __init__(self, group=None, target=None, name=None,
@@ -43,26 +43,26 @@ class Thread(_Thread):
             return self.result
 
 
-serialize = GenericMethod('serialize')
-
-data = dict()
-
-
 def _chunker(seq, size):
     return (seq[pos:pos + size] for pos in range(0, len(seq), size))
 
 
-@serialize.of(bool)
-@serialize.of(type(None))
-@serialize.of(int)
-@serialize.of(float)
-@serialize.of(str)
+@singledispatch
 def serialize(value, **kwargs):
+    pass
+
+
+@serialize.register(bool)
+@serialize.register(type(None))
+@serialize.register(int)
+@serialize.register(float)
+@serialize.register(str)
+def value_parse(value, **kwargs):
     return value
 
 
-@serialize.of(collections.Iterable)
-def serialize(value, **kwargs):
+@serialize.register(collections.Iterable)
+def iter_parse(value, **kwargs):
     value = list(value)
     if len(value) > 10:
         thread_list = [
@@ -75,45 +75,40 @@ def serialize(value, **kwargs):
         for element in value
     ]
 
-@serialize.of(collections.Mapping)
-def serialize(value, **kwargs):
+
+@serialize.register(collections.Mapping)
+def map_parse(value, **kwargs):
     result = collections.OrderedDict()
     for key, value in value.items():
         result[key] = serialize(value, **kwargs)
     return result
 
-
-@serialize.of(datetime.datetime)
-@serialize.of(datetime.date)
-def serialize(value, **kwargs):
+@serialize.register(datetime.datetime)
+@serialize.register(datetime.date)
+def date_parse(value, **kwargs):
     return value.isoformat()
 
 
-@serialize.of(datetime.date)
-def serialize(value, **kwargs):
-    return value.isoformat()
-
-
-@serialize.of(datetime.time)
-def serialize(value, **kwargs):
+@serialize.register(datetime.time)
+def time_parse(value, **kwargs):
     return value.replace(microsecond=0).isoformat()
 
 
-@serialize.of(uuid.UUID)
-def serialize(value, **kwargs):
+@serialize.register(uuid.UUID)
+def uuid_parse(value, **kwargs):
     return str(value)
 
 
-@serialize.of(SimpleLazyObject)
-def serialize(obj, **kwargs):
+@serialize.register(SimpleLazyObject)
+def slo_parse(obj, **kwargs):
     return serialize(obj._wrapped, **kwargs)
 
-@serialize.of(User)
-def serialize(user, **kwargs):
+@serialize.register(User)
+def user_parse(user, **kwargs):
     result = {
         'id': user.id,
         'email': user.email,
-        'name': user.name,
+        'username': user.username,
         'email_verified': user.email_verified
     }
 
