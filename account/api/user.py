@@ -13,9 +13,8 @@ from rest_framework.status import (
 )
 from account.models import User
 from account.models import id_generator as random_id
-# from FreeList.account.models import User
-from utils import serialize
-# from FreeList.utils import serialize
+from utils.serialize import serialize
+
 
 # TODO: USER CRUD
 # TODO: 시리얼라이징 오류 픽스 (User 모델 수정 요구?)
