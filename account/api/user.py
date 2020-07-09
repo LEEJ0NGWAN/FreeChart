@@ -50,6 +50,9 @@ class UserController(View):
 
             if User.objects.filter(email=email).exists():
                 return JsonResponse({}, status=HTTP_409_CONFLICT)
+            
+            if User.objects.filter(username=username).exists():
+                return JsonResponse({}, status=HTTP_409_CONFLICT)
 
             new_user = User.objects.create_user(
                 username=username,
@@ -61,7 +64,7 @@ class UserController(View):
             return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
 
         login(request, new_user)
-
+        
         return JsonResponse(serialize({
             'user': new_user,
         }))
