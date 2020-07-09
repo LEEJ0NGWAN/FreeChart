@@ -9,7 +9,6 @@ from django.contrib.auth.validators import UnicodeUsernameValidator
 def id_generator(size=32, chars=ascii_uppercase + digits):
     return ''.join(random_choice(chars) for _ in range(size))
 
-# TODO: User Model 새로 만들기
 class UserManager(BaseUserManager):
     use_in_migrations = True
 

@@ -1,5 +1,5 @@
 import json
-
+import datetime
 from django.contrib.auth import (
     login, logout
 )
@@ -15,9 +15,8 @@ from account.models import User
 from account.models import id_generator as random_id
 from utils.serialize import serialize
 
+now = datetime.datetime.now
 
-# TODO: USER CRUD
-# TODO: 시리얼라이징 오류 픽스 (User 모델 수정 요구?)
 @method_decorator(csrf_exempt, name='dispatch')
 class UserController(View):
     def get(self, request):
@@ -70,7 +69,45 @@ class UserController(View):
         }))
 
     def put(self, request):
-        pass
+        if not request.user.is_authenticated:
+            return JsonResponse({}, status=HTTP_401_UNAUTHORIZED)
+
+        user = request.user
+        data = json.loads(request.body.decode("utf-8"))
+
+        if 'usesrname' in data:
+            user.username = data['username']
+        
+        if 'password' in data:
+            user.password = data['password']
+        
+        user.save()
+
+        return JsonResponse({
+            'user': user
+        })
+
     def delete(self, request):
-        pass
+        if not request.user.is_authenticated:
+            return JsonResponse({}, status=HTTP_401_UNAUTHORIZED)
+
+        data = request.GET
+        user = request.user
+
+        if 'id' not in data:
+            return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
+
+        if int(data['id']) != user.id:
+            return JsonResponse({}, status=HTTP_403_FORBIDDEN)
+
+        user.is_active = False
+        user.set_unusable_password()
+        user.email = f'{user.email}@leave'+str(now())
+        user.username = f'{user.username}@leave'+str(now())
+        user.save()
+        logout(request)
+        
+        return JsonResponse({
+            'user_id': user.id
+        })
 
