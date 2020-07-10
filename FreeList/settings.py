@@ -69,7 +69,7 @@ MIDDLEWARE = [
 
 # 세션 엔진을 디폴트 벡엔드 디비에서 클라이언트 브라우저 쿠키로 변경
 SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
-SESSION_COOKIE_SECURE = False
+# SESSION_COOKIE_SECURE = False
 
 ROOT_URLCONF = 'FreeList.urls'
 
