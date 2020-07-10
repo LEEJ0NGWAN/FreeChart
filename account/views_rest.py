@@ -4,9 +4,9 @@ from django.contrib.auth import (
     authenticate, login, logout, update_session_auth_hash
 )
 
-from rest_framework.permissions import AllowAny
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view
 from django.views.decorators.csrf import csrf_exempt
+from django.views.generic import View
 from django.http import JsonResponse
 
 from rest_framework.status import (
@@ -18,7 +18,6 @@ from rest_framework.status import (
 from account.models import User
 from utils.serialize import serialize
 
-# TODO: login & logout
 
 @api_view(["POST"])
 @csrf_exempt
@@ -61,9 +60,6 @@ def login(request):
 
     key = user._meta.pk.value_to_string(user)
 
-    # session_auth_hash = ''
-
-    # if hasattr(user, 'get_session_auth_hash'):
     session_auth_hash = user.get_session_auth_hash()
     
     request.session[SESSION_KEY] = key
@@ -77,7 +73,11 @@ def login(request):
         'session_key': request.session.session_key
     })
 
-@api_view(["POST"])
-@permission_classes((AllowAny,))
-def logout(request):
-    pass
+class Logout(View):
+    def post(self, request):
+        if not request.user.is_authenticated:
+            return JsonResponse({}, status=HTTP_401_UNAUTHORIZED)
+
+        logout(request)
+        return JsonResponse({})
+
