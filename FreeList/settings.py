@@ -182,7 +182,7 @@ AUTH_USER_MODEL = 'account.User'
 
 # SMTP setting
 # USER & PASSWORD는 email_setting.py 파일 안에 설정 후 사용합니다
-import email_setting
+from . import email_setting
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.daum.net'
 EMAIL_USE_SSL = True
