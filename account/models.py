@@ -48,3 +48,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = []
     USERNAME_FIELD = 'email'
 
+
+# TODO: 비밀번호 재설정에 대해 redis key-pair or PostgreSQL TABLE?
+# TODO: 이메일 인증에 대해 redis key-pair or PostgreSQL TABLE?
+
