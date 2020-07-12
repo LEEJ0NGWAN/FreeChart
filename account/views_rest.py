@@ -17,6 +17,7 @@ from rest_framework.status import (
 
 from account.models import User
 from utils.serialize import serialize
+from django.core.mail import send_mail
 
 
 @api_view(["POST"])
@@ -80,4 +81,26 @@ class Logout(View):
 
         logout(request)
         return JsonResponse({})
+
+# TODO: SMTP + REDIS
+class EmailVerify(View):
+    def get(self, request):
+        return
+    def post(self, request):
+        return
+    def put(self, request):
+        return
+    def delete(self, request):
+        return
+
+# TODO: SMTP + REDIS
+class PasswordReset(View):
+    def get(self, request):
+        return
+    def post(self, request):
+        return
+    def put(self, request):
+        return
+    def delete(self, request):
+        return
 
