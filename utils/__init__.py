@@ -1,4 +1,5 @@
 from redis import StrictRedis
+from FreeList import settings
 
 redis = StrictRedis(
     host=settings.REDIS_HOST,
