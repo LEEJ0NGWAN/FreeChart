@@ -85,14 +85,36 @@ class Logout(View):
         logout(request)
         return JsonResponse({})
 
-# TODO: SMTP + REDIS
 @method_decorator(csrf_exempt, name='dispatch')
 class EmailVerify(View):
     def get(self, request):
         if not request.user.is_authenticated:
             return JsonResponse({}, status=HTTP_401_UNAUTHORIZED)
         
-        return
+        data = request.GET
+
+        if 'token' not in data:
+            return JsonResponse({
+                'error': 'no token'
+            }, status=HTTP_400_BAD_REQUEST)
+        
+        key = f'VERIFY:{request.user.email}'
+        token = redis.get(key)
+        
+        if not token:
+            return JsonResponse({}, status=HTTP_404_NOT_FOUND)
+        
+        if token != data['token']:
+            return JsonResponse({
+                'error': 'incorrect'
+            }, status=HTTP_400_BAD_REQUEST)
+        
+        request.user.email_verified = True
+        request.user.save()
+
+        del redis[key]
+
+        return JsonResponse({})
 
     def post(self, request):
         if not request.user.is_authenticated:
