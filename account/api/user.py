@@ -12,7 +12,6 @@ from rest_framework.status import (
     HTTP_404_NOT_FOUND, HTTP_409_CONFLICT
 )
 from account.models import User
-from account.models import id_generator as random_id
 from utils.serialize import serialize
 
 now = datetime.datetime.now
@@ -43,9 +42,9 @@ class UserController(View):
             return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
 
         if 'email' in data:
-            email = str(data.get('email'))
-            username = str(data.get('username', random_id(size=10)))
-            password = str(data.get('password', ''))
+            email = data.get('email')
+            username = data.get('username', email)
+            password = data.get('password', '')
 
             if User.objects.filter(email=email).exists():
                 return JsonResponse({}, status=HTTP_409_CONFLICT)
