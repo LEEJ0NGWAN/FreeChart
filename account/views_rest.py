@@ -87,56 +87,50 @@ class Logout(View):
 
 @method_decorator(csrf_exempt, name='dispatch')
 class EmailVerify(View):
-    def get(self, request):
-        if not request.user.is_authenticated:
-            return JsonResponse({}, status=HTTP_401_UNAUTHORIZED)
-        
-        data = request.GET
-
-        if 'token' not in data:
-            return JsonResponse({
-                'error': 'no token'
-            }, status=HTTP_400_BAD_REQUEST)
-        
-        key = f'VERIFY:{request.user.email}'
-        token = redis.get(key)
-        
-        if not token:
-            return JsonResponse({}, status=HTTP_404_NOT_FOUND)
-        
-        if token != data['token']:
-            return JsonResponse({
-                'error': 'incorrect'
-            }, status=HTTP_400_BAD_REQUEST)
-        
-        request.user.email_verified = True
-        request.user.save()
-
-        del redis[key]
-
-        return JsonResponse({})
-
     def post(self, request):
         if not request.user.is_authenticated:
             return JsonResponse({}, status=HTTP_401_UNAUTHORIZED)
-        
+
         key = f'VERIFY:{request.user.email}'
-        token = id_generator(size=128)
-        redis.set(key, token, 180) # 3분
+        data = request.POST
 
-        link = 'http://localhost:8000/account/email/verify/?token='+token
-        html = loader.render_to_string(
-            'email_verify_template.html',
-            {'link': link}
-        )
+        if data:
+            if 'token' not in data:
+                return JsonResponse({
+                    'error': 'no token'
+                }, status=HTTP_400_BAD_REQUEST)
+            
+            token = redis.get(key)
 
-        send_mail(
-            '[FreeList] 이메일 인증 링크',
-            '',
-            'no-reply@freelist.tk',
-            [request.user.email],
-            html_message=html
-        )
+            if not token:
+                return JsonResponse({}, status=HTTP_404_NOT_FOUND)
+            
+            if token != data.get('token'):
+                return JsonResponse({
+                    'error': 'incorrect'
+                }, status=HTTP_400_BAD_REQUEST)
+            
+            request.user.email_verified = True
+            request.user.save()
+
+            del redis[key]
+
+        else:
+            token = id_generator(size=128)
+            redis.set(key, token, 180) # 3분
+
+            html = loader.render_to_string(
+                'email_verify_template.html',
+                {'token': token}
+            )
+
+            send_mail(
+                '[FreeList] 이메일 인증 링크',
+                '',
+                'no-reply@freelist.tk',
+                [request.user.email],
+                html_message=html
+            )
 
         return JsonResponse({})
 
