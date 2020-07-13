@@ -1,13 +1,8 @@
-from random import choice as random_choice
-from string import ascii_uppercase, digits
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.validators import UnicodeUsernameValidator
-
-def id_generator(size=32, chars=ascii_uppercase + digits):
-    return ''.join(random_choice(chars) for _ in range(size))
 
 class UserManager(BaseUserManager):
     use_in_migrations = True
