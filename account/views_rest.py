@@ -5,9 +5,11 @@ from django.contrib.auth import (
 )
 
 from rest_framework.decorators import api_view
+from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
 from django.http import JsonResponse
+from django.template import loader
 
 from rest_framework.status import (
     HTTP_200_OK,
@@ -18,7 +20,7 @@ from rest_framework.status import (
 from account.models import User
 from utils.serialize import serialize
 from django.core.mail import send_mail
-
+from utils import id_generator, redis
 
 @api_view(["POST"])
 @csrf_exempt
@@ -74,6 +76,7 @@ def login(request):
         'session_key': request.session.session_key
     })
 
+@method_decorator(csrf_exempt, name='dispatch')
 class Logout(View):
     def post(self, request):
         if not request.user.is_authenticated:
@@ -83,15 +86,37 @@ class Logout(View):
         return JsonResponse({})
 
 # TODO: SMTP + REDIS
+@method_decorator(csrf_exempt, name='dispatch')
 class EmailVerify(View):
     def get(self, request):
+        if not request.user.is_authenticated:
+            return JsonResponse({}, status=HTTP_401_UNAUTHORIZED)
+        
         return
+
     def post(self, request):
-        return
-    def put(self, request):
-        return
-    def delete(self, request):
-        return
+        if not request.user.is_authenticated:
+            return JsonResponse({}, status=HTTP_401_UNAUTHORIZED)
+        
+        key = f'VERIFY:{request.user.email}'
+        token = id_generator(size=128)
+        redis.set(key, token, 180) # 3분
+
+        link = 'http://localhost:8000/account/email/verify/?token='+token
+        html = loader.render_to_string(
+            'email_verify_template.html',
+            {'link': link}
+        )
+
+        send_mail(
+            '[FreeList] 이메일 인증 링크',
+            '',
+            'no-reply@freelist.tk',
+            [request.user.email],
+            html_message=html
+        )
+
+        return JsonResponse({})
 
 # TODO: SMTP + REDIS
 class PasswordReset(View):
