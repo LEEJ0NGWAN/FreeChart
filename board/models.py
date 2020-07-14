@@ -9,6 +9,7 @@ class Board(models.Model):
     title = models.CharField(max_length=256, verbose_name='제목')
     create_date = models.DateTimeField(auto_now_add=True, verbose_name='작성 날짜')
     modify_date = models.DateTimeField(auto_now=True, verbose_name='수정 날짜')
+    deleted = models.BooleanField(default=False, null=False)
 
 class Sheet(models.Model):
     class Meta:
@@ -19,6 +20,7 @@ class Sheet(models.Model):
     title = models.CharField(max_length=256, verbose_name='이름')
     create_date = models.DateTimeField(auto_now_add=True, verbose_name='작성 날짜')
     modify_date = models.DateTimeField(auto_now=True, verbose_name='수정 날짜')
+    deleted = models.BooleanField(default=False, null=False)
 
 class Node(models.Model):
     class Meta:
@@ -26,6 +28,7 @@ class Node(models.Model):
         verbose_name = 'node'
     sheet = models.ForeignKey('board.Sheet', on_delete=models.SET_NULL, null=True)
     label = models.CharField(max_length=128, verbose_name='라벨')
+    deleted = models.BooleanField(default=False, null=False)
 
 class Edge(models.Model):
     class Meta:
@@ -43,4 +46,5 @@ class Edge(models.Model):
         on_delete=models.CASCADE,
         related_name='node2'
     )
+    deleted = models.BooleanField(default=False, null=False)
 
