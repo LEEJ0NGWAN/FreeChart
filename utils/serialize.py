@@ -145,7 +145,7 @@ def node_parse(node, **kwargs):
     result = {
         'id': node.id,
         'label': node.label,
-        'shhet_id': node.sheet_id
+        'sheet_id': node.sheet_id
     }
 
     return serialize(result, **kwargs)
