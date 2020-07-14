@@ -9,6 +9,7 @@ from django.db import connection
 from django.contrib.contenttypes.models import ContentType
 from django.utils.functional import SimpleLazyObject
 from account.models import User
+from board.models import (Board, Sheet, Node, Edge)
 
 class Thread(_Thread):
     def __init__(self, group=None, target=None, name=None,
@@ -110,6 +111,52 @@ def user_parse(user, **kwargs):
         'email': user.email,
         'username': user.username,
         'email_verified': user.email_verified
+    }
+
+    return serialize(result, **kwargs)
+
+@serialize.register(Board)
+def board_parse(board, **kwargs):
+    result = {
+        'id': board.id,
+        'title': board.title,
+        'create_date': board.create_date,
+        'modify_date': board.modify_date,
+        'owner_id': board.owner_id
+    }
+
+    return serialize(result, **kwargs)
+
+@serialize.register(Sheet)
+def sheet_parse(sheet, **kwargs):
+    result = {
+        'id': sheet.id,
+        'title': sheet.title,
+        'create_date': sheet.create_date,
+        'modify_date': sheet.modify_date,
+        'owner_id': sheet.owner_id,
+        'board_id': sheet.board_id
+    }
+
+    return serialize(result, **kwargs)
+
+@serialize.register(Node)
+def node_parse(node, **kwargs):
+    result = {
+        'id': node.id,
+        'label': node.label,
+        'sheet_id': node.sheet_id
+    }
+
+    return serialize(result, **kwargs)
+
+@serialize.register(Edge)
+def edge_parse(edge, **kwargs):
+    result = {
+        'id': edge.id,
+        'label': edge.label,
+        'node1_id': edge.node1_id,
+        'node2_id': edge.node2_id
     }
 
     return serialize(result, **kwargs)

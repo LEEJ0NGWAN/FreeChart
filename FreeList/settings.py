@@ -52,6 +52,7 @@ EXTERNAL_APPS = [
 
 PROJECT_APPS = [
     'account',
+    'board',
     'common',
 ]
 
