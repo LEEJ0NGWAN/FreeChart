@@ -11,10 +11,8 @@ from rest_framework.status import (
     HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN,
     HTTP_404_NOT_FOUND, HTTP_409_CONFLICT
 )
-from board.models import Board
+from board.models import ( Board, Sheet )
 from utils.serialize import serialize
-
-now = datetime.datetime.now
 
 @method_decorator(csrf_exempt, name='dispatch')
 class BoardController(View):
@@ -64,7 +62,7 @@ class BoardController(View):
         
         new_board = Board.objects.create(
             title=title,
-            owner=request.user
+            owner_id=request.user.id
         )
 
         return JsonResponse({
@@ -99,14 +97,14 @@ class BoardController(View):
         if not request.user.is_authenticated:
             return JsonResponse({}, status=HTTP_401_UNAUTHORIZED)
         
-        data = json.loads(request.body.decode("utf-8"))
+        data = request.GET
         
         if 'id' not in data:
             return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
         
         board = Board.objects\
             .filter(
-                id=data.get('id'),
+                id=data['id'],
                 deleted=False).first()
         
         if not board:
