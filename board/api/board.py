@@ -117,3 +117,117 @@ class BoardController(View):
             'board': board
         })
 
+@method_decorator(csrf_exempt, name='dispatch')
+class SheetController(View):
+    def get(self, request):
+        if not request.user.is_authenticated:
+            return JsonResponse({}, status=HTTP_401_UNAUTHORIZED)
+        
+        data = request.GET
+
+        if 'id' in data:
+            sheet = Sheet.objects\
+                .filter(
+                    id=data['id'],
+                    deleted=False).first()
+            
+            if not sheet:
+                return JsonResponse({}, status=HTTP_404_NOT_FOUND)
+            
+            return JsonResponse({
+                'sheet': sheet
+            })
+        
+        if 'board_id' in data:
+            sheets = Sheet.objects\
+                .filter(
+                    board_id=data['board_id'],
+                    deleted=False)\
+                .order_by('modify_date')
+        
+        else:
+            sheets = Sheet.objects\
+                .filter(
+                    owner_id=request.user.id,
+                    deleted=False)\
+                .order_by('modify_date')
+        
+        if not sheets:
+            return JsonResponse({}, status=HTTP_404_NOT_FOUND)
+        
+        return JsonResponse({
+            'sheets': sheets
+        })
+        
+    def post(self, request):
+        if not request.user.is_authenticated:
+            return JsonResponse({}, status=HTTP_401_UNAUTHORIZED)
+        
+        data = json.loads(request.body.decode("utf-8"))
+
+        if 'board_id' not in data:
+            return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
+        
+        new_sheet = Sheet.objects.create(
+            title=data.get('title'),
+            board_id=data.get('board_id'),
+            owner_id=request.user.id
+        )
+
+        return JsonResponse({
+            'sheet': new_sheet
+        })
+
+    def put(self, request):
+        if not request.user.is_authenticated:
+            return JsonResponse({}, status=HTTP_401_UNAUTHORIZED)
+        
+        data = json.loads(request.body.decode("utf-8"))
+
+        if 'id' not in data:
+            return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
+        
+        sheet = Sheet.objects\
+            .filter(
+                id=data.get('id'),
+                deleted=False).fisrt()
+        
+        if not sheet:
+            return JsonResponse({}, status=HTTP_404_NOT_FOUND)
+
+        if 'title' in data:
+            sheet.title = data.get('title')
+        
+        if 'board_id' in data:
+            sheet.board_id = data.get('board_id')
+        
+        sheet.save()
+
+        return JsonResponse({
+            'sheet': sheet
+        })
+
+    def delete(self, request):
+        if not request.user.is_authenticated:
+            return JsonResponse({}, status=HTTP_401_UNAUTHORIZED)
+        
+        data = request.GET
+
+        if 'id' not in data:
+            return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
+        
+        sheet = Sheet.objects\
+            .filter(
+                id=data['id'],
+                deleted=False).first()
+        
+        if not sheet:
+            return JsonResponse({}, status=HTTP_404_NOT_FOUND)
+        
+        sheet.deleted = True
+        sheet.save()
+
+        return JsonResponse({
+            'sheet': sheet
+        })
+
