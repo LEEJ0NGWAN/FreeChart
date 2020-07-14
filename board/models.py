@@ -2,6 +2,7 @@ from django.db import models
 
 class Board(models.Model):
     class Meta:
+        db_table = 'board'
         verbose_name = 'board'
     owner = models.ForeignKey('account.User', on_delete=models.SET_NULL, null=True)
     title = models.CharField(max_length=256, verbose_name='제목')
