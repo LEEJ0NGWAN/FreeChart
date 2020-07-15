@@ -11,7 +11,7 @@ from rest_framework.status import (
     HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN,
     HTTP_404_NOT_FOUND, HTTP_409_CONFLICT
 )
-from board.models import ( Board, Sheet )
+from board.models import ( Board, Sheet, Node, Edge )
 from utils.serialize import serialize
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -227,4 +227,147 @@ class SheetController(View):
         return JsonResponse({
             'sheet': sheet
         })
+
+@method_decorator(csrf_exempt, name='dispatch')
+class ElementController(View):
+    def get(self, request):
+        data = request.GET
+        if 'sheet_id' not in data:
+            return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
+        
+        nodes = Node.objects\
+            .filter(
+                sheet_id=data['sheet_id'],
+                deleted=False)\
+            .order_by('id').all()
+        
+        if not nodes:
+            return JsonResponse({}, status=HTTP_404_NOT_FOUND)
+        
+        edges = Edge.objects\
+            .filter(
+                sheet_id=data['sheet_id'],
+                deleted=False)\
+            .order_by('id').all()
+        
+        return JsonResponse({
+            'nodes': nodes,
+            'edges': edges
+        })
+
+    def post(self, request):
+        if not request.user.is_authenticated:
+            return JsonResponse({}, status=HTTP_401_UNAUTHORIZED)
+        
+        data = json.loads(request.body.decode("utf-8"))
+
+        if 'sheet_id' not in data \
+            or 'nodes' not in data or 'edges' not in data:
+            return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
+
+        parse = dict()
+        nodes = list()
+        edges = list()
+
+        nodes_app = nodes.append
+        edges_app = edges.append
+
+        for raw in data['nodes']:
+            if 'id' not in raw:
+                continue
+
+            nodes_app(Node(
+                sheet_id=data['sheet_id'],
+                label=raw.get('label')
+            ))
+        
+        nodes = Node.objects.bulk_create(nodes)
+        
+        index = 0
+        for raw in data['nodes']:
+            if 'id' not in raw:
+                continue
+            parse[raw['id']] = nodes[index].id
+            index+=1
+        
+        for raw in data['edges']:
+            if 'node1_id' not in raw\
+            or 'node2_id' not in raw:
+                continue
+
+            edges_app(Edge(
+                node1_id=parse[raw['node1_id']],
+                node2_id=parse[raw['node2_id']],
+                sheet_id=data['sheet_id']
+            ))
+        
+        edges = Edge.objects.bulk_create(edges)
+
+        return JsonResponse({
+            'nodes': nodes,
+            'edges': edges
+        })
+
+    def put(self, request):
+        if not request.user.is_authenticated:
+            return JsonResponse({}, status=HTTP_401_UNAUTHORIZED)
+        
+        data = json.loads(request.body.decode("utf-8"))
+
+        nodes = None
+        edges = None
+
+        if 'nodes' in data:
+            raws = dict()
+            nodes = list()
+            nodes_app = nodes.append
+
+            for raw in data['nodes']:
+                raws[raw['id']] = raw
+                nodes_app(raw['id'])
+            
+            nodes = Node.objects.in_bulk(nodes)
+
+            for pk in nodes:
+                if 'label' in raws[pk]:
+                    nodes[pk].label = raws[pk]['label']
+                if 'deleted' in raws[pk]:
+                    nodes[pk].deleted = raws[pk]['deleted']
+
+            nodes = list(nodes.values())
+            Node.objects.bulk_update(nodes,['label','deleted'])
+
+        if 'edges' in data:
+            raws = dict()
+            edges = list()
+            edges_app = edges.append
+
+            for raw in data['edges']:
+                raws[raw['id']] = raw
+                edges_app(raw['id'])
+            
+            edges = Edge.objects.in_bulk(edges)
+
+            for pk in edges:
+                if 'label' in raws[pk]:
+                    edges[pk].label = raws[pk]['label']
+                if 'node1_id' in raws[pk]:
+                    edges[pk].node1_id = raws[pk]['node1_id']
+                if 'node2_id' in raws[pk]:
+                    edges[pk].node2_id = raws[pk]['node2_id']
+                if 'deleted' in raws[pk]:
+                    edges[pk].deleted = raws[pk]['deleted']
+            
+            edges = list(edges.values())
+            Edge.objects.bulk_update(
+                edges,
+                ['label','node1_id','node2_id','deleted'])
+
+        return JsonResponse({
+            'nodes': nodes,
+            'edges': edges
+        })
+    
+    # TODO: controller 테스트 및 폴리싱
+    # TODO: DELETE 메소드 구현?
 

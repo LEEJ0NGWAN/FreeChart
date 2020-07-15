@@ -1,7 +1,7 @@
 from django.urls import path
 from account.api.user import UserController
 from board.api.board import (
-    BoardController, SheetController
+    BoardController, SheetController, ElementController
 )
 
 # TODO: board
@@ -18,5 +18,9 @@ urlpatterns = [
         'board/sheet/',
         SheetController.as_view(),
         name='SheetView'),
+    path(
+        'board/sheet/element',
+        ElementController.as_view(),
+        name='ElementView'),
 ]
 
