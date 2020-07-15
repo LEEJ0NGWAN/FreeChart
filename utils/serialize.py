@@ -156,7 +156,8 @@ def edge_parse(edge, **kwargs):
         'id': edge.id,
         'label': edge.label,
         'node1_id': edge.node1_id,
-        'node2_id': edge.node2_id
+        'node2_id': edge.node2_id,
+        'sheet_id': edge.sheet_id
     }
 
     return serialize(result, **kwargs)
