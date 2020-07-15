@@ -17,8 +17,7 @@ from utils.serialize import serialize
 @method_decorator(csrf_exempt, name='dispatch')
 class BoardController(View):
     def get(self, request):
-        if not request.user.is_authenticated:
-            return JsonResponse({}, status=HTTP_401_UNAUTHORIZED)
+
         data = request.GET
 
         if 'id' in data:
@@ -120,8 +119,6 @@ class BoardController(View):
 @method_decorator(csrf_exempt, name='dispatch')
 class SheetController(View):
     def get(self, request):
-        if not request.user.is_authenticated:
-            return JsonResponse({}, status=HTTP_401_UNAUTHORIZED)
         
         data = request.GET
 
