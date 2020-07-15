@@ -38,14 +38,14 @@ class BoardController(View):
                 .filter(
                     owner_id=data['owner_id'],
                     deleted=False)\
-                .order_by('modify_date')
+                .order_by('modify_date').all()
         
         else:
             boards = Board.objects\
                 .filter(
                     owner_id=request.user.id,
                     deleted=False)\
-                .order_by('modify_date')
+                .order_by('modify_date').all()
 
         return JsonResponse({
             'boards': boards
@@ -140,14 +140,14 @@ class SheetController(View):
                 .filter(
                     board_id=data['board_id'],
                     deleted=False)\
-                .order_by('modify_date')
+                .order_by('modify_date').all()
         
         else:
             sheets = Sheet.objects\
                 .filter(
                     owner_id=request.user.id,
                     deleted=False)\
-                .order_by('modify_date')
+                .order_by('modify_date').all()
         
         if not sheets:
             return JsonResponse({}, status=HTTP_404_NOT_FOUND)
