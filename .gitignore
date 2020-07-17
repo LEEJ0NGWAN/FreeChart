@@ -3,3 +3,4 @@ venv/*
 *.pyc
 **/__pycache__/*
 **/email_setting.py
+front/node_modules/
