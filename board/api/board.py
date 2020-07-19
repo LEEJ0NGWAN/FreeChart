@@ -29,9 +29,9 @@ class BoardController(View):
             if not board:
                 return JsonResponse({}, status=HTTP_404_NOT_FOUND)
             
-            return JsonResponse({
+            return JsonResponse(serialize({
                 'board': board
-            })
+            }))
         
         if 'owner_id' in data:
             boards = Board.objects\
@@ -47,9 +47,9 @@ class BoardController(View):
                     deleted=False)\
                 .order_by('modify_date').all()
 
-        return JsonResponse({
+        return JsonResponse(serialize({
             'boards': boards
-        })
+        }))
 
     def post(self, request):
         if not request.user.is_authenticated:
@@ -64,9 +64,9 @@ class BoardController(View):
             owner_id=request.user.id
         )
 
-        return JsonResponse({
+        return JsonResponse(serialize({
             'board': new_board
-        })
+        }))
 
     def put(self, request):
         if not request.user.is_authenticated:
@@ -88,9 +88,9 @@ class BoardController(View):
         board.title = data.get('title')
         board.save()
 
-        return JsonResponse({
+        return JsonResponse(serialize({
             'board': board
-        })
+        }))
 
     def delete(self, request):
         if not request.user.is_authenticated:
@@ -112,9 +112,9 @@ class BoardController(View):
         board.deleted = True
         board.save()
 
-        return JsonResponse({
+        return JsonResponse(serialize({
             'board': board
-        })
+        }))
 
 @method_decorator(csrf_exempt, name='dispatch')
 class SheetController(View):
@@ -131,9 +131,9 @@ class SheetController(View):
             if not sheet:
                 return JsonResponse({}, status=HTTP_404_NOT_FOUND)
             
-            return JsonResponse({
+            return JsonResponse(serialize({
                 'sheet': sheet
-            })
+            }))
         
         if 'board_id' in data:
             sheets = Sheet.objects\
@@ -152,9 +152,9 @@ class SheetController(View):
         if not sheets:
             return JsonResponse({}, status=HTTP_404_NOT_FOUND)
         
-        return JsonResponse({
+        return JsonResponse(serialize({
             'sheets': sheets
-        })
+        }))
         
     def post(self, request):
         if not request.user.is_authenticated:
@@ -171,9 +171,9 @@ class SheetController(View):
             owner_id=request.user.id
         )
 
-        return JsonResponse({
+        return JsonResponse(serialize({
             'sheet': new_sheet
-        })
+        }))
 
     def put(self, request):
         if not request.user.is_authenticated:
@@ -200,9 +200,9 @@ class SheetController(View):
         
         sheet.save()
 
-        return JsonResponse({
+        return JsonResponse(serialize({
             'sheet': sheet
-        })
+        }))
 
     def delete(self, request):
         if not request.user.is_authenticated:
@@ -224,9 +224,9 @@ class SheetController(View):
         sheet.deleted = True
         sheet.save()
 
-        return JsonResponse({
+        return JsonResponse(serialize({
             'sheet': sheet
-        })
+        }))
 
 @method_decorator(csrf_exempt, name='dispatch')
 class ElementController(View):
@@ -250,10 +250,10 @@ class ElementController(View):
                 deleted=False)\
             .order_by('id').all()
         
-        return JsonResponse({
+        return JsonResponse(serialize({
             'nodes': nodes,
             'edges': edges
-        })
+        }))
 
     def post(self, request):
         if not request.user.is_authenticated:
@@ -303,10 +303,10 @@ class ElementController(View):
         
         edges = Edge.objects.bulk_create(edges)
 
-        return JsonResponse({
+        return JsonResponse(serialize({
             'nodes': nodes,
             'edges': edges
-        })
+        }))
 
     def put(self, request):
         if not request.user.is_authenticated:
@@ -363,10 +363,10 @@ class ElementController(View):
                 edges,
                 ['label','node1_id','node2_id','deleted'])
 
-        return JsonResponse({
+        return JsonResponse(serialize({
             'nodes': nodes,
             'edges': edges
-        })
+        }))
     
     # TODO: controller 테스트 및 폴리싱
     # TODO: DELETE 메소드 구현?
