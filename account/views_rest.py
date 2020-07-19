@@ -72,9 +72,9 @@ def login(request):
 
     request.user = user
 
-    return JsonResponse({
-        'session_key': request.session.session_key
-    })
+    return JsonResponse(serialize({
+        'user': user
+    }))
 
 @method_decorator(csrf_exempt, name='dispatch')
 class Logout(View):

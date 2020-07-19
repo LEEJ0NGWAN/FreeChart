@@ -82,9 +82,9 @@ class UserController(View):
         
         user.save()
 
-        return JsonResponse({
+        return JsonResponse(serialize({
             'user': user
-        })
+        }))
 
     def delete(self, request):
         if not request.user.is_authenticated:
@@ -106,7 +106,7 @@ class UserController(View):
         user.save()
         logout(request)
         
-        return JsonResponse({
-            'user_id': user.id
-        })
+        return JsonResponse(serialize({
+            'user': user
+        }))
 
