@@ -1,4 +1,4 @@
-import { GET_USER } from '../actions/api';
+import { LOGIN, LOGOUT } from '../actions/api';
 
 const initialState = {
     user: null,
@@ -6,8 +6,13 @@ const initialState = {
 
 export default function (state = initialState, action) {
     switch(action.type) {
-        case GET_USER:
-            return { ...state, user: action.payload.data };
+        case LOGIN:
+            return { 
+                ...state,
+                user: action.payload.user
+            };
+        case LOGOUT:
+            return { ...state, user: null };
         default:
             return state;
     }
