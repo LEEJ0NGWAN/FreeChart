@@ -4,19 +4,27 @@ import { logout } from '../actions/api';
 
 class Logout extends Component {
     componentDidMount() {
+        const {logged} = this.props;
+        if (!logged) return;
+
         this.props.logout();
     }
-  
-    renderUser() {
-        return JSON.stringify(this.props.user);
+
+    componentDidUpdate() {
+        const {history} = this.props;
+
+        if (!this.props.logged){
+            localStorage.removeItem('user');
+            history.push('/');
+        }
     }
-  
+
     render() {
         return (
             <div>
             <h2>logout</h2>
             <ul>
-                {this.renderUser()}
+                로그아웃
             </ul>
             </div>
         );
@@ -25,7 +33,8 @@ class Logout extends Component {
 
 export default connect((state) => {
     return {
-      user: state.userReducer.user
+      user: state.userReducer.user,
+      logged: state.userReducer.logged
     };
   }, { logout })(Logout);
 

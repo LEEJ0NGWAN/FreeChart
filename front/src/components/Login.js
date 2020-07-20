@@ -4,7 +4,22 @@ import { login } from '../actions/api';
 
 class Login extends Component {
     componentDidMount() {
+        const {logged} = this.props;
+        if (logged) return;
+
         this.props.login('aaa6400','6400');
+    }
+
+    componentDidUpdate() {
+        const {history} = this.props;
+
+        if (this.props.logged){
+            localStorage.setItem(
+                'user',
+                JSON.stringify(this.props.user)
+            );
+            history.push('/'); // 루트 페이지로 이동
+        }
     }
   
     renderUser() {
@@ -25,7 +40,8 @@ class Login extends Component {
 
 export default connect((state) => {
     return {
-      user: state.userReducer.user
+      user: state.userReducer.user,
+      logged: state.userReducer.logged
     };
   }, { login })(Login);
 

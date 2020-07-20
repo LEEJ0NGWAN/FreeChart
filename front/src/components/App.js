@@ -1,10 +1,22 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import { NavLink, Route, Switch } from 'react-router-dom';
 import Home from './Home';
 import Login from './Login';
 import Logout from './Logout';
+import User from './User';
+import { fetchUser } from '../actions/fetch';
 
 class App extends Component {
+    initializeUserInfo = async () => {
+        const user = JSON.parse(localStorage.getItem('user'));
+        if(!user) return;
+
+        await this.props.fetchUser(user);
+    }
+    componentDidMount() {
+        this.initializeUserInfo();
+    }
     render() {
         return (
             <div className="App">
@@ -16,17 +28,26 @@ class App extends Component {
                         <li><NavLink exact to="/">홈</NavLink></li>
                         <li><NavLink to="/login">로그인</NavLink></li>
                         <li><NavLink to="/logout">로그아웃</NavLink></li>
+                        <li><NavLink to="/result">로그인결과</NavLink></li>
                     </ul>
-                    <switch>
+                    <Switch>
                         <Route exact path="/" component={Home}/>
                         <Route exact path="/login" component={Login}/>
                         <Route exact path="/logout" component={Logout}/>
-                    </switch>
+                        <Route exact path="/result" component={User}/>
+                    </Switch>
                 </div>
             </div>
         );
     }
 }
 
-export default App;
+export default connect((state) => {
+    return {
+      user: state.userReducer.user,
+      logged: state.userReducer.logged
+    };
+  }, { fetchUser })(App);
+
+// export default App;
 
