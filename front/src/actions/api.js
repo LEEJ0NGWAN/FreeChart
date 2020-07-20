@@ -1,24 +1,9 @@
+import { fetchData } from './fetch';
 import axios from 'axios';
 axios.defaults.withCredentials = true;
 
-export const GET_USER = 'GET_USER';
 export const LOGIN = 'LOGIN';
 export const LOGOUT = 'LOGOUT';
-
-export function getUser() {
-    const res = axios.get('api/user/')
-    return {
-        type: GET_USER,
-        payload: res
-    };
-}
-
-export const fetchData = (type, data) => {
-    return {
-        type: type,
-        payload: data
-    };
-}
 
 export function login(email, password) {
     return (dispatch) => {
