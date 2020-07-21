@@ -2,6 +2,7 @@ import { fetchData } from './fetch';
 import axios from 'axios';
 axios.defaults.withCredentials = true;
 
+export const ERROR = 'ERROR';
 export const LOGIN = 'LOGIN';
 export const LOGOUT = 'LOGOUT';
 
@@ -14,12 +15,14 @@ export function login(email, password) {
                 password: password
             })
             .then(res => {
-                if (res.status == 200){
-                    dispatch(fetchData(LOGIN, res.data));
-                }
+                dispatch(fetchData(LOGIN, res.data));
             })
             .catch(err => {
-                throw(err);
+                let data = {
+                    msg: err.response.data.error,
+                    status: err.response.status
+                };
+                dispatch(fetchData(ERROR, data));
             });
     };
 }
@@ -28,9 +31,7 @@ export function logout() {
     return (dispatch) => {
         return axios.post('api/account/logout/')
         .then(res => {
-            if (res.status == 200){
-                dispatch(fetchData(LOGOUT, {}));
-            }
+            dispatch(fetchData(LOGOUT, {}));
         })
         .catch(err => {
             throw(err);
