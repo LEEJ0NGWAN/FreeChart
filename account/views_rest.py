@@ -205,3 +205,25 @@ class PasswordReset(View):
 
         return JsonResponse({})
 
+@method_decorator(csrf_exempt, name='dispatch')
+class Check(View):
+    def post(self, request):
+        data = json.loads(request.body.decode('utf-8'))
+
+        if not data or 'email' not in data and 'username' not in data:
+            return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
+
+        res = {}
+
+        if 'email' in data:
+            res['email'] = False
+            if User.objects.filter(email=data['email']).exists():
+                res['email'] = True
+        
+        if 'username' in data:
+            res['username'] = False
+            if User.objects.filter(username=data['username']).exists():
+                res['username'] = True
+        
+        return JsonResponse(serialize(res))
+
