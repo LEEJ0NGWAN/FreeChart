@@ -4,7 +4,7 @@ import { NavLink, Route, Switch } from 'react-router-dom';
 import Home from './Home';
 import Login from './Login';
 import Logout from './Logout';
-import User from './User';
+import Register from './Register';
 import { fetchUser } from '../actions/fetch';
 
 class App extends Component {
@@ -34,13 +34,15 @@ class App extends Component {
                     <ul>
                         <li><NavLink exact to="/">홈</NavLink></li>
                         {this.props.logged? logout: login}
-                        <li><NavLink to="/result">로그인결과</NavLink></li>
+                        {!this.props.logged &&
+                        <li><NavLink to="/register">회원가입</NavLink></li>
+                        }
                     </ul>
                     <Switch>
                         <Route exact path="/" component={Home}/>
                         <Route exact path="/login" component={Login}/>
                         <Route exact path="/logout" component={Logout}/>
-                        <Route exact path="/result" component={User}/>
+                        <Route exact path="/register" component={Register}/>
                     </Switch>
                 </div>
             </div>
