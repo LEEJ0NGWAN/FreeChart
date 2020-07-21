@@ -18,6 +18,13 @@ class App extends Component {
         this.initializeUserInfo();
     }
     render() {
+        const login = (
+            <li><NavLink to="/login">로그인</NavLink></li>
+        )
+        const logout = (
+            <li><NavLink to="/logout">로그아웃</NavLink></li>
+        )
+
         return (
             <div className="App">
                 <div className="App-header">
@@ -26,8 +33,7 @@ class App extends Component {
                 <div className="content-wrapper">
                     <ul>
                         <li><NavLink exact to="/">홈</NavLink></li>
-                        <li><NavLink to="/login">로그인</NavLink></li>
-                        <li><NavLink to="/logout">로그아웃</NavLink></li>
+                        {this.props.logged? logout: login}
                         <li><NavLink to="/result">로그인결과</NavLink></li>
                     </ul>
                     <Switch>
