@@ -216,14 +216,14 @@ class Check(View):
         res = {}
 
         if 'email' in data:
-            res['email'] = False
+            res['email'] = True
             if User.objects.filter(email=data['email']).exists():
-                res['email'] = True
+                res['email'] = False
         
         if 'username' in data:
-            res['username'] = False
+            res['username'] = True
             if User.objects.filter(username=data['username']).exists():
-                res['username'] = True
+                res['username'] = False
         
         return JsonResponse(serialize(res))
 
