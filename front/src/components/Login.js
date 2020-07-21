@@ -30,7 +30,7 @@ class Login extends Component {
     }
 
     componentDidUpdate(prevProps, prevStates) {
-        const {history, msg, code} = this.props;
+        const {history, error_msg, error_code} = this.props;
 
         if (!prevProps.logged && this.props.logged){
             localStorage.setItem(
@@ -40,9 +40,9 @@ class Login extends Component {
             history.push('/'); // 루트 페이지로 이동
         }
 
-        if (!this.state.error && code){
+        if (!this.state.error && error_code){
             this.setState({
-                error: msg? msg: "[ERROR] "+ code
+                error: error_msg? error_msg: "[ERROR] "+ error_code
             });
         }
     }
@@ -56,7 +56,7 @@ class Login extends Component {
         const inputs = (
             <div>
                 <div className="input-field email">
-                    <label>email</label>
+                    <label>email</label><br/>
                     <input
                     name="email"
                     type="text"
@@ -65,7 +65,7 @@ class Login extends Component {
                     value={this.state.email}/>
                 </div>
                 <div className="input-field password">
-                    <label>password</label>
+                    <label>password</label><br/>
                     <input
                     name="password"
                     type="password"
@@ -73,6 +73,7 @@ class Login extends Component {
                     onChange={this.changer}
                     value={this.state.password}/>
                 </div>
+                <br/>
             </div>
         );
 
@@ -93,8 +94,8 @@ export default connect((state) => {
     return {
       user: state.userReducer.user,
       logged: state.userReducer.logged,
-      msg: state.userReducer.msg,
-      code: state.userReducer.code
+      error_msg: state.commonReducer.error_msg,
+      error_code: state.commonReducer.error_code,
     };
   }, { login })(Login);
 
