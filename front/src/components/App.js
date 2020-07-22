@@ -5,7 +5,7 @@ import Home from './Home';
 import Login from './Login';
 import Logout from './Logout';
 import Register from './Register';
-import { fetchUser } from '../actions/fetch';
+import { fetchUser } from '../actions/common';
 
 class App extends Component {
     initializeUserInfo = async () => {
