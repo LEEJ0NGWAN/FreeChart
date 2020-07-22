@@ -34,9 +34,6 @@ class App extends Component {
                     <ul>
                         <li><NavLink exact to="/">홈</NavLink></li>
                         {this.props.logged? logout: login}
-                        {!this.props.logged &&
-                        <li><NavLink to="/register">회원가입</NavLink></li>
-                        }
                     </ul>
                     <Switch>
                         <Route exact path="/" component={Home}/>

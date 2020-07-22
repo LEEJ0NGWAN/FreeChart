@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { login } from '../actions/api';
 import { clearError } from '../actions/common';
+import { NavLink } from 'react-router-dom';
 
 class Login extends Component {
     state = {
@@ -31,6 +32,7 @@ class Login extends Component {
     }
 
     componentDidMount() {
+        this.props.clearError();
         const {logged, history} = this.props;
         if (logged) history.push('/');
     }
@@ -66,10 +68,9 @@ class Login extends Component {
             this.props.clearError();
         }
     }
-  
     render() {
         const error = (
-            <label>
+            <label className="error-label">
                 <b>{this.state.error}</b>
             </label>
         );
@@ -101,10 +102,14 @@ class Login extends Component {
             <div className="loginView">
                 <div className="row">
                     {inputs}
+                    {error}<br/><br/>
                     <button className="waves-effect waves-light btn"
                         onClick={this.processer}>로그인</button>
+                    <button className="waves-effect waves-light btn">
+                        <NavLink to="/register" 
+                        style={{textDecoration:'none'}}>회원가입</NavLink>
+                    </button>
                 </div>
-                {error}
             </div>
         );
     }

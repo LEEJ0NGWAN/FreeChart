@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { clearError } from '../actions/common';
 import { check, register_ } from '../actions/api';
+import { NavLink } from 'react-router-dom';
 
 function checkEmail(email) {
     let regExp = /^[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}$/i;
@@ -194,7 +195,11 @@ class Register extends Component {
                     {(this.state.email_pattern_validity &&
                     this.props.email_validity && 
                     this.props.username_validity &&
-                    this.state.password_validity) && submitButton}
+                    this.state.password_validity) && submitButton}<br/>
+                    <button>
+                        <NavLink to="/login"
+                        style={{textDecoration:'none'}}>돌아가기</NavLink>
+                    </button>
                 </div><br/>
                 {error}
             </div>
