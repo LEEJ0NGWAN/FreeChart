@@ -1,4 +1,4 @@
-import { CLEAR, ERROR } from '../actions/api';
+import { CLEAR, ERROR } from '../actions/common';
 
 const initialState = {
     error_msg: null,
