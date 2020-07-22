@@ -1,4 +1,4 @@
-import { FETCH_USER } from '../actions/fetch';
+import { FETCH_USER } from '../actions/common';
 import { LOGIN, LOGOUT } from '../actions/api';
 
 const initialState = {

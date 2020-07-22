@@ -1,9 +1,7 @@
-import { fetchData } from './fetch';
+import { fetchData, clearError, ERROR } from './common';
 import axios from 'axios';
 axios.defaults.withCredentials = true;
 
-export const CLEAR = 'CLEAR'; // 에러와 같은 공용 state에 대한 clear
-export const ERROR = 'ERROR';
 export const LOGIN = 'LOGIN';
 export const LOGOUT = 'LOGOUT';
 export const CHECK = 'CHECK';
@@ -18,7 +16,7 @@ export function login(email, password) {
             })
             .then(res => {
                 dispatch(fetchData(LOGIN, res.data));
-                dispatch(fetchData(CLEAR, ERROR));
+                dispatch(clearError());
             })
             .catch(err => {
                 let payload = {
@@ -35,7 +33,7 @@ export function logout() {
         return axios.post('api/account/logout/')
         .then(res => {
             dispatch(fetchData(LOGOUT, {}));
-            dispatch(fetchData(CLEAR, ERROR));
+            dispatch(clearError());
         })
         .catch(err => {
             let payload = {
@@ -64,9 +62,10 @@ export function check(email=null, username=null) {
         return axios.post('api/account/check/', data)
         .then(res => {
             dispatch(fetchData(CHECK, res.data));
-            dispatch(fetchData(CLEAR, ERROR));
+            dispatch(clearError());
         })
         .catch(err => {
+            console.log(err);
             let payload = {
                 error_msg: err.response.data.error,
                 error_code: err.response.status
@@ -74,5 +73,29 @@ export function check(email=null, username=null) {
             dispatch(fetchData(ERROR, payload));
         })
     }
+}
+
+export function register_(email, username=null, password) {
+    return (dispatch) => {
+        let data = {
+            email: email,
+            password: password
+        };
+        if (username)
+            data.username = username;
+        
+        return axios.post('api/user/', data)
+        .then(res => {
+            dispatch(fetchData(LOGIN, res.data));
+            dispatch(clearError());
+        })
+        .catch(err => {
+            let payload = {
+                error_msg: err.response.data.error,
+                error_code: err.response.status
+            };
+            dispatch(fetchData(ERROR, payload));
+        });
+    };
 }
 
