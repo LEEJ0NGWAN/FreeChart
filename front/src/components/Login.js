@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { login } from '../actions/api';
+import { clearError } from '../actions/common';
 
 class Login extends Component {
     state = {
@@ -18,7 +19,12 @@ class Login extends Component {
     processer = () => {
         const {email, password} = this.state;
 
-        if (!email.length || !password.length) return;
+        if (!email.length || !password.length) {
+            this.setState({
+                error: "입력을 확인해주세요!"
+            });
+            return;
+        }
 
         this.props.login(email, password);
         this.setState({password:""});
@@ -40,10 +46,24 @@ class Login extends Component {
             history.push('/'); // 루트 페이지로 이동
         }
 
-        if (!this.state.error && error_code){
+        if (error_code){
+            let error;
+            switch (error_code) {
+                case 400:
+                    if (error_msg == 'email or password error')
+                        error = "이메일 또는 비밀번호 에러!";
+                    else
+                        error = "비밀번호가 틀렸습니다!"
+                    break;
+                case 404:
+                    error = "가입되지 않는 이메일입니다!"; break;
+                default:
+                    error = "[ERROR CODE] "+error_code;
+            }
             this.setState({
-                error: error_msg? error_msg: "[ERROR] "+ error_code
+                error: error
             });
+            this.props.clearError();
         }
     }
   
@@ -97,5 +117,5 @@ export default connect((state) => {
       error_msg: state.commonReducer.error_msg,
       error_code: state.commonReducer.error_code,
     };
-  }, { login })(Login);
+  }, { login, clearError })(Login);
 
