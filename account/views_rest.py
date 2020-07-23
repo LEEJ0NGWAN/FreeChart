@@ -88,10 +88,6 @@ class Logout(View):
 @method_decorator(csrf_exempt, name='dispatch')
 class EmailVerify(View):
     def post(self, request):
-        if not request.user.is_authenticated:
-            return JsonResponse({}, status=HTTP_401_UNAUTHORIZED)
-
-        key = f'VERIFY:{request.user.email}'
         data = request.POST
 
         if data:
@@ -100,28 +96,49 @@ class EmailVerify(View):
                     'error': 'no token'
                 }, status=HTTP_400_BAD_REQUEST)
             
+            if 'email' not in data:
+                return JsonResponse({
+                    'error': 'no email'
+                }, status=HTTP_400_BAD_REQUEST)
+            
+            email = data['email']
+
+            user = User.objects.filter(email=email).first()
+
+            if not user:
+                return JsonResponse({
+                    'error': 'no user'
+                }, status=HTTP_404_NOT_FOUND)
+
+            key = f'VERIFY:{email}'
             token = redis.get(key)
 
             if not token:
-                return JsonResponse({}, status=HTTP_404_NOT_FOUND)
+                return JsonResponse({
+                    'error': 'no token'
+                }, status=HTTP_404_NOT_FOUND)
             
             if token != data.get('token'):
                 return JsonResponse({
                     'error': 'incorrect'
                 }, status=HTTP_400_BAD_REQUEST)
             
-            request.user.email_verified = True
-            request.user.save()
+            user.email_verified = True
+            user.save()
 
             del redis[key]
 
         else:
+            if not request.user.is_authenticated:
+                return JsonResponse({}, status=HTTP_401_UNAUTHORIZED)
+
+            key = f'VERIFY:{request.user.email}'
             token = id_generator(size=128)
             redis.set(key, token, 180) # 3분
 
             html = loader.render_to_string(
                 'email_verify_template.html',
-                {'token': token}
+                {'token': token, 'email': request.user.email}
             )
 
             send_mail(
@@ -137,6 +154,9 @@ class EmailVerify(View):
 @method_decorator(csrf_exempt, name='dispatch')
 class PasswordReset(View):
     def post(self, request):
+        if request.user.is_authenticated:
+            return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
+
         if request.POST:
             data = request.POST
         else:
