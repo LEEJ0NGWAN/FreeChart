@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { clearError } from '../actions/common';
+import { clear, clearError } from '../actions/common';
 import { check, register_ } from '../actions/api';
 import { NavLink } from 'react-router-dom';
 
@@ -110,7 +110,7 @@ class Register extends Component {
     }
 
     componentDidMount() {
-        this.props.clearError();
+        this.props.clear();
         const {logged, history} = this.props;
         if (logged) history.push('/');
     }
@@ -216,5 +216,5 @@ export default connect((state) => {
       error_msg: state.commonReducer.error_msg,
       error_code: state.commonReducer.error_code,
     };
-  }, { check, register_, clearError })(Register);
+  }, { check, register_, clearError, clear })(Register);
 

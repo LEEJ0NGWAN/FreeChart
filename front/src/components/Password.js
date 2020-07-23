@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { clearError } from '../actions/common';
+import { clear, clearError } from '../actions/common';
 import { check, passwordReset } from '../actions/api';
 import { NavLink } from 'react-router-dom';
 
@@ -57,7 +57,7 @@ class Password extends Component {
     }
 
     componentDidMount() {
-        this.props.clearError();
+        this.props.clear();
         const {logged, history} = this.props;
         if (logged) history.push('/');
     }
@@ -131,5 +131,5 @@ export default connect((state) => {
       error_msg: state.commonReducer.error_msg,
       error_code: state.commonReducer.error_code,
     };
-}, { check, passwordReset, clearError })(Password);
+}, { check, passwordReset, clearError, clear })(Password);
 

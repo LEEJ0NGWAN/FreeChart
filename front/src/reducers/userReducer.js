@@ -1,10 +1,7 @@
 import { USER } from '../actions/common';
 import { LOGIN, LOGOUT } from '../actions/api';
 
-const initialState = {
-    logged: false,
-    user: null,
-};
+const initialState = {};
 
 export default function (state = initialState, action) {
     switch(action.type) {
@@ -21,11 +18,7 @@ export default function (state = initialState, action) {
                 logged: true,
             };
         case LOGOUT:
-            return {
-                ...state, 
-                user: null, 
-                logged: false,
-            };
+            return {};
         default:
             return state;
     }

@@ -1,23 +1,12 @@
-import { CLEAR, ERROR } from '../actions/common';
+import { CLEAR, ERROR, CLEAR_ERROR } from '../actions/common';
 
-const initialState = {
-    error_msg: null,
-    error_code: null
-};
+const initialState = {};
 
 export default function (state = initialState, action) {
     switch(action.type) {
         case CLEAR:
-            switch (action.payload) {
-                case ERROR:
-                    return {
-                        ...state,
-                        error_msg: null,
-                        error_code: null,
-                    };
-                default:
-                    return state;
-            }
+        case CLEAR_ERROR:
+            return {};
         case ERROR:
             return {
                 ...state,
