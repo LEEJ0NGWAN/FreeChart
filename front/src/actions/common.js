@@ -1,18 +1,11 @@
 export const ERROR = 'ERROR';
 export const CLEAR = 'CLEAR';
-export const FETCH_USER = 'FETCH_USER';
+export const USER = 'USER';
 
-export const fetchData = (type, data) => {
+export const fetch = (type, data) => {
     return {
         type: type,
         payload: data
-    };
-}
-
-export function fetchUser(user) {
-    return {
-        type: FETCH_USER,
-        payload: user
     };
 }
 
