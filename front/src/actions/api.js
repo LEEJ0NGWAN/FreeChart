@@ -1,10 +1,18 @@
-import { fetchData, clearError, ERROR } from './common';
+import { fetch, clearError, ERROR } from './common';
 import axios from 'axios';
 axios.defaults.withCredentials = true;
 
 export const LOGIN = 'LOGIN';
 export const LOGOUT = 'LOGOUT';
 export const CHECK = 'CHECK';
+
+function reportError(err) {
+    let payload = {
+        error_msg: err.response.data.error,
+        error_code: err.response.status
+    };
+    dispatch(fetch(ERROR, payload));
+}
 
 export function login(email, password) {
     return (dispatch) => {
@@ -15,15 +23,11 @@ export function login(email, password) {
                 password: password
             })
             .then(res => {
-                dispatch(fetchData(LOGIN, res.data));
+                dispatch(fetch(LOGIN, res.data));
                 dispatch(clearError());
             })
             .catch(err => {
-                let payload = {
-                    error_msg: err.response.data.error,
-                    error_code: err.response.status
-                };
-                dispatch(fetchData(ERROR, payload));
+                reportError(err);
             });
     };
 }
@@ -32,15 +36,11 @@ export function logout() {
     return (dispatch) => {
         return axios.post('api/account/logout/')
         .then(res => {
-            dispatch(fetchData(LOGOUT, {}));
+            dispatch(fetch(LOGOUT, {}));
             dispatch(clearError());
         })
         .catch(err => {
-            let payload = {
-                error_msg: err.response.data.error,
-                error_code: err.response.status
-            };
-            dispatch(fetchData(ERROR, payload));
+            reportError(err);
         });
     };
 }
@@ -61,16 +61,11 @@ export function check(email=null, username=null) {
         
         return axios.post('api/account/check/', data)
         .then(res => {
-            dispatch(fetchData(CHECK, res.data));
+            dispatch(fetch(CHECK, res.data));
             dispatch(clearError());
         })
         .catch(err => {
-            console.log(err);
-            let payload = {
-                error_msg: err.response.data.error,
-                error_code: err.response.status
-            };
-            dispatch(fetchData(ERROR, payload));
+            reportError(err);
         })
     }
 }
@@ -86,16 +81,25 @@ export function register_(email, username=null, password) {
         
         return axios.post('api/user/', data)
         .then(res => {
-            dispatch(fetchData(LOGIN, res.data));
+            dispatch(fetch(LOGIN, res.data));
             dispatch(clearError());
         })
         .catch(err => {
-            let payload = {
-                error_msg: err.response.data.error,
-                error_code: err.response.status
-            };
-            dispatch(fetchData(ERROR, payload));
+            reportError(err);
         });
     };
+}
+
+export function passwordReset(email) {
+    return (dispatch) => {
+        return axios.post(
+            'api/account/password/reset/', { email: email })
+        .then(res => {
+            dispatch(clearError());
+        })
+        .catch(err => {
+            reportError(err);
+        });
+    }
 }
 

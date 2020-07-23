@@ -5,14 +5,14 @@ import Home from './Home';
 import Login from './Login';
 import Logout from './Logout';
 import Register from './Register';
-import { fetchUser } from '../actions/common';
+import { USER, fetch } from '../actions/common';
 
 class App extends Component {
     initializeUserInfo = async () => {
         const user = JSON.parse(localStorage.getItem('user'));
         if(!user) return;
 
-        await this.props.fetchUser(user);
+        await this.props.fetch(USER, user);
     }
     componentDidMount() {
         this.initializeUserInfo();
@@ -52,7 +52,7 @@ export default connect((state) => {
       user: state.userReducer.user,
       logged: state.userReducer.logged
     };
-  }, { fetchUser })(App);
+  }, { fetch })(App);
 
 // export default App;
 
