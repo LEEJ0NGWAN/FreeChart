@@ -1,18 +1,10 @@
-import { fetch, clearError, ERROR } from './common';
+import { fetch, clearError, reportError } from './common';
 import axios from 'axios';
 axios.defaults.withCredentials = true;
 
 export const LOGIN = 'LOGIN';
 export const LOGOUT = 'LOGOUT';
 export const CHECK = 'CHECK';
-
-function reportError(err) {
-    let payload = {
-        error_msg: err.response.data.error,
-        error_code: err.response.status
-    };
-    dispatch(fetch(ERROR, payload));
-}
 
 export function login(email, password) {
     return (dispatch) => {
