@@ -189,7 +189,7 @@ class Register extends Component {
             onClick={this.processor}>회원가입</button>
         )
         return (
-            <div className="loginView">
+            <div className="registerView">
                 <div className="row">
                     {inputs}
                     {(this.state.email_pattern_validity &&

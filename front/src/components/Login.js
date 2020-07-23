@@ -109,6 +109,10 @@ class Login extends Component {
                         <NavLink to="/register" 
                         style={{textDecoration:'none'}}>회원가입</NavLink>
                     </button>
+                    <button className="waves-effect waves-light btn">
+                        <NavLink to="/password" 
+                        style={{textDecoration:'none'}}>비밀번호 찾기</NavLink>
+                    </button>
                 </div>
             </div>
         );
