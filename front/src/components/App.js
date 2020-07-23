@@ -5,6 +5,7 @@ import Home from './Home';
 import Login from './Login';
 import Logout from './Logout';
 import Register from './Register';
+import Password from './Password';
 import { USER, fetch } from '../actions/common';
 
 class App extends Component {
@@ -40,6 +41,7 @@ class App extends Component {
                         <Route exact path="/login" component={Login}/>
                         <Route exact path="/logout" component={Logout}/>
                         <Route exact path="/register" component={Register}/>
+                        <Route exact path="/password" component={Password}/>
                     </Switch>
                 </div>
             </div>

@@ -1,9 +1,12 @@
+import { CLEAR } from '../actions/common';
 import { CHECK } from '../actions/api';
 
 const initialState = {};
 
 export default function (state = initialState, action) {
     switch(action.type) {
+        case CLEAR:
+            return {};
         case CHECK:
             let nextState = { ...state, };
             if (action.payload.email != null)
