@@ -24,6 +24,7 @@
             아래 버튼을 클릭하면 이메일 인증이 완료됩니다.<br>
           </p>
           <form action="http://localhost:8000/account/email/verify/" method="POST">
+            <input type="hidden" name="email" value={{email}} />
             <input type="hidden" name="token" value={{token}} />
             <input style="color: #fe8767;" type='submit' value='이메일 인증하기'>
           </form>
