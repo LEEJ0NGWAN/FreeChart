@@ -15,11 +15,11 @@ urlpatterns = [
         BoardController.as_view(),
         name='BoardView'),
     path(
-        'board/sheet/',
+        'sheet/',
         SheetController.as_view(),
         name='SheetView'),
     path(
-        'board/sheet/element',
+        'sheet/element',
         ElementController.as_view(),
         name='ElementView'),
 ]

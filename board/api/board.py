@@ -39,17 +39,32 @@ class BoardController(View):
                     owner_id=data['owner_id'],
                     deleted=False)\
                 .order_by('modify_date').all()
+
+            return JsonResponse(serialize({
+                'boards': boards
+            }))
         
         else:
+            if not request.user.is_authenticated:
+                return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
+
             boards = Board.objects\
                 .filter(
                     owner_id=request.user.id,
                     deleted=False)\
                 .order_by('modify_date').all()
+            
+            sheets = Sheet.objects\
+                .filter(
+                    owner_id=request.user.id,
+                    board=None,
+                    deleted=False)\
+                .order_by('modify_date').all()
 
-        return JsonResponse(serialize({
-            'boards': boards
-        }))
+            return JsonResponse(serialize({
+                'boards': boards,
+                'sheets': sheets
+            }))
 
     def post(self, request):
         if not request.user.is_authenticated:
@@ -161,9 +176,6 @@ class SheetController(View):
             return JsonResponse({}, status=HTTP_401_UNAUTHORIZED)
         
         data = json.loads(request.body.decode("utf-8"))
-
-        if 'board_id' not in data:
-            return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
         
         new_sheet = Sheet.objects.create(
             title=data.get('title'),
