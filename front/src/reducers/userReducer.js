@@ -1,5 +1,5 @@
 import { USER } from '../actions/common';
-import { LOGIN, LOGOUT } from '../actions/api';
+import { LOGIN, LOGOUT, CLEAR_SESSION } from '../actions/api';
 
 const initialState = {};
 
@@ -19,6 +19,8 @@ export default function (state = initialState, action) {
             };
         case LOGOUT:
             return {};
+        case CLEAR_SESSION:
+            return {expired: true};
         default:
             return state;
     }

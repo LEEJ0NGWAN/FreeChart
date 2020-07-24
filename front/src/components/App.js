@@ -7,17 +7,30 @@ import Logout from './Logout';
 import Register from './Register';
 import Password from './Password';
 import { USER, fetch } from '../actions/common';
+import { checkSession } from '../actions/api';
 
 class App extends Component {
+    checkSessionInfo = async () => {
+        await this.props.checkSession();
+
+        if (this.props.expired){
+            localStorage.removeItem('user');
+            localStorage.removeItem('root');
+        }
+    }
+
     initializeUserInfo = async () => {
         const user = JSON.parse(localStorage.getItem('user'));
         if(!user) return;
 
         await this.props.fetch(USER, user);
     }
+
     componentDidMount() {
+        this.checkSessionInfo();
         this.initializeUserInfo();
     }
+
     render() {
         const login = (
             <li><NavLink to="/login">로그인</NavLink></li>
@@ -52,9 +65,10 @@ class App extends Component {
 export default connect((state) => {
     return {
       user: state.userReducer.user,
-      logged: state.userReducer.logged
+      logged: state.userReducer.logged,
+      expired: state.userReducer.expired
     };
-  }, { fetch })(App);
+}, { fetch, checkSession })(App);
 
 // export default App;
 

@@ -1,10 +1,11 @@
-import { fetch, clearError, reportError } from './common';
+import { action, fetch, clearError, reportError } from './common';
 import axios from 'axios';
 axios.defaults.withCredentials = true;
 
 export const LOGIN = 'LOGIN';
 export const LOGOUT = 'LOGOUT';
 export const CHECK = 'CHECK';
+export const CLEAR_SESSION = 'CLEAR_SESSION';
 
 export function login(email, password) {
     return (dispatch) => {
@@ -28,7 +29,7 @@ export function logout() {
     return (dispatch) => {
         return axios.post('api/account/logout/')
         .then(res => {
-            dispatch(fetch(LOGOUT, {}));
+            dispatch(action(LOGOUT));
             dispatch(clearError());
         })
         .catch(err => {
@@ -92,6 +93,20 @@ export function passwordReset(email) {
         .catch(err => {
             reportError(err);
         });
+    }
+}
+
+export function checkSession() {
+    return (dispatch) => {
+        return axios.post(
+            'api/account/login/',
+            {email: null, password: null})
+        .then()
+        .catch(err => {
+            let status = err.response.status;
+            if (status != 403)
+                dispatch(action(CLEAR_SESSION));
+        })
     }
 }
 
