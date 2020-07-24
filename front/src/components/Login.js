@@ -126,5 +126,5 @@ export default connect((state) => {
       error_msg: state.commonReducer.error_msg,
       error_code: state.commonReducer.error_code,
     };
-  }, { login, clearError })(Login);
+}, { login, clearError })(Login);
 

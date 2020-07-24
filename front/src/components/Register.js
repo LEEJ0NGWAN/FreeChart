@@ -216,5 +216,5 @@ export default connect((state) => {
       error_msg: state.commonReducer.error_msg,
       error_code: state.commonReducer.error_code,
     };
-  }, { check, register_, clearError, clear })(Register);
+}, { check, register_, clearError, clear })(Register);
 

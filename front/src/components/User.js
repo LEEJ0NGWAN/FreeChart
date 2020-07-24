@@ -28,5 +28,5 @@ export default connect((state) => {
       user: state.userReducer.user,
       logged: state.userReducer.logged
     };
-  }, {})(User);
+}, {})(User);
 
