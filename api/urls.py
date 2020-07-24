@@ -19,7 +19,7 @@ urlpatterns = [
         SheetController.as_view(),
         name='SheetView'),
     path(
-        'sheet/element',
+        'sheet/element/',
         ElementController.as_view(),
         name='ElementView'),
 ]

@@ -249,7 +249,10 @@ class SheetController(View):
 @method_decorator(csrf_exempt, name='dispatch')
 class ElementController(View):
     def get(self, request):
+        if not request.user.is_authenticated:
+            return JsonResponse({}, status=HTTP_401_UNAUTHORIZED)
         data = request.GET
+
         if 'sheet_id' not in data:
             return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
         
@@ -258,9 +261,6 @@ class ElementController(View):
                 sheet_id=data['sheet_id'],
                 deleted=False)\
             .order_by('id').all()
-        
-        if not nodes:
-            return JsonResponse({}, status=HTTP_404_NOT_FOUND)
         
         edges = Edge.objects\
             .filter(
