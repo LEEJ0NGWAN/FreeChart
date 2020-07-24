@@ -15,6 +15,7 @@ class Logout extends Component {
 
         if (!this.props.logged){
             localStorage.removeItem('user');
+            localStorage.removeItem('root');
             history.push('/');
         }
     }
@@ -36,5 +37,5 @@ export default connect((state) => {
       user: state.userReducer.user,
       logged: state.userReducer.logged
     };
-  }, { logout })(Logout);
+}, { logout })(Logout);
 
