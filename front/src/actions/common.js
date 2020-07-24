@@ -3,6 +3,12 @@ export const ERROR = 'ERROR';
 export const CLEAR = 'CLEAR';
 export const USER = 'USER';
 
+export const action = (type) => {
+    return {
+        type: type
+    };
+}
+
 export const fetch = (type, data) => {
     return {
         type: type,
