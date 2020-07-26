@@ -29,12 +29,12 @@ export function clearError() {
 }
 
 export function reportError(err) {
-    return (dispatch) => {
-        let payload = {
+    return {
+        type: ERROR,
+        payload: {
             error_msg: err.response.data.error,
-            error_code: err.response.status
-        };
-        dispatch(fetch(ERROR, payload));
-    }
+            error_code: err.response.status          
+        }
+    };
 }
 
