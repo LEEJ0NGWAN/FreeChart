@@ -5,7 +5,7 @@ import { check, register_ } from '../actions/api';
 import { NavLink } from 'react-router-dom';
 
 function checkEmail(email) {
-    let regExp = /^[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}$/i;
+    let regExp = /^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}$/i;
 
     return regExp.test(email);	
 }
@@ -76,7 +76,7 @@ class Register extends Component {
         if (!email.length && !username.length) return;
         let nextState = {};
         
-        if (event.target.name == 'email' && email.length){
+        if (event.target.name === 'email' && email.length){
             await this.props.check(email);
 
             if (!this.props.email_validity)
@@ -85,7 +85,7 @@ class Register extends Component {
                 nextState.email_msg = "가능한 이메일 입니다!";
         }
 
-        else if (event.target.name == 'username' && username.length){
+        else if (event.target.name === 'username' && username.length){
             await this.props.check(null,username);
 
             if (!this.props.username_validity)

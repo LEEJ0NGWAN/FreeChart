@@ -5,7 +5,7 @@ import { check, passwordReset } from '../actions/api';
 import { NavLink } from 'react-router-dom';
 
 function checkEmail(email) {
-    let regExp = /^[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}$/i;
+    let regExp = /^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}$/i;
 
     return regExp.test(email);	
 }
@@ -62,16 +62,8 @@ class Password extends Component {
         if (logged) history.push('/');
     }
 
-    componentDidUpdate(prevProps, prevStates) {
-        const { history, error_msg, error_code } = this.props;
-
-        if (!prevProps.logged && this.props.logged){
-            localStorage.setItem(
-                'user',
-                JSON.stringify(this.props.user)
-            );
-            history.push('/'); // 루트 페이지로 이동
-        }
+    componentDidUpdate() {
+        const { error_msg, error_code } = this.props;
         
         if (error_code) {
             let nextState = {};
