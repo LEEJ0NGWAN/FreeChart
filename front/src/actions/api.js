@@ -20,7 +20,7 @@ export function login(email, password) {
                 dispatch(clearError());
             })
             .catch(err => {
-                reportError(err);
+                dispatch(reportError(err));
             });
     };
 }
@@ -33,7 +33,7 @@ export function logout() {
             dispatch(clearError());
         })
         .catch(err => {
-            reportError(err);
+            dispatch(reportError(err));
         });
     };
 }
@@ -58,7 +58,7 @@ export function check(email=null, username=null) {
             dispatch(clearError());
         })
         .catch(err => {
-            reportError(err);
+            dispatch(reportError(err));
         })
     }
 }
@@ -78,7 +78,7 @@ export function register_(email, username=null, password) {
             dispatch(clearError());
         })
         .catch(err => {
-            reportError(err);
+            dispatch(reportError(err));
         });
     };
 }
@@ -91,7 +91,7 @@ export function passwordReset(email) {
             dispatch(clearError());
         })
         .catch(err => {
-            reportError(err);
+            dispatch(reportError(err));
         });
     }
 }
@@ -104,7 +104,7 @@ export function checkSession() {
         .then()
         .catch(err => {
             let status = err.response.status;
-            if (status != 403)
+            if (status !== 403)
                 dispatch(action(CLEAR_SESSION));
         })
     }

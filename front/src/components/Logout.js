@@ -14,8 +14,7 @@ class Logout extends Component {
         const {history} = this.props;
 
         if (!this.props.logged){
-            localStorage.removeItem('user');
-            localStorage.removeItem('root');
+            localStorage.clear();
             history.push('/');
         }
     }

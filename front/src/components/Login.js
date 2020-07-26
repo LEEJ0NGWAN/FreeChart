@@ -47,12 +47,11 @@ class Login extends Component {
             );
             history.push('/'); // 루트 페이지로 이동
         }
-
         if (error_code){
             let error;
             switch (error_code) {
                 case 400:
-                    if (error_msg == 'email or password error')
+                    if (error_msg === 'email or password error')
                         error = "이메일 또는 비밀번호 에러!";
                     else
                         error = "비밀번호가 틀렸습니다!"
