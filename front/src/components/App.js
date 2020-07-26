@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { NavLink, Route, Switch } from 'react-router-dom';
+import { NavLink, Route, Switch, Redirect } from 'react-router-dom';
 import Home from './Home';
 import Login from './Login';
 import Logout from './Logout';
@@ -32,29 +32,26 @@ class App extends Component {
     }
 
     render() {
-        const login = (
-            <li><NavLink to="/login">로그인</NavLink></li>
-        )
         const logout = (
-            <li><NavLink to="/logout">로그아웃</NavLink></li>
+            <button className="waves-effect waves-light btn">
+            <NavLink to="/logout" 
+            style={{textDecoration:'none'}}>로그아웃</NavLink>
+            </button>
         )
-
         return (
             <div className="App">
                 <div className="App-header">
-                    <h1>자유로운 필기! FreeList!</h1>
+                    <h1>FreeList</h1>
                 </div>
                 <div className="content-wrapper">
-                    <ul>
-                        <li><NavLink exact to="/">홈</NavLink></li>
-                        {this.props.logged? logout: login}
-                    </ul>
+                    {this.props.logged && logout}
                     <Switch>
                         <Route exact path="/" component={Home}/>
                         <Route exact path="/login" component={Login}/>
                         <Route exact path="/logout" component={Logout}/>
                         <Route exact path="/register" component={Register}/>
                         <Route exact path="/password" component={Password}/>
+                        <Redirect path="*" to="/" />
                     </Switch>
                 </div>
             </div>
@@ -69,6 +66,4 @@ export default connect((state) => {
       expired: state.userReducer.expired
     };
 }, { fetch, checkSession })(App);
-
-// export default App;
 
