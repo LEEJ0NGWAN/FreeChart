@@ -9,7 +9,6 @@ export default function (state = initialState, action) {
             return {};
         case ERROR:
             return {
-                ...state,
                 error_msg: action.payload.error_msg,
                 error_code: action.payload.error_code
             };
