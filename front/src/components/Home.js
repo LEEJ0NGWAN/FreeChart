@@ -2,15 +2,24 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { clearError, fetch } from '../actions/common';
 import { NavLink } from 'react-router-dom';
-import { BOARDS, SHEETS, getBoard } from '../actions/board_api';
+import { BOARDS, SHEETS, getBoard, getSheet } from '../actions/board_api';
+import Sheet from './Sheet';
 
 class Home extends Component {
-    initializeUserInfo = async () => {
+    state = {
+        error: null,
+        isRoot: true,
+        sheetId: null,
+    }
+
+    initializeUserInfo = async (event) => {
         const boards = JSON.parse(localStorage.getItem('boards'));
         const sheets = JSON.parse(localStorage.getItem('sheets'));
 
-        if(!boards || !sheets) {
-            await this.props.getBoard();            
+        if(!boards || !sheets || event) {
+            await this.props.getBoard();
+            if (event)
+                this.setState({isRoot:true});
             return;
         }
 
@@ -42,6 +51,20 @@ class Home extends Component {
                 JSON.stringify(sheets));
         }
     }
+
+    finder = (event) => {
+        const board_id = event.target.id;
+        if (!board_id)
+            return;
+        
+        this.props.getSheet(null, board_id);
+        this.setState({isRoot: false});
+    }
+
+    processer = (event) => {
+        const sheet_id = event.target.id;
+        this.setState({sheetId:sheet_id});
+    }
   
     renderUser() {
         const {user} = this.props;
@@ -62,7 +85,7 @@ class Home extends Component {
         
         let boardList = [];
         for (let board of boards) {
-            boardList.push(<li key={board.id}><b>{board.title}</b></li>)
+            boardList.push(<p onClick={this.finder} key={board.id} id={board.id}>{board.title}</p>)
         }
         return boardList;
     }
@@ -74,7 +97,7 @@ class Home extends Component {
 
         let sheetList = [];
         for (let sheet of sheets) {
-            sheetList.push(<li key={sheet.id}><b>{sheet.title}</b></li>)
+            sheetList.push(<p onClick={this.processer} key={sheet.id} id={sheet.id}>{sheet.title}</p>)
         }
         return sheetList;
     }
@@ -86,11 +109,21 @@ class Home extends Component {
             style={{textDecoration:'none'}}>로그아웃</NavLink>
             </button>
         )
+        const back = (
+            <p onClick={this.initializeUserInfo}>...</p>
+        )
+        const exit = (
+            <p onClick={(e)=>{this.setState({sheetId:null})}}>나가기</p>
+        )
         return (
             <div>
             <h1><b>{this.renderUser()}</b></h1><br/>
-            {this.renderBoards()}<br/>
-            {this.renderSheets()}<br/>
+            {(!this.state.sheetId && this.state.isRoot) &&
+            this.renderBoards()}
+            {(!this.state.sheetId && !this.state.isRoot) &&
+            back}
+            {this.state.sheetId? exit: this.renderSheets()}
+            {this.state.sheetId && <Sheet sheet_id={this.state.sheetId}/>}
             </div>
         );
     }
@@ -107,5 +140,5 @@ export default connect((state) => {
       nodes: state.elementReducer.nodes,
       edges: state.elementReducer.edges,
     };
-}, { clearError, fetch, getBoard })(Home);
+}, { clearError, fetch, getBoard, getSheet })(Home);
 
