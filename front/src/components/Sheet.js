@@ -1,27 +1,51 @@
-import React, { Component } from 'react';
+import React, { Component, createRef } from 'react';
 import { connect } from 'react-redux';
 import { clearError } from '../actions/common';
 import { getElement } from '../actions/sheet_api';
+import { fetch } from '../actions/common';
+import Graph from "react-graph-vis";
+
+const options = {
+    layout: {
+        hierarchical: false
+    },
+    edges: {
+        color: "#000000"
+    }
+};
+  
+const events = {
+    select: function(event) {
+        var { nodes, edges } = event;
+        console.log("Selected nodes:");
+        console.log(nodes);
+        console.log("Selected edges:");
+        console.log(edges);
+    }
+};
 
 class Sheet extends Component {
     state = {
         error: null,
     };
 
-    componentDidMount() {
-        const {logged, history, sheet} = this.props;
-        if (!logged){
-            history.push('/login');
-            return;
-        }
-        if (!sheet){
-            history.push('/');
-            return;
-        }
-        this.props.getElement(sheet.id);
+    fetchElements = async () => {
+        const {sheet_id} = this.props;
+        await this.props.getElement(sheet_id);
+
+        this.setState({
+            graph: {
+                nodes: this.props.nodes,
+                edges: this.props.edges
+            }
+        });
     }
 
-    componentDidUpdate(prevProps, prevStates) {
+    componentDidMount() {
+        this.fetchElements();
+    }
+
+    componentDidUpdate() {
         const {error_msg, error_code} = this.props;
 
         if (error_code) {
@@ -33,22 +57,29 @@ class Sheet extends Component {
         }
     }
 
-    // TODO vis.js 연동해서 노드와 엣지 그리기
-
     render() {
-        
+        const graph = (
+            <Graph 
+            graph={this.state.graph} 
+            options={options} 
+            events={events} 
+            style={{ height: "640px" }} />
+        )
+        return (
+            <div>
+                {this.state.error}
+                {this.state.graph && graph}
+            </div>
+        )
     }
 }
 
 export default connect((state) => {
     return {
-        user: state.userReducer.user,
-        logged: state.userReducer.logged,
         error_msg: state.commonReducer.error_msg,
         error_code: state.commonReducer.error_code,
-        sheet: state.sheetReducer.sheet,
         nodes: state.elementReducer.nodes,
-        edges: state.elementReducer.edges
+        edges: state.elementReducer.edges,
     };
-}, { getElement, clearError })(Sheet);
+}, { getElement, clearError, fetch })(Sheet);
 
