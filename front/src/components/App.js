@@ -14,8 +14,7 @@ class App extends Component {
         await this.props.checkSession();
 
         if (this.props.expired){
-            localStorage.removeItem('user');
-            localStorage.removeItem('root');
+            localStorage.clear();
         }
     }
 
