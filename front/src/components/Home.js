@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { clearError, fetch } from '../actions/common';
-import { NavLink } from 'react-router-dom';
 import { BOARDS, SHEETS, getBoard, getSheet } from '../actions/board_api';
 import Sheet from './Sheet';
 
@@ -103,12 +102,6 @@ class Home extends Component {
     }
 
     render() {
-        const logout = (
-            <button className="waves-effect waves-light btn">
-            <NavLink to="/logout" 
-            style={{textDecoration:'none'}}>로그아웃</NavLink>
-            </button>
-        )
         const back = (
             <p onClick={this.initializeUserInfo}>...</p>
         )
