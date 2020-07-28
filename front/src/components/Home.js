@@ -110,7 +110,7 @@ class Home extends Component {
         )
         return (
             <div>
-            <h1><b>{this.renderUser()}</b></h1><br/>
+            <h5><b>{this.renderUser()}</b></h5><br/>
             {(!this.state.sheetId && this.state.isRoot) &&
             this.renderBoards()}
             {(!this.state.sheetId && !this.state.isRoot) &&
