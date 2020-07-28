@@ -8,6 +8,7 @@ import Register from './Register';
 import Password from './Password';
 import { USER, fetch } from '../actions/common';
 import { checkSession } from '../actions/api';
+import './App.css';
 
 class App extends Component {
     checkSessionInfo = async () => {

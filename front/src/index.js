@@ -5,6 +5,7 @@ import App from './components/App';
 import { createBrowserHistory } from 'history';
 import { Router, Route} from 'react-router-dom'
 import store from './store';
+import './index.css';
 
 const history = createBrowserHistory();
 
