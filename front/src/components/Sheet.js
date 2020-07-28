@@ -11,7 +11,9 @@ const options = {
         hierarchical: false
     },
     edges: {
-        color: "#000000"
+        color: "#000000",
+        arrowStrikethrough: false,
+        width: 5,
     }
 };
 
@@ -23,26 +25,25 @@ class Sheet extends Component {
     };
 
     events = {
-        // hold: function(event) {
-        // },
+        hold: function(event) {
+            console.log("꾹")
+        },
         // click: function(event) {
+        //     console.log(this);
         // },
         // select: function(event) {
-        //     var { nodes, edges } = event;
-        //     if (!this.selected)
-        //         this.selected = nodes
-        //     console.log(this.selected, nodes);
+        //     console.log(this);
+        //     console.log(event)
         // },
         doubleClick: function(event) {
             const {nodes} = event;
             if (!nodes.length) {
                 const {x, y} = event.pointer.canvas;
                 let node = {
-                    id: this.state.index,
+                    // id: this.state.index,
                     label: 'test',
                     sheet_id: Number(this.props.sheet_id),
                     x: x, y: y,
-                    title: 'test'
                 };
                 this.setState({
                     graph: {
@@ -56,24 +57,31 @@ class Sheet extends Component {
                 });
             }
             else {
+                const nodeId = nodes[0];
                 const {x, y} = event.pointer.DOM;
-                this.togglePop(x,y);
+                this.togglePop();
+                this.fetchInfo(nodeId,x,y);
             }
         }.bind(this),
-
-        // dragging: function(event) {
-        // }
     };
 
-    togglePop = (x=null, y=null) => {
-        let nextState = {
+    togglePop = () => {
+        this.setState({
             popped: !this.state.popped
+        });
+    }
+
+    fetchInfo = (nodeId, x=null, y=null, label=null, deleted=false) => {
+        let nextState = {
+            nodeId: nodeId
         };
         if (x)
             nextState.x = x;
         if (y)
             nextState.y = y;
-
+        if (label)
+            nextState.label = label;
+        
         this.setState(nextState);
     }
 
@@ -115,7 +123,8 @@ class Sheet extends Component {
                     {this.state.error}
                     {this.state.popped && 
                     <NodeEdit 
-                    togglePop={this.togglePop} 
+                    togglePop={this.togglePop}
+                    fetchInfo={this.fetchInfo}
                     x={this.state.x}
                     y={this.state.y}/>}
                 </div>
