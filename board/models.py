@@ -1,3 +1,4 @@
+from uuid import uuid4
 from django.db import models
 from FreeList.settings import AUTH_USER_MODEL
 
@@ -26,25 +27,31 @@ class Node(models.Model):
     class Meta:
         db_table = 'node'
         verbose_name = 'node'
+    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
     sheet = models.ForeignKey('board.Sheet', on_delete=models.SET_NULL, null=True)
     label = models.CharField(max_length=128, verbose_name='라벨')
+    create = models.DateTimeField(auto_now_add=True, verbose_name='작성 날짜')
+    modify = models.DateTimeField(auto_now=True, verbose_name='수정 날짜')
     deleted = models.BooleanField(default=False, null=False)
 
 class Edge(models.Model):
     class Meta:
         db_table = 'edge'
         verbose_name = 'edge'
+    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
     sheet = models.ForeignKey('board.Sheet', on_delete=models.SET_NULL, null=True)
     label = models.CharField(max_length=128, verbose_name='라벨')
-    node1 = models.ForeignKey(
+    node_from = models.ForeignKey(
         'board.Node',
         on_delete=models.CASCADE,
         related_name='node1'
     )
-    node2 = models.ForeignKey(
+    node_to = models.ForeignKey(
         'board.Node',
         on_delete=models.CASCADE,
         related_name='node2'
     )
+    create = models.DateTimeField(auto_now_add=True, verbose_name='작성 날짜')
+    modify = models.DateTimeField(auto_now=True, verbose_name='수정 날짜')
     deleted = models.BooleanField(default=False, null=False)
 
