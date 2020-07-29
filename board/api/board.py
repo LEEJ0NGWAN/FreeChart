@@ -1,5 +1,6 @@
 import json
 import datetime
+from uuid import UUID
 from django.contrib.auth import (
     login, logout
 )
@@ -205,6 +206,7 @@ class SheetController(View):
         sheet = Sheet.objects\
             .filter(
                 id=data.get('id'),
+                owner_id=request.user.id,
                 deleted=False).fisrt()
         
         if not sheet:
@@ -234,6 +236,7 @@ class SheetController(View):
         sheet = Sheet.objects\
             .filter(
                 id=data['id'],
+                owner_id=request.user.id,
                 deleted=False).first()
         
         if not sheet:
@@ -280,97 +283,68 @@ class ElementController(View):
         data = json.loads(request.body.decode("utf-8"))
 
         if 'sheet_id' not in data \
-            or 'nodes' not in data or 'edges' not in data:
+        or 'nodes' not in data or 'edges' not in data\
+        or 'nodeStates' not in data or 'edgeStates' not in data:
             return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
-
-        nodes = list()
-        edges = list()
-
-        nodes_app = nodes.append
-        edges_app = edges.append
-
-        for raw in data['nodes']:
-            if 'id' not in raw:
-                continue
-
-            nodes_app(Node(
-                id=raw['id'],
-                sheet_id=data['sheet_id'],
-                label=raw.get('label')
-            ))
         
-        nodes = Node.objects.bulk_create(nodes)
+        sheet = Sheet.objects\
+            .filter(
+                id=data['sheet_id'],
+                owner_id=request.user.id,
+                deleted=False).first()
         
-        for raw in data['edges']:
-            if 'id' not in raw\
-            or 'from' not in raw\
-            or 'to' not in raw:
-                continue
+        if not sheet:
+            return JsonResponse({}, status=HTTP_404_NOT_FOUND)
 
-            edges_app(Edge(
-                id=raw['id'],
-                node_from_id=raw['from'],
-                node_to_id=raw['to'],
-                sheet_id=data['sheet_id']
-            ))
+        sheet_id = data['sheet_id']
+
+        new_nodes = list()
+        new_app = new_nodes.append
+
+        # 0: del, 1: crt, 2: mod
+        nodes = Node.objects.in_bulk(list(data['nodeStates'].keys()))
+
+        for node_id in data['nodeStates']:
+            state = data['nodeStates'][node_id]
+            if not state:
+                nodes[UUID(node_id)].deleted = True
+            elif (state == 1):
+                new_app(Node(
+                id=node_id,
+                sheet_id=sheet_id,
+                label=data['nodes'][node_id]['label']))
+            else:
+                nodes[UUID(node_id)].label = data['nodes'][node_id]['label']
+
+        nodes = list(nodes.values())
+        Node.objects.bulk_update(nodes,['label','deleted'])
+        Node.objects.bulk_create(new_nodes)
+
+        new_edges = list()
+        new_app = new_edges.append
+
+        edges = Edge.objects.in_bulk(list(data['edgeStates'].keys()))
+
+        for edge_id in data['edgeStates']:
+            state = data['edgeStates'][edge_id]
+            if not state:
+                edges[UUID(edge_id)].deleted = True
+            elif (state == 1):
+                edge = data['edges'][edge_id]
+                new_app(Edge(
+                    id=edge_id,
+                    sheet_id=sheet_id,
+                    label=edge['label'],
+                    node_from_id=edge['from'],
+                    node_to_id=edge['to']))
+            else:
+                edge = data['edges'][edge_id]
+                edges[UUID(edge_id)].node_from_id = edge['from']
+                edges[UUID(edge_id)].node_to_id = edge['to']
         
-        edges = Edge.objects.bulk_create(edges)
+        edges = list(edges.values())
+        Edge.objects.bulk_update(edges,['node_from_id', 'node_to_id', 'deleted'])
+        Edge.objects.bulk_create(new_edges)
 
-        return JsonResponse(serialize({
-            'nodes': nodes,
-            'edges': edges
-        }))
-
-    def put(self, request):
-        if not request.user.is_authenticated:
-            return JsonResponse({}, status=HTTP_401_UNAUTHORIZED)
-        
-        data = json.loads(request.body.decode("utf-8"))
-
-        nodes = None
-        edges = None
-
-        if 'nodes' in data:
-            nodes = data['nodes']
-            raws = dict((node['id'], node) for node in nodes)
-            
-            nodes = Node.objects.in_bulk(nodes)
-
-            for pk in nodes:
-                if 'label' in raws[pk]:
-                    nodes[pk].label = raws[pk]['label']
-                if 'deleted' in raws[pk]:
-                    nodes[pk].deleted = raws[pk]['deleted']
-
-            nodes = list(nodes.values())
-            Node.objects.bulk_update(nodes,['label','deleted'])
-
-        if 'edges' in data:
-            edges = data['edges']
-            raws = dict((edge['id'], edge) for edge in edges)
-            
-            edges = Edge.objects.in_bulk(edges)
-
-            for pk in edges:
-                if 'label' in raws[pk]:
-                    edges[pk].label = raws[pk]['label']
-                if 'from' in raws[pk]:
-                    edges[pk].node_from_id = raws[pk]['from']
-                if 'to' in raws[pk]:
-                    edges[pk].node_to_id = raws[pk]['to']
-                if 'deleted' in raws[pk]:
-                    edges[pk].deleted = raws[pk]['deleted']
-            
-            edges = list(edges.values())
-            Edge.objects.bulk_update(
-                edges,
-                ['label','node_from_id','node_to_id','deleted'])
-
-        return JsonResponse(serialize({
-            'nodes': nodes,
-            'edges': edges
-        }))
-    
-    # TODO: controller 테스트 및 폴리싱
-    # TODO: DELETE 메소드 구현?
+        return JsonResponse({})
 
