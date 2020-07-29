@@ -155,8 +155,8 @@ def edge_parse(edge, **kwargs):
     result = {
         'id': edge.id,
         'label': edge.label,
-        'from': edge.node1_id,
-        'to': edge.node2_id,
+        'from': edge.node_from_id,
+        'to': edge.node_to_id,
         'sheet_id': edge.sheet_id
     }
 

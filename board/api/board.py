@@ -283,7 +283,6 @@ class ElementController(View):
             or 'nodes' not in data or 'edges' not in data:
             return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
 
-        parse = dict()
         nodes = list()
         edges = list()
 
@@ -295,27 +294,23 @@ class ElementController(View):
                 continue
 
             nodes_app(Node(
+                id=raw['id'],
                 sheet_id=data['sheet_id'],
                 label=raw.get('label')
             ))
         
         nodes = Node.objects.bulk_create(nodes)
         
-        index = 0
-        for raw in data['nodes']:
-            if 'id' not in raw:
-                continue
-            parse[raw['id']] = nodes[index].id
-            index+=1
-        
         for raw in data['edges']:
-            if 'node1_id' not in raw\
-            or 'node2_id' not in raw:
+            if 'id' not in raw\
+            or 'from' not in raw\
+            or 'to' not in raw:
                 continue
 
             edges_app(Edge(
-                node1_id=parse[raw['node1_id']],
-                node2_id=parse[raw['node2_id']],
+                id=raw['id'],
+                node_from_id=raw['from'],
+                node_to_id=raw['to'],
                 sheet_id=data['sheet_id']
             ))
         
@@ -336,13 +331,8 @@ class ElementController(View):
         edges = None
 
         if 'nodes' in data:
-            raws = dict()
-            nodes = list()
-            nodes_app = nodes.append
-
-            for raw in data['nodes']:
-                raws[raw['id']] = raw
-                nodes_app(raw['id'])
+            nodes = data['nodes']
+            raws = dict((node['id'], node) for node in nodes)
             
             nodes = Node.objects.in_bulk(nodes)
 
@@ -356,30 +346,25 @@ class ElementController(View):
             Node.objects.bulk_update(nodes,['label','deleted'])
 
         if 'edges' in data:
-            raws = dict()
-            edges = list()
-            edges_app = edges.append
-
-            for raw in data['edges']:
-                raws[raw['id']] = raw
-                edges_app(raw['id'])
+            edges = data['edges']
+            raws = dict((edge['id'], edge) for edge in edges)
             
             edges = Edge.objects.in_bulk(edges)
 
             for pk in edges:
                 if 'label' in raws[pk]:
                     edges[pk].label = raws[pk]['label']
-                if 'node1_id' in raws[pk]:
-                    edges[pk].node1_id = raws[pk]['node1_id']
-                if 'node2_id' in raws[pk]:
-                    edges[pk].node2_id = raws[pk]['node2_id']
+                if 'from' in raws[pk]:
+                    edges[pk].node_from_id = raws[pk]['from']
+                if 'to' in raws[pk]:
+                    edges[pk].node_to_id = raws[pk]['to']
                 if 'deleted' in raws[pk]:
                     edges[pk].deleted = raws[pk]['deleted']
             
             edges = list(edges.values())
             Edge.objects.bulk_update(
                 edges,
-                ['label','node1_id','node2_id','deleted'])
+                ['label','node_from_id','node_to_id','deleted'])
 
         return JsonResponse(serialize({
             'nodes': nodes,
