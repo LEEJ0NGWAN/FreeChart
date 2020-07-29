@@ -3,7 +3,14 @@ import './NodeEdit.css';
 
 class NodeEdit extends Component {
     state = {
+        label: "",
         ref: React.createRef()
+    }
+
+    changer = (event) => {
+        let nextState = {};
+        nextState[event.target.name] = event.target.value;
+        this.setState(nextState);
     }
 
     render() {
@@ -11,7 +18,7 @@ class NodeEdit extends Component {
         let y = this.props.y+'px';
         return(
             <div className="modal"
-            onClick={this.props.togglePop}>
+            onClick={()=>{this.props.togglePop();}}>
                 <div
                 onClick={(e)=>{e.stopPropagation();}}
                 ref={this.state.ref}
@@ -20,8 +27,17 @@ class NodeEdit extends Component {
                     top: y,
                     left: x
                 }}>
-                    <input defaultValue="라벨"></input>
-                    <button>수정</button>
+                    <input 
+                    name="label" 
+                    type="text" 
+                    value={this.state.label}
+                    onChange={this.changer}/>
+                    <button
+                    onClick={()=>{
+                        this.props.fetchInfo(
+                            this.props.nodeId,
+                            null,null,
+                            this.state.label,true)}}>수정</button>
                     <button>삭제</button>
                 </div>
                 

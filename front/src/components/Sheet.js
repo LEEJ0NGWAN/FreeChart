@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { clearError } from '../actions/common';
-import { getElement } from '../actions/sheet_api';
-import { fetch } from '../actions/common';
+import { getElement, editElement, RESET } from '../actions/sheet_api';
+import { action, fetch } from '../actions/common';
 import Graph from 'react-graph-vis';
 import NodeEdit from './NodeEdit';
+import { v4 as uuid } from 'uuid';
 
 const options = {
     layout: {
@@ -19,62 +20,97 @@ const options = {
 
 class Sheet extends Component {
     state = {
+        networkRef: React.createRef(),
         popped: false,
-        isChanged: false,
-        error: null,
+        nodeStates: {},
+        edgeStates: {}
     };
 
     events = {
         hold: function(event) {
-            console.log("꾹")
-        },
-        // click: function(event) {
-        //     console.log(this);
-        // },
-        // select: function(event) {
-        //     console.log(this);
-        //     console.log(event)
-        // },
+            // TODO: 삭제 기능 따로 빼기
+            // TODO: 엣지 수정 및 만들기 기능
+            // const nodeId = event.nodes[0];
+            // if (nodeId) {
+            //     const nodes = this.state.networkRef.current.nodes;
+
+            //     let nextState = {
+            //         nodeStates: {
+            //             ...this.state.nodeStates
+            //         },
+            //         edgeStates: {
+            //             ...this.state.edgeStates
+            //         }
+            //     };
+            //     nextState.nodeStates[nodeId] = 0;
+            //     event.edges.forEach((key)=>{
+            //         nextState.edgeStates[key] = 0;
+            //     });
+                
+            //     this.setState(nextState);
+            //     nodes.remove(nodeId);
+            // }
+        }.bind(this),
         doubleClick: function(event) {
             const {nodes} = event;
             if (!nodes.length) {
+                const nodes = this.state.networkRef.current.nodes;
                 const {x, y} = event.pointer.canvas;
                 let node = {
-                    // id: this.state.index,
-                    label: 'test',
-                    sheet_id: Number(this.props.sheet_id),
-                    x: x, y: y,
+                    id: uuid(),
+                    label: '새로운 노드',
+                    x: x, y: y
                 };
-                this.setState({
-                    graph: {
-                        ...this.state.graph,
-                        nodes: [
-                            ...this.state.graph.nodes,
-                            node
-                        ]
-                    },
-                    index: (this.state.index+1)
-                });
+
+                let nextState = {
+                    nodeStates: {
+                        ...this.state.nodeStates
+                    }
+                };
+                nextState.nodeStates[node.id] = 1;
+                
+                this.setState(nextState);
+                nodes.add(node);
             }
             else {
                 const nodeId = nodes[0];
                 const {x, y} = event.pointer.DOM;
+                const label = this.state.networkRef
+                                .current.nodes._data[nodeId].label;
                 this.togglePop();
-                this.fetchInfo(nodeId,x,y);
+                this.fetchInfo(nodeId,x,y,label);
             }
         }.bind(this),
     };
 
     togglePop = () => {
-        this.setState({
-            popped: !this.state.popped
-        });
+        this.setState({popped: !this.state.popped});
     }
 
-    fetchInfo = (nodeId, x=null, y=null, label=null, deleted=false) => {
+    fetchInfo = (nodeId, x=null, y=null, label=null, modified=false, deleted=false) => {
+        if (modified) {
+            const nodes = this.state.networkRef.current.nodes;
+            nodes.update({
+                id: nodeId,
+                label: label
+            });
+
+            let nextState = {popped: !this.state.popped};
+            
+            if (!this.state.nodeStates[nodeId]) {
+                nextState['nodeStates'] = {
+                    ...this.state.nodeStates
+                };
+                nextState.nodeStates[nodeId] = 2;
+            }
+            this.setState(nextState);
+            return;
+        }
+        
         let nextState = {
             nodeId: nodeId
         };
+
         if (x)
             nextState.x = x;
         if (y)
@@ -89,52 +125,90 @@ class Sheet extends Component {
         const {sheet_id} = this.props;
         await this.props.getElement(sheet_id);
 
-        const {nodes} = this.props;
-        let index = nodes.length? nodes[nodes.length-1].id + 1: 0;
         this.setState({
             graph: {
                 nodes: this.props.nodes,
                 edges: this.props.edges
-            },
-            index: index
+            }
         });
+    }
+
+    isEdited = () => {
+        const {nodeStates, edgeStates} = this.state;
+        const nodeLength = Object.keys(nodeStates).length;
+        const edgeLength = Object.keys(edgeStates).length;
+
+        return (nodeLength+edgeLength)? true: false;
+    }
+
+    save = async () => {
+        const {sheet_id} = this.props;
+        const nodes = this.state.networkRef.current.nodes._data;
+        const edges = this.state.networkRef.current.edges._data;
+        const {nodeStates, edgeStates} = this.state;
+        await this.props.editElement(sheet_id,nodes,edges,nodeStates,edgeStates);
+    }
+
+    cancel = () => {
+        // TODO: 취소 구현
+        // this.setState({
+        //     graph: {
+        //         nodes: this.props.nodes,
+        //         edges: this.props.edges
+        //     },
+        //     nodeStates: {},
+        //     edgeStates: {}
+        // });
     }
 
     componentDidMount() {
         this.fetchElements();
     }
 
-    componentDidUpdate() {
-        const {error_msg, error_code} = this.props;
-
-        if (error_code) {
-            let nextState = {};
-            nextState.error = error_msg?
-                error_msg: "[ERROR] "+ error_code;
-            this.props.clearError();
-            this.setState(nextState);
+    componentDidUpdate(prevProps, prevStates) {
+        const {saved} = this.props;
+        if (!prevProps.saved && saved) {
+            this.setState({
+                nodeStates: {},
+                edgeStates: {}
+            });
+            this.props.action(RESET);
         }
     }
 
     render() {
+        const save = (
+            <button
+            onClick={this.save}>변경 사항 저장</button>
+        )
+        const cancel = (
+            <button
+            onClick={this.cancel}>취소</button>
+        )
         return (
             <div>
+                {this.isEdited() && save}
+                {this.isEdited() && cancel}
                 <div>
-                    {this.state.error}
                     {this.state.popped && 
                     <NodeEdit 
                     togglePop={this.togglePop}
                     fetchInfo={this.fetchInfo}
+                    nodeId={this.state.nodeId}
                     x={this.state.x}
-                    y={this.state.y}/>}
+                    y={this.state.y}
+                    label={this.state.label}/>}
                 </div>
                 <div>
                     {this.state.graph &&
-                    <Graph 
+                    <Graph
+                    ref={this.state.networkRef}
                     graph={this.state.graph} 
                     options={options} 
                     events={this.events}
-                    style={{position: 'absolute', width:'100%', height: '65%'}}/>}
+                    style={{
+                        position: 'absolute', 
+                        width:'100%', height: '65%'}}/>}
                 </div>
             </div>
 
@@ -144,10 +218,9 @@ class Sheet extends Component {
 
 export default connect((state) => {
     return {
-        error_msg: state.commonReducer.error_msg,
-        error_code: state.commonReducer.error_code,
         nodes: state.elementReducer.nodes,
         edges: state.elementReducer.edges,
+        saved: state.elementReducer.saved
     };
-}, { getElement, clearError, fetch })(Sheet);
+}, { editElement, getElement, clearError, fetch, action })(Sheet);
 

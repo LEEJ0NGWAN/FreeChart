@@ -1,7 +1,9 @@
-import { fetch, clearError, reportError } from './common';
+import { action, fetch, clearError, reportError } from './common';
 import axios from 'axios';
 axios.defaults.withCredentials = true;
 
+export const SAVED = 'SAVED';
+export const RESET = 'RESET';
 export const ELEMENTS = 'ELEMENTS';
 
 export function getElement(sheet_id) {
@@ -13,8 +15,25 @@ export function getElement(sheet_id) {
             dispatch(clearError());
         })
         .catch(err => {
-            reportError(err);
+            dispatch(reportError(err));
         });
     };
+}
+
+export function editElement(sheet_id, nodes, edges, nodeStates, edgeStates) {
+    return (dispatch) => {
+        return axios.post(
+            'api/sheet/element/',
+            {
+                sheet_id: sheet_id,
+                nodes: nodes, edges:edges,
+                nodeStates: nodeStates,
+                edgeStates: edgeStates
+            })
+        .then(() => {
+            dispatch(action(SAVED));
+            dispatch(clearError());
+        });
+    }
 }
 
