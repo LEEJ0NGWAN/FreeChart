@@ -72,7 +72,8 @@ class Home extends Component {
         
         let userInfo = [];
         userInfo.push(<div key={user.email}>{user.email}<br/></div>);
-        userInfo.push(<div key={user.username}>{user.username}<br/></div>);
+        if (user.email !== user.username)
+            userInfo.push(<div key={user.username}>{user.username}<br/></div>);
 
         return userInfo;
     }
