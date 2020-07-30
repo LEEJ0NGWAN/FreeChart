@@ -23,15 +23,55 @@ class Sheet extends Component {
         networkRef: React.createRef(),
         popped: false,
         nodeStates: {},
-        edgeStates: {}
+        edgeStates: {},
+        from: null,
     };
 
     events = {
-        // hold: function(event) {
+        hold: function(event) {
+            const {nodes, edges} = event;
+            if (nodes.length) {
+                if (this.state.from) {
+                    const edges = this.state.networkRef.current.edges;
+                    let edge = {
+                        id: uuid(),
+                        from: this.state.from,
+                        to: nodes[0],
+                        label: ""
+                    };
 
-        //     // TODO: 엣지 수정 및 만들기 기능
-        //     // }
-        // }.bind(this),
+                    let nextState = {
+                        from: null,
+                        edgeStates: {
+                            ...this.state.edgeStates
+                        }
+                    };
+                    nextState.edgeStates[edge.id] = 1;
+
+                    this.setState(nextState);
+                    edges.add(edge);
+                }
+                else {
+                    this.setState({
+                        from: nodes[0]
+                    });
+                }
+            }
+            else if (edges) {
+                const edgeId = edges[0];
+                const _edges = this.state.networkRef.current.edges;
+
+                let nextState = {
+                    from: null,
+                    edgeStates: {
+                        ...this.state.edgeStates
+                    }
+                };
+                nextState.edgeStates[edgeId] = 0;
+                this.setState(nextState);
+                _edges.remove(edgeId);
+            }
+        }.bind(this),
         doubleClick: function(event) {
             const {nodes} = event;
             if (!nodes.length) {
@@ -195,7 +235,7 @@ class Sheet extends Component {
         return (
             <div>
                 {this.isEdited() && save}
-                {this.isEdited() && cancel}
+                {/* {this.isEdited() && cancel} */}
                 <div>
                     {this.state.popped && 
                     <NodeEdit 
