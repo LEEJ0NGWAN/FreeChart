@@ -1,22 +1,18 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { logout } from '../actions/api';
+import { deleteCookie } from '../utils';
 
 class Logout extends Component {
     componentDidMount() {
-        const {logged} = this.props;
+        const {logged, history} = this.props;
         if (!logged) return;
 
+        deleteCookie('boardId');
+        deleteCookie('sheetId');
+        
         this.props.logout();
-    }
-
-    componentDidUpdate() {
-        const {history} = this.props;
-
-        if (!this.props.logged){
-            localStorage.clear();
-            history.push('/');
-        }
+        history.push('/login');
     }
 
     render() {
