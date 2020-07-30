@@ -27,30 +27,11 @@ class Sheet extends Component {
     };
 
     events = {
-        hold: function(event) {
-            // TODO: 삭제 기능 따로 빼기
-            // TODO: 엣지 수정 및 만들기 기능
-            // const nodeId = event.nodes[0];
-            // if (nodeId) {
-            //     const nodes = this.state.networkRef.current.nodes;
+        // hold: function(event) {
 
-            //     let nextState = {
-            //         nodeStates: {
-            //             ...this.state.nodeStates
-            //         },
-            //         edgeStates: {
-            //             ...this.state.edgeStates
-            //         }
-            //     };
-            //     nextState.nodeStates[nodeId] = 0;
-            //     event.edges.forEach((key)=>{
-            //         nextState.edgeStates[key] = 0;
-            //     });
-                
-            //     this.setState(nextState);
-            //     nodes.remove(nodeId);
-            // }
-        }.bind(this),
+        //     // TODO: 엣지 수정 및 만들기 기능
+        //     // }
+        // }.bind(this),
         doubleClick: function(event) {
             const {nodes} = event;
             if (!nodes.length) {
@@ -77,8 +58,9 @@ class Sheet extends Component {
                 const {x, y} = event.pointer.DOM;
                 const label = this.state.networkRef
                                 .current.nodes._data[nodeId].label;
+                const {edges} = event;
                 this.togglePop();
-                this.fetchInfo(nodeId,x,y,label);
+                this.fetchInfo(nodeId,x,y,label,edges);
             }
         }.bind(this),
     };
@@ -87,29 +69,8 @@ class Sheet extends Component {
         this.setState({popped: !this.state.popped});
     }
 
-    fetchInfo = (nodeId, x=null, y=null, label=null, modified=false, deleted=false) => {
-        if (modified) {
-            const nodes = this.state.networkRef.current.nodes;
-            nodes.update({
-                id: nodeId,
-                label: label
-            });
-
-            let nextState = {popped: !this.state.popped};
-            
-            if (!this.state.nodeStates[nodeId]) {
-                nextState['nodeStates'] = {
-                    ...this.state.nodeStates
-                };
-                nextState.nodeStates[nodeId] = 2;
-            }
-            this.setState(nextState);
-            return;
-        }
-        
-        let nextState = {
-            nodeId: nodeId
-        };
+    fetchInfo = (nodeId, x=null, y=null, label=null, edges=null) => {        
+        let nextState = {nodeId: nodeId};
 
         if (x)
             nextState.x = x;
@@ -117,6 +78,8 @@ class Sheet extends Component {
             nextState.y = y;
         if (label)
             nextState.label = label;
+        if (edges)
+            nextState.edges = edges;
         
         this.setState(nextState);
     }
@@ -139,6 +102,50 @@ class Sheet extends Component {
         const edgeLength = Object.keys(edgeStates).length;
 
         return (nodeLength+edgeLength)? true: false;
+    }
+
+    modifyNode = (label) => {
+        const {nodeId} = this.state;
+        const nodes = this.state.networkRef.current.nodes;
+        nodes.update({
+            id: nodeId,
+            label: label
+        });
+
+        let nextState = {popped: !this.state.popped};
+        
+        if (!this.state.nodeStates[nodeId]) {
+            nextState['nodeStates'] = {
+                ...this.state.nodeStates
+            };
+            nextState.nodeStates[nodeId] = 2;
+        }
+        this.setState(nextState);
+    }
+
+    deleteNode = () => {
+        const {nodeId, edges} = this.state;
+        const nodes = this.state.networkRef.current.nodes;
+
+        let nextState = {
+            nodeStates: {
+                ...this.state.nodeStates
+            },
+            edgeStates: {
+                ...this.state.edgeStates
+            }
+        };
+        nextState.nodeStates[nodeId] = 0;
+        edges.forEach((key)=>{
+            nextState.edgeStates[key] = 0;
+        });
+        
+        this.setState(nextState);
+        nodes.remove(nodeId);
+    }
+
+    delete = () => {
+        //sheet 삭제
     }
 
     save = async () => {
@@ -193,7 +200,8 @@ class Sheet extends Component {
                     {this.state.popped && 
                     <NodeEdit 
                     togglePop={this.togglePop}
-                    fetchInfo={this.fetchInfo}
+                    modifyNode={this.modifyNode}
+                    deleteNode={this.deleteNode}
                     nodeId={this.state.nodeId}
                     x={this.state.x}
                     y={this.state.y}
