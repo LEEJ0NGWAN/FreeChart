@@ -1,5 +1,4 @@
-import { USER } from '../actions/common';
-import { LOGIN, LOGOUT, CLEAR_SESSION } from '../actions/api';
+import { LOGIN, LOGOUT, CLEAR_SESSION, USER } from '../actions/api';
 
 const initialState = {};
 
