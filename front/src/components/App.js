@@ -6,29 +6,18 @@ import Login from './Login';
 import Logout from './Logout';
 import Register from './Register';
 import Password from './Password';
-import { USER, fetch } from '../actions/common';
+import { fetch } from '../actions/common';
 import { checkSession } from '../actions/api';
 import './App.css';
 
 class App extends Component {
-    checkSessionInfo = async () => {
-        await this.props.checkSession();
-
-        if (this.props.expired){
-            localStorage.clear();
-        }
-    }
-
-    initializeUserInfo = async () => {
-        const user = JSON.parse(localStorage.getItem('user'));
-        if(!user) return;
-
-        await this.props.fetch(USER, user);
-    }
-
     componentDidMount() {
-        this.checkSessionInfo();
-        this.initializeUserInfo();
+        this.props.checkSession();
+        const {logged, history} = this.props;
+        if (!logged){
+            history.push('/login');
+            return;
+        }
     }
 
     render() {

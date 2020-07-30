@@ -1,29 +1,34 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { clearError, fetch } from '../actions/common';
-import { BOARDS, SHEETS, getBoard, getSheet } from '../actions/board_api';
+import { getBoard, getSheet } from '../actions/board_api';
+import { getCookie, setCookie, deleteCookie } from '../utils';
 import Sheet from './Sheet';
 
 class Home extends Component {
     state = {
         error: null,
-        isRoot: true,
+        boardId: null,
         sheetId: null,
     }
 
-    initializeUserInfo = async (event) => {
-        const boards = JSON.parse(localStorage.getItem('boards'));
-        const sheets = JSON.parse(localStorage.getItem('sheets'));
-
-        if(!boards || !sheets || event) {
-            await this.props.getBoard();
-            if (event)
-                this.setState({isRoot:true});
-            return;
+    initialize = async (event) => {
+        const boardId = getCookie('boardId');
+        const sheetId = getCookie('sheetId');
+        
+        if (!boardId || event){
+            deleteCookie('boardId');
+            deleteCookie('sheetId');
+            this.setState({boardId: null});
+            this.props.getBoard();
         }
-
-        this.props.fetch(BOARDS, {boards: boards});
-        this.props.fetch(SHEETS, {sheets: sheets});
+        else {
+            this.setState({
+                boardId: boardId,
+                sheetId: sheetId
+            });
+            this.props.getSheet(null, boardId);
+        }
     }
 
     componentDidMount() {
@@ -32,36 +37,30 @@ class Home extends Component {
             history.push('/login');
             return;
         }
-        this.initializeUserInfo();
+        this.initialize();
     }
 
-    componentDidUpdate(prevProps, prevStates) {
-        const {boards, sheets} = this.props;
-
-        if (prevProps.boards !== boards){
-            localStorage.setItem(
-                'boards',
-                JSON.stringify(boards));
-        }
-
-        if (prevProps.sheets !== sheets){
-            localStorage.setItem(
-                'sheets',
-                JSON.stringify(sheets));
+    componentDidUpdate() {
+        const {logged, history} = this.props;
+        if (!logged){
+            history.push('/login');
+            return;
         }
     }
 
-    finder = (event) => {
+    finder = async (event) => {
         const board_id = event.target.id;
         if (!board_id)
             return;
         
-        this.props.getSheet(null, board_id);
-        this.setState({isRoot: false});
+        await this.props.getSheet(null, board_id);
+        setCookie('boardId',board_id);
+        this.setState({boardId: board_id});
     }
 
     processer = (event) => {
         const sheet_id = event.target.id;
+        setCookie('sheetId',sheet_id);
         this.setState({sheetId:sheet_id});
     }
   
@@ -104,18 +103,18 @@ class Home extends Component {
 
     render() {
         const back = (
-            <p onClick={this.initializeUserInfo}>...</p>
+            <p onClick={this.initialize}>...</p>
         )
         const exit = (
-            <p onClick={(e)=>{this.setState({sheetId:null})}}>나가기</p>
+            <p onClick={(e)=>{
+                deleteCookie('sheetId');
+                this.setState({sheetId:null});}}>나가기</p>
         )
         return (
             <div>
             <h5><b>{this.renderUser()}</b></h5><br/>
-            {(!this.state.sheetId && this.state.isRoot) &&
-            this.renderBoards()}
-            {(!this.state.sheetId && !this.state.isRoot) &&
-            back}
+            {!this.state.boardId && this.renderBoards()}
+            {(this.state.boardId && !this.state.sheetId) && back}
             {this.state.sheetId? exit: this.renderSheets()}
             {this.state.sheetId && <Sheet sheet_id={this.state.sheetId}/>}
             </div>
@@ -127,12 +126,8 @@ export default connect((state) => {
     return {
       user: state.userReducer.user,
       logged: state.userReducer.logged,
-      board: state.boardReducer.board,
-      sheet: state.sheetReducer.sheet,
       boards: state.boardReducer.boards,
       sheets: state.sheetReducer.sheets,
-      nodes: state.elementReducer.nodes,
-      edges: state.elementReducer.edges,
     };
 }, { clearError, fetch, getBoard, getSheet })(Home);
 
