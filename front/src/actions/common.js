@@ -1,7 +1,6 @@
 export const CLEAR_ERROR = 'CLEAR_ERROR';
 export const ERROR = 'ERROR';
 export const CLEAR = 'CLEAR';
-export const USER = 'USER';
 
 export const action = (type) => {
     return {

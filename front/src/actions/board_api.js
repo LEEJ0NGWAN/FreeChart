@@ -8,13 +8,11 @@ export const SHEET = 'SHEET';
 export const SHEETS = 'SHEETS';
 
 
-export function getBoard(id=null, owner_id=null) {
+export function getBoard(id=null) {
     return (dispatch) => {
         let params = {};
         if (id)
             params.id = id;
-        if (owner_id)
-            params.owner_id = owner_id;
         return axios.get('api/board/', {params})
         .then(res => {
             if (res.data.board)

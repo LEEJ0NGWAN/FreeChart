@@ -2,6 +2,7 @@ import { action, fetch, clearError, reportError } from './common';
 import axios from 'axios';
 axios.defaults.withCredentials = true;
 
+export const USER = 'USER';
 export const LOGIN = 'LOGIN';
 export const LOGOUT = 'LOGOUT';
 export const CHECK = 'CHECK';
@@ -98,14 +99,13 @@ export function passwordReset(email) {
 
 export function checkSession() {
     return (dispatch) => {
-        return axios.post(
-            'api/account/login/',
-            {email: null, password: null})
-        .then()
-        .catch(err => {
-            let status = err.response.status;
-            if (status !== 403)
-                dispatch(action(CLEAR_SESSION));
+        return axios.get('api/user/')
+        .then(res => {
+            dispatch(fetch(USER, res.data.user));
+            dispatch(clearError());
+        })
+        .catch(() => {
+            dispatch(action(CLEAR_SESSION));
         })
     }
 }
