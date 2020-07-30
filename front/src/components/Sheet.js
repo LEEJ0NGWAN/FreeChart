@@ -28,6 +28,10 @@ class Sheet extends Component {
     };
 
     events = {
+        click: function() {
+            if (this.state.from)
+                this.setState({from: null});
+        }.bind(this),
         hold: function(event) {
             const {nodes, edges} = event;
             if (nodes.length) {
@@ -57,17 +61,21 @@ class Sheet extends Component {
                     });
                 }
             }
-            else if (edges) {
+            else if (edges.length) {
                 const edgeId = edges[0];
                 const _edges = this.state.networkRef.current.edges;
 
                 let nextState = {
-                    from: null,
                     edgeStates: {
                         ...this.state.edgeStates
                     }
                 };
-                nextState.edgeStates[edgeId] = 0;
+                if (this.state.from)
+                    nextState.from = null;
+                if (nextState.edgeStates[edgeId] === 1)
+                    delete nextState.edgeStates[edgeId];
+                else
+                    nextState.edgeStates[edgeId] = 0;
                 this.setState(nextState);
                 _edges.remove(edgeId);
             }
@@ -88,6 +96,10 @@ class Sheet extends Component {
                         ...this.state.nodeStates
                     }
                 };
+
+                if (this.state.from)
+                    nextState.from = null;
+
                 nextState.nodeStates[node.id] = 1;
                 
                 this.setState(nextState);
@@ -99,7 +111,7 @@ class Sheet extends Component {
                 const label = this.state.networkRef
                                 .current.nodes._data[nodeId].label;
                 const {edges} = event;
-                this.togglePop();
+
                 this.fetchInfo(nodeId,x,y,label,edges);
             }
         }.bind(this),
@@ -110,8 +122,13 @@ class Sheet extends Component {
     }
 
     fetchInfo = (nodeId, x=null, y=null, label=null, edges=null) => {        
-        let nextState = {nodeId: nodeId};
+        let nextState = {
+            popped: !this.state.popped,
+            nodeId: nodeId,
+        };
 
+        if (this.state.from)
+            nextState.from = null;
         if (x)
             nextState.x = x;
         if (y)
@@ -175,9 +192,15 @@ class Sheet extends Component {
                 ...this.state.edgeStates
             }
         };
-        nextState.nodeStates[nodeId] = 0;
+        if (nextState.nodeStates[nodeId] === 1)
+            delete nextState.nodeStates[nodeId];
+        else
+            nextState.nodeStates[nodeId] = 0;
         edges.forEach((key)=>{
-            nextState.edgeStates[key] = 0;
+            if (nextState.edgeStates[key] === 1)
+                delete nextState.edgeStates[key];
+            else
+                nextState.edgeStates[key] = 0;
         });
         
         this.setState(nextState);
