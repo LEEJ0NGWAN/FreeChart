@@ -120,9 +120,6 @@ def board_parse(board, **kwargs):
     result = {
         'id': board.id,
         'title': board.title,
-        'create_date': board.create_date,
-        'modify_date': board.modify_date,
-        'owner_id': board.owner_id
     }
 
     return serialize(result, **kwargs)
@@ -132,10 +129,6 @@ def sheet_parse(sheet, **kwargs):
     result = {
         'id': sheet.id,
         'title': sheet.title,
-        'create_date': sheet.create_date,
-        'modify_date': sheet.modify_date,
-        'owner_id': sheet.owner_id,
-        'board_id': sheet.board_id
     }
 
     return serialize(result, **kwargs)
@@ -145,7 +138,6 @@ def node_parse(node, **kwargs):
     result = {
         'id': node.id,
         'label': node.label,
-        'sheet_id': node.sheet_id
     }
 
     return serialize(result, **kwargs)
@@ -157,7 +149,6 @@ def edge_parse(edge, **kwargs):
         'label': edge.label,
         'from': edge.node_from_id,
         'to': edge.node_to_id,
-        'sheet_id': edge.sheet_id
     }
 
     return serialize(result, **kwargs)

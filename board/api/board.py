@@ -26,6 +26,7 @@ class BoardController(View):
             board = Board.objects\
                 .filter(
                     id=data['id'],
+                    owner_id=request.user.id,
                     deleted=False).first()
 
             if not board:
@@ -33,17 +34,6 @@ class BoardController(View):
             
             return JsonResponse(serialize({
                 'board': board
-            }))
-        
-        if 'owner_id' in data:
-            boards = Board.objects\
-                .filter(
-                    owner_id=data['owner_id'],
-                    deleted=False)\
-                .order_by('modify_date').all()
-
-            return JsonResponse(serialize({
-                'boards': boards
             }))
         
         else:
@@ -94,6 +84,7 @@ class BoardController(View):
         board = Board.objects\
             .filter(
                 id=data.get('id'),
+                owner_id=request.user.id,
                 deleted=False).first()
         
         if not board:
@@ -118,6 +109,7 @@ class BoardController(View):
         board = Board.objects\
             .filter(
                 id=data['id'],
+                owner_id=request.user.id,
                 deleted=False).first()
         
         if not board:
@@ -148,6 +140,7 @@ class SheetController(View):
             sheet = Sheet.objects\
                 .filter(
                     id=data['id'],
+                    owner_id=request.user.id,
                     deleted=False).first()
             
             if not sheet:
@@ -161,6 +154,7 @@ class SheetController(View):
             sheets = Sheet.objects\
                 .filter(
                     board_id=data['board_id'],
+                    owner_id=request.user.id,
                     deleted=False)\
                 .order_by('modify_date').all()
         
@@ -259,17 +253,20 @@ class ElementController(View):
         if 'sheet_id' not in data:
             return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
         
+        if not Sheet.objects\
+            .filter(id=data['sheet_id'],
+            owner_id=request.user.id,deleted=False).exists():
+            return JsonResponse({}, status=HTTP_404_NOT_FOUND)
+        
         nodes = Node.objects\
             .filter(
                 sheet_id=data['sheet_id'],
-                deleted=False)\
-            .order_by('id').all()
+                deleted=False).all()
         
         edges = Edge.objects\
             .filter(
                 sheet_id=data['sheet_id'],
-                deleted=False)\
-            .order_by('id').all()
+                deleted=False).all()
         
         return JsonResponse(serialize({
             'nodes': nodes,
@@ -286,17 +283,13 @@ class ElementController(View):
         or 'nodes' not in data or 'edges' not in data\
         or 'nodeStates' not in data or 'edgeStates' not in data:
             return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
-        
-        sheet = Sheet.objects\
-            .filter(
-                id=data['sheet_id'],
-                owner_id=request.user.id,
-                deleted=False).first()
-        
-        if not sheet:
-            return JsonResponse({}, status=HTTP_404_NOT_FOUND)
 
         sheet_id = data['sheet_id']
+
+        if not Sheet.objects\
+            .filter(id=data['sheet_id'],
+            owner_id=request.user.id,deleted=False).exists():
+            return JsonResponse({}, status=HTTP_404_NOT_FOUND)
 
         new_nodes = list()
         new_app = new_nodes.append
