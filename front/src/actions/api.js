@@ -7,6 +7,8 @@ export const LOGIN = 'LOGIN';
 export const LOGOUT = 'LOGOUT';
 export const CHECK = 'CHECK';
 export const CLEAR_SESSION = 'CLEAR_SESSION';
+export const CLEAR_EMAIL_VALIDITY = 'CLEAR_EMAIL_VALIDITY';
+export const CLEAR_USERNAME_VALIDITY = 'CLEAR_USERNAME_VALIDITY';
 
 export function login(email, password) {
     return (dispatch) => {
