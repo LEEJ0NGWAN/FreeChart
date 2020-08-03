@@ -15,7 +15,8 @@ const options = {
         color: "#000000",
         arrowStrikethrough: false,
         width: 5,
-    }
+    },
+    autoResize: true,
 };
 
 class Sheet extends Component {
@@ -249,16 +250,23 @@ class Sheet extends Component {
 
     render() {
         const save = (
-            <button
-            onClick={this.save}>변경 사항 저장</button>
+            <p className="control item" style={{marginLeft:'10px'}}
+            onClick={this.save}>변경 사항 저장</p>
         )
         const cancel = (
             <button
             onClick={this.cancel}>취소</button>
         )
+        const control = (
+            <div>
+                <p className="control item"
+                onClick={()=>{this.props.escape();}}>나가기</p>
+                {this.isEdited() && save}<br/>
+            </div>
+        )
         return (
             <div>
-                {this.isEdited() && save}
+                {control}
                 {/* {this.isEdited() && cancel} */}
                 <div>
                     {this.state.popped && 
@@ -279,8 +287,13 @@ class Sheet extends Component {
                     options={options} 
                     events={this.events}
                     style={{
-                        position: 'absolute', 
-                        width:'100%', height: '75%'}}/>}
+                        position: 'absolute',
+                        left: '5px',
+                        right: '5px',
+                        bottom: '5px',
+                        height: 'calc(100% - 70px)',
+                        border: '1px solid #000000',
+                        borderRadius: '1em'}}/>}
                 </div>
             </div>
 
