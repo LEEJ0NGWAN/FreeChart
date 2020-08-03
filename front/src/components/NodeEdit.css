@@ -1,9 +1,11 @@
 .modal {
     position: absolute;
     z-index: 1;
-    width: 100%;
-    height: 75%;
     background-color: rgba(0, 0, 0, 0.25);
+    left: 5px; right: 5px; bottom: 5px;
+    height: calc(100% - 68px);
+    /* border: 1px solid #000000; */
+    border-radius: 1em;
 }
   
 .modal_content {

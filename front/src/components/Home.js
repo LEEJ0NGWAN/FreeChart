@@ -63,19 +63,6 @@ class Home extends Component {
         setCookie('sheetId',sheet_id);
         this.setState({sheetId:sheet_id});
     }
-  
-    renderUser() {
-        const {user} = this.props;
-        if (!user)
-            return;
-        
-        let userInfo = [];
-        userInfo.push(<div key={user.email}>{user.email}<br/></div>);
-        if (user.email !== user.username)
-            userInfo.push(<div key={user.username}>{user.username}<br/></div>);
-
-        return userInfo;
-    }
 
     renderBoards() {
         const {boards} = this.props;
@@ -84,7 +71,12 @@ class Home extends Component {
         
         let boardList = [];
         for (let board of boards) {
-            boardList.push(<p onClick={this.finder} key={board.id} id={board.id}>{board.title}</p>)
+            boardList.push(
+            <p className="item"
+            onClick={this.finder} key={board.id} id={board.id}>
+                {board.title}
+                <button className="item-button">...</button>            
+            </p>)
         }
         return boardList;
     }
@@ -96,27 +88,34 @@ class Home extends Component {
 
         let sheetList = [];
         for (let sheet of sheets) {
-            sheetList.push(<p onClick={this.processer} key={sheet.id} id={sheet.id}>{sheet.title}</p>)
+            sheetList.push(
+            <p className="item"
+            onClick={this.processer} key={sheet.id} id={sheet.id}>
+                {sheet.title}
+                <button className="item-button">...</button> 
+            </p>)
         }
         return sheetList;
+    }
+
+    escape() {
+        deleteCookie('sheetId');
+        this.setState({sheetId:null});
     }
 
     render() {
         const back = (
             <p onClick={this.initialize}>...</p>
         )
-        const exit = (
-            <p onClick={(e)=>{
-                deleteCookie('sheetId');
-                this.setState({sheetId:null});}}>나가기</p>
-        )
         return (
-            <div>
-            <h5><b>{this.renderUser()}</b></h5><br/>
+            <div className="board-menu">
             {!this.state.boardId && this.renderBoards()}
             {(this.state.boardId && !this.state.sheetId) && back}
-            {this.state.sheetId? exit: this.renderSheets()}
-            {this.state.sheetId && <Sheet sheet_id={this.state.sheetId}/>}
+            {!this.state.sheetId && this.renderSheets()}
+            {this.state.sheetId && 
+            <Sheet
+            sheet_id={this.state.sheetId}
+            escape={this.escape.bind(this)}/>}
             </div>
         );
     }
