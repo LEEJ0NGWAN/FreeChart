@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { clear, clearError } from '../actions/common';
-import { check, register_ } from '../actions/api';
+import { clear, clearError, action } from '../actions/common';
+import { check, register_,
+    CLEAR_EMAIL_VALIDITY, CLEAR_USERNAME_VALIDITY } from '../actions/api';
 import { NavLink } from 'react-router-dom';
 
 function checkEmail(email) {
@@ -24,9 +25,10 @@ class Register extends Component {
     };
 
     changer = (event) => {
-        let nextState = {};
+        let nextState = (this.state.username_msg)? {username_msg: ""}: {};
         nextState[event.target.name] = event.target.value;
         this.setState(nextState);
+        this.props.action(CLEAR_USERNAME_VALIDITY);
     }
 
     email_checker = (event) => {
@@ -45,6 +47,7 @@ class Register extends Component {
         }
 
         this.setState(nextState);
+        this.props.action(CLEAR_EMAIL_VALIDITY);
     }
     
     password_checker = (event) => {
@@ -144,42 +147,48 @@ class Register extends Component {
         const inputs = (
             <div>
                 <div className="input-field email">
-                    <label>email</label><br/>
                     <input
                     name="email"
                     type="text"
                     className="register"
+                    placeholder="[이메일] abc@abc.com"
                     onChange={this.email_checker}
                     value={this.state.email}/>
-                    {this.state.email_pattern_validity &&
+                    {(this.state.email_pattern_validity &&
+                    !this.props.email_validity) &&
                     <button
+                    className="item check-button"
                     name="email"
-                    onClick={this.checker}>중복 검사</button>
-                    }
-                    {this.state.email_msg}<br/>
+                    onClick={this.checker}>검사</button>}<br/>
+                    {!this.props.email_validity && 
+                    this.state.email_msg}<br/>
                 </div>
                 <div className="input-field username">
-                    <label>username</label><br/>
                     <input
                     name="username"
                     type="text"
                     className="register"
+                    placeholder="[닉네임] 깜순이"
                     onChange={this.changer}
                     value={this.state.username}/>
+                    {(Boolean(this.state.username.length) &&
+                    !this.props.username_validity) &&
                     <button
+                    className="item check-button"
                     name="username"
-                    onClick={this.checker}>중복 검사</button>
-                    {this.state.username_msg}<br/>
+                    onClick={this.checker}>검사</button>}<br/>
+                    {!this.props.username_validity && 
+                    this.state.username_msg}<br/>
                 </div>
                 <div className="input-field password">
-                    <label>password</label><br/>
                     <input
                     name="password"
                     type="password"
                     className="register"
+                    placeholder="[비밀번호]"
                     onChange={this.password_checker}
-                    value={this.state.password}/>
-                    {this.state.password_msg}<br/>
+                    value={this.state.password}/><br/>
+                    {this.state.password_msg}
                 </div>
             </div>
         );
@@ -189,18 +198,16 @@ class Register extends Component {
             onClick={this.processor}>회원가입</button>
         )
         return (
-            <div className="registerView">
-                <div className="row">
-                    {inputs}
-                    {(this.state.email_pattern_validity &&
-                    this.props.email_validity && 
-                    this.props.username_validity &&
-                    this.state.password_validity) && submitButton}<br/>
-                    <button>
-                        <NavLink to="/login"
-                        style={{textDecoration:'none'}}>돌아가기</NavLink>
-                    </button>
-                </div><br/>
+            <div className="view">
+                {inputs}
+                {(this.state.email_pattern_validity &&
+                this.props.email_validity && 
+                this.props.username_validity &&
+                this.state.password_validity) && submitButton}<br/>
+                <button>
+                    <NavLink to="/login"
+                    style={{textDecoration:'none'}}>돌아가기</NavLink>
+                </button>
                 {error}
             </div>
         );
@@ -216,5 +223,5 @@ export default connect((state) => {
       error_msg: state.commonReducer.error_msg,
       error_code: state.commonReducer.error_code,
     };
-}, { check, register_, clearError, clear })(Register);
+}, { check, register_, clearError, clear, action })(Register);
 
