@@ -222,6 +222,7 @@ class Sheet extends Component {
     }
 
     cancel = () => {
+        this.fetchElements();
         const {nodes, edges} = this.state.networkRef.current;
 
         this.setState({
