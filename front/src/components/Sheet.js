@@ -222,15 +222,18 @@ class Sheet extends Component {
     }
 
     cancel = () => {
-        // TODO: 취소 구현
-        // this.setState({
-        //     graph: {
-        //         nodes: this.props.nodes,
-        //         edges: this.props.edges
-        //     },
-        //     nodeStates: {},
-        //     edgeStates: {}
-        // });
+        const {nodes, edges} = this.state.networkRef.current;
+
+        this.setState({
+            nodeStates: {},
+            edgeStates: {},
+        });
+        this.props.action(RESET);
+
+        nodes.clear();
+        edges.clear();
+        nodes.add(this.props.nodes);
+        edges.add(this.props.edges);
     }
 
     componentDidMount() {
@@ -254,20 +257,20 @@ class Sheet extends Component {
             onClick={this.save}>변경 사항 저장</p>
         )
         const cancel = (
-            <button
-            onClick={this.cancel}>취소</button>
+            <p className="control item" style={{marginLeft:'10px'}}
+            onClick={this.cancel}>취소</p>
         )
         const control = (
             <div>
                 <p className="control item"
                 onClick={()=>{this.props.escape();}}>나가기</p>
-                {this.isEdited() && save}<br/>
+                {this.isEdited() && save}
+                {this.isEdited() && cancel}<br/>
             </div>
         )
         return (
             <div>
                 {control}
-                {/* {this.isEdited() && cancel} */}
                 <div>
                     {this.state.popped && 
                     <NodeEdit 
