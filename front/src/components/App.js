@@ -20,20 +20,31 @@ class App extends Component {
         }
     }
 
+    renderUser() {
+        const {user} = this.props;
+        if (!user)
+            return;
+        return user.username;
+    }
+
     render() {
-        const logout = (
-            <button className="waves-effect waves-light btn">
+        const user = (
+            <div className="user-menu">
+            {this.renderUser()}
+            <button className="item" style={{position:"absolute", right:"1%"}}>
             <NavLink to="/logout" 
             style={{textDecoration:'none'}}>로그아웃</NavLink>
             </button>
+            </div>
         )
         return (
             <div className="App">
+                {!this.props.logged &&
                 <div className="App-header">
                     <h1>FreeList</h1>
-                </div>
+                </div>}
                 <div className="content-wrapper">
-                    {this.props.logged && logout}
+                    {this.props.logged && user}
                     <Switch>
                         <Route exact path="/" component={Home}/>
                         <Route exact path="/login" component={Login}/>
