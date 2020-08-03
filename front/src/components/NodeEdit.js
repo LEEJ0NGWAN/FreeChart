@@ -9,11 +9,8 @@ class NodeEdit extends Component {
 
     componentDidMount() {
         this.labelInput.focus();
-    }
-
-    UNSAFE_componentWillReceiveProps(nextProps) {
         this.setState({
-            label: nextProps.label
+            label: this.props.label
         });
     }
 

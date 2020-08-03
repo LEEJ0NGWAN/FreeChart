@@ -28,8 +28,9 @@ class Sheet extends Component {
     };
 
     events = {
-        click: function() {
-            if (this.state.from)
+        click: function(event) {
+            const {nodes} = event;
+            if (!nodes.length && this.state.from)
                 this.setState({from: null});
         }.bind(this),
         hold: function(event) {
@@ -279,7 +280,7 @@ class Sheet extends Component {
                     events={this.events}
                     style={{
                         position: 'absolute', 
-                        width:'100%', height: '65%'}}/>}
+                        width:'100%', height: '75%'}}/>}
                 </div>
             </div>
 
