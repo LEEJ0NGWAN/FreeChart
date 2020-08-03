@@ -1,5 +1,56 @@
 
 .App-header {
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     text-align: center;
+}
+
+.item {
+    border-radius: 1em;
+    border: 1px solid #000000;
+    padding: 3px;
+    background-color: transparent;
+}
+
+.item-button {
+    background-color: transparent;
+    border: 0px;
+    position: absolute;
+    right: 3%;
+}
+
+.padding1 {
+    padding: 1px;
+}
+
+.margin2 {
+    margin: 2px;
+}
+
+.view {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.user-menu {
+    margin: 10px;
+}
+
+.board-menu {
+    margin: 10px;
+}
+
+.control {
+    display: inline;
+}
+
+.check-button {
+    position: absolute;
+    width: 30%;
 }
 
