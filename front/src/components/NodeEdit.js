@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import './NodeEdit.css';
 
 class NodeEdit extends Component {
     state = {
