@@ -4,9 +4,11 @@ import { clearError, fetch } from '../actions/common';
 import { getBoard, getSheet } from '../actions/board_api';
 import { getCookie, setCookie, deleteCookie } from '../utils';
 import Sheet from './Sheet';
+import BoardEdit from './BoardEdit';
 
 class Home extends Component {
     state = {
+        popped: false,
         error: null,
         boardId: null,
         sheetId: null,
@@ -64,6 +66,37 @@ class Home extends Component {
         this.setState({sheetId:sheet_id});
     }
 
+    renderFolderIcon(boardId) {
+        return (<svg id={boardId}
+        style={{marginRight: '10px'}}
+        width="24" height="24" viewBox="0 0 24 24">
+        <path id={boardId} d="M0 10v12h24v-12h-24zm22 
+        10h-20v-8h20v8zm-22-12v-6h7c1.695 
+        1.942 2.371 3 4 3h13v3h-2v-1h-11c-2.34 
+        0-3.537-1.388-4.916-3h-4.084v4h-2z"/></svg>);
+    }
+
+    renderNewFolderIcon() {
+        return (<svg width="24" height="24" 
+        fillRule="evenodd" clipRule="evenodd">
+        <path d="M7 2c1.695 1.942 2.371 3 4 
+        3h13v17h-24v-20h7zm4 5c-2.339 
+        0-3.537-1.388-4.917-3h-4.083v16h20v-13h-11zm2 
+        6h3v2h-3v3h-2v-3h-3v-2h3v-3h2v3z"/></svg>);
+    }
+
+    renderEditIcon(boardId) {
+        return (<svg className="board-item-edit" id={boardId} 
+        width="24" height="24" viewBox="0 0 24 24">
+        <path id={boardId} d="M1.439 16.873l-1.439 7.127 
+        7.128-1.437 16.873-16.872-5.69-5.69-16.872 
+        16.872zm4.702 3.848l-3.582.724.721-3.584 
+        2.861 2.86zm15.031-15.032l-13.617 
+        13.618-2.86-2.861 10.825-10.826 
+        2.846 2.846 1.414-1.414-2.846-2.846 
+        1.377-1.377 2.861 2.86z"/></svg>);
+    }
+
     renderBoards() {
         const {boards} = this.props;
         if (!boards)
@@ -72,12 +105,17 @@ class Home extends Component {
         let boardList = [];
         for (let board of boards) {
             boardList.push(
-            <p className="item"
-            onClick={this.finder} key={board.id} id={board.id}>
-                {board.title}
-                <button className="item-button">...</button>            
-            </p>)
+                <p className="board-item"
+                    onClick={this.finder} 
+                    key={board.id} 
+                    id={board.id}>
+                    {this.renderFolderIcon(board.id)}
+                    <label className="board-label" id={board.id}>{board.title}</label>
+                    {this.renderEditIcon(board.id)}</p>)
         }
+        boardList.push(
+            <p className="board-item center" key="newFolder">
+                {this.renderNewFolderIcon()}</p>)
         return boardList;
     }
 
@@ -91,8 +129,8 @@ class Home extends Component {
             sheetList.push(
             <p className="item"
             onClick={this.processer} key={sheet.id} id={sheet.id}>
-                {sheet.title}
-                <button className="item-button">...</button> 
+                <label>{sheet.title}</label>
+                <button className="board-item-edit">편집</button> 
             </p>)
         }
         return sheetList;
@@ -105,7 +143,7 @@ class Home extends Component {
 
     render() {
         const back = (
-            <p onClick={this.initialize}>...</p>
+            <label className="item" onClick={this.initialize}>←</label>
         )
         return (
             <div className="board-menu">
