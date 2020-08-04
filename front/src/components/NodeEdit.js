@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import './NodeEdit.css';
 
 class NodeEdit extends Component {
     state = {
@@ -41,10 +40,10 @@ class NodeEdit extends Component {
         let y = this.props.y+'px';
         return(
             <div 
-            className="modal" 
+            className="node-modal" 
             onClick={()=>{this.props.togglePop();}}>
                 <div
-                className="modal_content"
+                className="node-modal-content"
                 onClick={(e)=>{e.stopPropagation();}}
                 ref={this.state.ref}
                 style={{
