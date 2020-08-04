@@ -8,10 +8,11 @@ import BoardEdit from './BoardEdit';
 
 class Home extends Component {
     state = {
-        popped: false,
         error: null,
         boardId: null,
         sheetId: null,
+        targetId: null,
+        targetValue: null
     }
 
     initialize = async (event) => {
@@ -66,9 +67,15 @@ class Home extends Component {
         this.setState({sheetId:sheet_id});
     }
 
+    togglePop = (id=null, value=null) => {
+        this.setState({
+            targetId: (this.state.targetId)? null: id,
+            targetValue: value,
+        });
+    }
+
     renderFolderIcon(boardId) {
         return (<svg id={boardId}
-        style={{marginRight: '10px'}}
         width="24" height="24" viewBox="0 0 24 24">
         <path id={boardId} d="M0 10v12h24v-12h-24zm22 
         10h-20v-8h20v8zm-22-12v-6h7c1.695 
@@ -77,7 +84,8 @@ class Home extends Component {
     }
 
     renderNewFolderIcon() {
-        return (<svg width="24" height="24" 
+        return (<svg className="board-item"
+        width="24" height="24" 
         fillRule="evenodd" clipRule="evenodd">
         <path d="M7 2c1.695 1.942 2.371 3 4 
         3h13v17h-24v-20h7zm4 5c-2.339 
@@ -85,16 +93,17 @@ class Home extends Component {
         6h3v2h-3v3h-2v-3h-3v-2h3v-3h2v3z"/></svg>);
     }
 
-    renderEditIcon(boardId) {
-        return (<svg className="board-item-edit" id={boardId} 
-        width="24" height="24" viewBox="0 0 24 24">
-        <path id={boardId} d="M1.439 16.873l-1.439 7.127 
-        7.128-1.437 16.873-16.872-5.69-5.69-16.872 
-        16.872zm4.702 3.848l-3.582.724.721-3.584 
-        2.861 2.86zm15.031-15.032l-13.617 
-        13.618-2.86-2.861 10.825-10.826 
-        2.846 2.846 1.414-1.414-2.846-2.846 
-        1.377-1.377 2.861 2.86z"/></svg>);
+    renderEditIcon(boardId, boardTitle) {
+        return (<svg className="board-item-edit" id={boardId}
+        onClick={(e)=>{
+            e.stopPropagation();
+            this.togglePop(boardId, boardTitle);}}
+        width="18" height="18" viewBox="0 0 24 24">
+        <path id={boardId} d="M12 18c1.657 0 3 1.343 3 
+        3s-1.343 3-3 3-3-1.343-3-3 1.343-3 3-3zm0-9c1.657 
+        0 3 1.343 3 3s-1.343 3-3 3-3-1.343-3-3 
+        1.343-3 3-3zm0-9c1.657 0 3 1.343 3 3s-1.343 
+        3-3 3-3-1.343-3-3 1.343-3 3-3z"/></svg>);
     }
 
     renderBoards() {
@@ -105,17 +114,14 @@ class Home extends Component {
         let boardList = [];
         for (let board of boards) {
             boardList.push(
-                <p className="board-item"
+                <div className="board-item"
                     onClick={this.finder} 
                     key={board.id} 
                     id={board.id}>
                     {this.renderFolderIcon(board.id)}
                     <label className="board-label" id={board.id}>{board.title}</label>
-                    {this.renderEditIcon(board.id)}</p>)
+                    {this.renderEditIcon(board.id, board.title)}</div>)
         }
-        boardList.push(
-            <p className="board-item center" key="newFolder">
-                {this.renderNewFolderIcon()}</p>)
         return boardList;
     }
 
@@ -146,14 +152,24 @@ class Home extends Component {
             <label className="item" onClick={this.initialize}>←</label>
         )
         return (
-            <div className="board-menu">
-            {!this.state.boardId && this.renderBoards()}
-            {(this.state.boardId && !this.state.sheetId) && back}
-            {!this.state.sheetId && this.renderSheets()}
-            {this.state.sheetId && 
-            <Sheet
-            sheet_id={this.state.sheetId}
-            escape={this.escape.bind(this)}/>}
+            <div>
+                <div className="board-sheet-menu">
+                {this.renderNewFolderIcon()}
+                </div>
+                <div className="board-sheet-list">
+                    {this.state.targetId && 
+                    <BoardEdit 
+                    togglePop={this.togglePop}
+                    id={this.state.targetId}
+                    value={this.state.targetValue}/>}
+                    {!this.state.boardId && this.renderBoards()}
+                    {(this.state.boardId && !this.state.sheetId) && back}
+                    {!this.state.sheetId && this.renderSheets()}
+                    {this.state.sheetId && 
+                    <Sheet
+                    sheet_id={this.state.sheetId}
+                    escape={this.escape.bind(this)}/>}
+                </div>
             </div>
         );
     }
