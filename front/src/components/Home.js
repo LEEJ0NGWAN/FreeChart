@@ -9,9 +9,11 @@ import BoardEdit from './BoardEdit';
 class Home extends Component {
     state = {
         error: null,
+        popped: false,
         boardId: null,
         sheetId: null,
         targetId: null,
+        targetKey: null,
         targetValue: null
     }
 
@@ -67,10 +69,12 @@ class Home extends Component {
         this.setState({sheetId:sheet_id});
     }
 
-    togglePop = (id=null, value=null) => {
+    togglePop = (id=null, key=null, value=null) => {
         this.setState({
+            popped: !this.state.popped,
             targetId: (this.state.targetId)? null: id,
-            targetValue: value,
+            targetKey: (this.state.targetKey)? null: key,
+            targetValue: (value)? value: ""
         });
     }
 
@@ -85,6 +89,7 @@ class Home extends Component {
 
     renderNewFolderIcon() {
         return (<svg className="board-item"
+        onClick={()=>{this.togglePop();}}
         width="24" height="24" 
         fillRule="evenodd" clipRule="evenodd">
         <path d="M7 2c1.695 1.942 2.371 3 4 
@@ -93,11 +98,11 @@ class Home extends Component {
         6h3v2h-3v3h-2v-3h-3v-2h3v-3h2v3z"/></svg>);
     }
 
-    renderEditIcon(boardId, boardTitle) {
+    renderEditIcon(boardId, boardKey, boardTitle) {
         return (<svg className="board-item-edit" id={boardId}
         onClick={(e)=>{
             e.stopPropagation();
-            this.togglePop(boardId, boardTitle);}}
+            this.togglePop(boardId, boardKey, boardTitle);}}
         width="18" height="18" viewBox="0 0 24 24">
         <path id={boardId} d="M12 18c1.657 0 3 1.343 3 
         3s-1.343 3-3 3-3-1.343-3-3 1.343-3 3-3zm0-9c1.657 
@@ -112,16 +117,20 @@ class Home extends Component {
             return;
         
         let boardList = [];
-        for (let board of boards) {
+
+        boards.forEach((board, key)=>{
             boardList.push(
-                <div className="board-item"
-                    onClick={this.finder} 
-                    key={board.id} 
-                    id={board.id}>
+                <div 
+                className="board-item"
+                onClick={this.finder} 
+                key={board.id}
+                id={board.id}>
                     {this.renderFolderIcon(board.id)}
-                    <label className="board-title" id={board.id}>{board.title}</label>
-                    {this.renderEditIcon(board.id, board.title)}</div>)
-        }
+                    <label 
+                    className="board-title" 
+                    id={board.id}>{board.title}</label>
+                    {this.renderEditIcon(board.id, key, board.title)}</div>);
+        });
         return boardList;
     }
 
@@ -149,7 +158,7 @@ class Home extends Component {
 
     render() {
         const menu = (
-            <div className="board-sheet-menu">
+            <div className="home-menu">
             {this.renderNewFolderIcon()}
             </div> 
         )
@@ -159,20 +168,23 @@ class Home extends Component {
         return (
             <div>
                 {!this.state.boardId && menu}
-                <div className="board-sheet-list">
-                    {this.state.targetId && 
-                    <BoardEdit 
+                {this.state.popped && 
+                <BoardEdit 
                     togglePop={this.togglePop}
                     id={this.state.targetId}
+                    key_={this.state.targetKey}
                     value={this.state.targetValue}/>}
+                <div className="board-list">
                     {!this.state.boardId && this.renderBoards()}
+                </div>
+                <div className="sheet-list">
                     {(this.state.boardId && !this.state.sheetId) && back}
                     {!this.state.sheetId && this.renderSheets()}
-                    {this.state.sheetId && 
-                    <Sheet
+                </div>
+                {this.state.sheetId && 
+                <Sheet
                     sheet_id={this.state.sheetId}
                     escape={this.escape.bind(this)}/>}
-                </div>
             </div>
         );
     }
