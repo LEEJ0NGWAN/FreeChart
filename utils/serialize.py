@@ -120,6 +120,8 @@ def board_parse(board, **kwargs):
     result = {
         'id': board.id,
         'title': board.title,
+        'create_date': board.create_date,
+        'modify_date': board.modify_date
     }
 
     return serialize(result, **kwargs)
@@ -129,6 +131,8 @@ def sheet_parse(sheet, **kwargs):
     result = {
         'id': sheet.id,
         'title': sheet.title,
+        'create_date': sheet.create_date,
+        'modify_date': sheet.modify_date
     }
 
     return serialize(result, **kwargs)
