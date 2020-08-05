@@ -37,18 +37,24 @@ class BoardController(View):
             }))
         
         else:
+            order = data.get('order', '-modify_date')
+            if order not in [
+                '-modify_date', '-create_date','-title',
+                'modify_date','create_date','title']:
+                order = '-modify_date'
+            
             boards = Board.objects\
                 .filter(
                     owner_id=request.user.id,
                     deleted=False)\
-                .order_by('modify_date').all()
+                .order_by(order).all()
             
             sheets = Sheet.objects\
                 .filter(
                     owner_id=request.user.id,
                     board=None,
                     deleted=False)\
-                .order_by('modify_date').all()
+                .order_by(order).all()
 
             return JsonResponse(serialize({
                 'boards': boards,
@@ -149,6 +155,12 @@ class SheetController(View):
             return JsonResponse(serialize({
                 'sheet': sheet
             }))
+
+        order = data.get('order', '-modify_date')
+        if order not in [
+            '-modify_date', '-create_date','-title',
+            'modify_date','create_date','title']:
+            order = '-modify_date'
         
         if 'board_id' in data:
             sheets = Sheet.objects\
@@ -156,14 +168,14 @@ class SheetController(View):
                     board_id=data['board_id'],
                     owner_id=request.user.id,
                     deleted=False)\
-                .order_by('modify_date').all()
+                .order_by(order).all()
         
         else:
             sheets = Sheet.objects\
                 .filter(
                     owner_id=request.user.id,
                     deleted=False)\
-                .order_by('modify_date').all()
+                .order_by(order).all()
         
         if not sheets:
             return JsonResponse({}, status=HTTP_404_NOT_FOUND)
@@ -291,16 +303,18 @@ class ElementController(View):
             owner_id=request.user.id,deleted=False).exists():
             return JsonResponse({}, status=HTTP_404_NOT_FOUND)
 
+        now = datetime.datetime.now()
+
         new_nodes = list()
         new_app = new_nodes.append
 
         # 0: del, 1: crt, 2: mod
         nodes = Node.objects.in_bulk(list(data['nodeStates'].keys()))
-
         for node_id in data['nodeStates']:
             state = data['nodeStates'][node_id]
             if not state:
                 nodes[UUID(node_id)].deleted = True
+                nodes[UUID(node_id)].modify = now
             elif (state == 1):
                 new_app(Node(
                 id=node_id,
@@ -308,9 +322,10 @@ class ElementController(View):
                 label=data['nodes'][node_id]['label']))
             else:
                 nodes[UUID(node_id)].label = data['nodes'][node_id]['label']
+                nodes[UUID(node_id)].modify = now
 
         nodes = list(nodes.values())
-        Node.objects.bulk_update(nodes,['label','deleted'])
+        Node.objects.bulk_update(nodes,['label','deleted','modify'])
         Node.objects.bulk_create(new_nodes)
 
         new_edges = list()
@@ -322,6 +337,7 @@ class ElementController(View):
             state = data['edgeStates'][edge_id]
             if not state:
                 edges[UUID(edge_id)].deleted = True
+                edges[UUID(edge_id)].modify = now
             elif (state == 1):
                 edge = data['edges'][edge_id]
                 new_app(Edge(
@@ -334,9 +350,11 @@ class ElementController(View):
                 edge = data['edges'][edge_id]
                 edges[UUID(edge_id)].node_from_id = edge['from']
                 edges[UUID(edge_id)].node_to_id = edge['to']
+                edges[UUID(edge_id)].modify = now
         
         edges = list(edges.values())
-        Edge.objects.bulk_update(edges,['node_from_id', 'node_to_id', 'deleted'])
+        Edge.objects.bulk_update(
+            edges,['node_from_id', 'node_to_id', 'deleted','modify'])
         Edge.objects.bulk_create(new_edges)
 
         return JsonResponse({})
