@@ -119,7 +119,7 @@ class Home extends Component {
                     key={board.id} 
                     id={board.id}>
                     {this.renderFolderIcon(board.id)}
-                    <label className="board-label" id={board.id}>{board.title}</label>
+                    <label className="board-title" id={board.id}>{board.title}</label>
                     {this.renderEditIcon(board.id, board.title)}</div>)
         }
         return boardList;
@@ -148,14 +148,17 @@ class Home extends Component {
     }
 
     render() {
+        const menu = (
+            <div className="board-sheet-menu">
+            {this.renderNewFolderIcon()}
+            </div> 
+        )
         const back = (
             <label className="item" onClick={this.initialize}>←</label>
         )
         return (
             <div>
-                <div className="board-sheet-menu">
-                {this.renderNewFolderIcon()}
-                </div>
+                {!this.state.boardId && menu}
                 <div className="board-sheet-list">
                     {this.state.targetId && 
                     <BoardEdit 
