@@ -53,16 +53,30 @@ export function getSheet(id=null, board_id=null) {
 }
 
 export function modifyBoard(id, title=null) {
-    return (dispath) => {
+    return (dispatch) => {
         return axios.put('api/board/', {
             id: id, title: title
         })
         .then(() => {
-            dispath(action(UPDATE));
-            dispath(clearError());
+            dispatch(action(UPDATE));
+            dispatch(clearError());
         })
         .catch(err => {
-            dispath(reportError(err));
+            dispatch(reportError(err));
+        });
+    };
+}
+
+export function deleteBoard(id) {
+    return (dispatch) => {
+        let params = {id: id};
+        return axios.delete('api/board/', {params})
+        .then(() => {
+            dispatch(action(UPDATE));
+            dispatch(clearError());
+        })
+        .catch(err => {
+            dispatch(reportError(err));
         });
     };
 }

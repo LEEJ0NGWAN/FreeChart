@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { action } from '../actions/common';
-import { ACK, modifyBoard } from '../actions/board_api';
+import { ACK, modifyBoard, deleteBoard } from '../actions/board_api';
 
 class BoardEdit extends Component {
     state = {
@@ -29,19 +29,23 @@ class BoardEdit extends Component {
                     await this.props.modifyBoard(
                         this.props.id, this.state.value);
                 }
+                if (this.props.success) {
+                    let label = document.getElementById(this.props.id).children[1];
+                    label.innerHTML = this.state.value;
+                    this.props.action(ACK);
+                }
                 break;
             case 'delete':
-                // this.props.deleteNode();
+                await this.props.deleteBoard(this.props.id);
+                if (this.props.success) {
+                    document.getElementById(this.props.id).remove();
+                    this.props.action(ACK);
+                }
                 break;
             default:
                 break;
         }
-        if (this.props.success) {
-            let label = document.getElementById(this.props.id).children[1];
-            label.innerHTML = this.state.value;
-            this.props.action(ACK);
-            this.props.togglePop();
-        }
+        this.props.togglePop();
     }
 
     renderSaveIcon() {
@@ -56,6 +60,7 @@ class BoardEdit extends Component {
 
     renderDeleteIcon() {
         return(<svg className="board-modal-icon"
+        onClick={()=>{this.processor('delete');}}
         width="24" height="24" viewBox="0 0 24 24">
         <path d="M9 19c0 .552-.448 1-1 
         1s-1-.448-1-1v-10c0-.552.448-1 
@@ -104,5 +109,5 @@ export default connect((state) => {
     return {
         success: state.boardReducer.success
     };
-}, { action, modifyBoard })(BoardEdit);
+}, { action, modifyBoard,deleteBoard })(BoardEdit);
 
