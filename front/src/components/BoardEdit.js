@@ -1,4 +1,7 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
+import { action } from '../actions/common';
+import { ACK, createBoard, modifyBoard, deleteBoard } from '../actions/board_api';
 
 class BoardEdit extends Component {
     state = {
@@ -19,15 +22,21 @@ class BoardEdit extends Component {
         this.setState(nextState);
     }
 
-    processor = (event) => {
-        switch(event.target.name) {
-            case 'label':
+    processor = async (mode) => {
+        switch(mode) {
+            case 'create':
+                if(this.state.value) {
+                    await this.props.createBoard(this.state.value);
+                }
+                break;
             case 'modify':
-                if(this.state.label !== this.props.label)
-                    // this.props.modifyNode(this.state.label);
+                if(this.state.value !== this.props.value) {
+                    await this.props.modifyBoard(
+                        this.props.id, this.props.key_, this.state.value);
+                }
                 break;
             case 'delete':
-                // this.props.deleteNode();
+                await this.props.deleteBoard(this.props.id, this.props.key_);
                 break;
             default:
                 break;
@@ -37,6 +46,9 @@ class BoardEdit extends Component {
 
     renderSaveIcon() {
         return(<svg className="board-modal-icon"
+        onClick={()=>{
+            let option = (this.props.id)? 'modify': 'create';
+            this.processor(option);}}
         width="24" height="24" viewBox="0 0 24 24">
         <path d="M13 3h2.996v5h-2.996v-5zm11 
         1v20h-24v-24h20l4 4zm-17 
@@ -46,6 +58,7 @@ class BoardEdit extends Component {
 
     renderDeleteIcon() {
         return(<svg className="board-modal-icon"
+        onClick={()=>{this.processor('delete');}}
         width="24" height="24" viewBox="0 0 24 24">
         <path d="M9 19c0 .552-.448 1-1 
         1s-1-.448-1-1v-10c0-.552.448-1 
@@ -74,8 +87,10 @@ class BoardEdit extends Component {
                     value={this.state.value}
                     onChange={this.changer}
                     onKeyPress={(e)=>{
-                        if (e.key === "Enter")
-                            this.processor(e);
+                        if (e.key === "Enter") {
+                            let option = (this.props.id)? 'modify': 'create';
+                            this.processor(option);
+                        }
                     }}
                     onKeyDown={(e)=>{
                         if (e.key === "Escape")
@@ -83,12 +98,17 @@ class BoardEdit extends Component {
                     }}
                     ref={(input)=>{this.labelInput = input}}/>
                     {this.renderSaveIcon()}
-                    {this.renderDeleteIcon()}
+                    {this.props.id && this.renderDeleteIcon()}
                 </div>
             </div>
         )
     }
 }
 
-export default BoardEdit;
+export default connect((state) => {
+    return {
+        board: state.boardReducer.board,
+        success: state.boardReducer.success
+    };
+}, { action, createBoard, modifyBoard,deleteBoard })(BoardEdit);
 
