@@ -1,7 +1,9 @@
-import { fetch, clearError, reportError } from './common';
+import { fetch, clearError, reportError, action } from './common';
 import axios from 'axios';
 axios.defaults.withCredentials = true;
 
+export const ACK = 'ACK';
+export const UPDATE = 'UPDATE';
 export const BOARD = 'BOARD';
 export const BOARDS = 'BOARDS';
 export const SHEET = 'SHEET';
@@ -46,6 +48,21 @@ export function getSheet(id=null, board_id=null) {
         })
         .catch(err => {
             dispatch(reportError(err));
+        });
+    };
+}
+
+export function modifyBoard(id, title=null) {
+    return (dispath) => {
+        return axios.put('api/board/', {
+            id: id, title: title
+        })
+        .then(() => {
+            dispath(action(UPDATE));
+            dispath(clearError());
+        })
+        .catch(err => {
+            dispath(reportError(err));
         });
     };
 }
