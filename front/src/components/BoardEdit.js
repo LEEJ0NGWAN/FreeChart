@@ -1,4 +1,7 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
+import { action } from '../actions/common';
+import { ACK, modifyBoard } from '../actions/board_api';
 
 class BoardEdit extends Component {
     state = {
@@ -19,12 +22,13 @@ class BoardEdit extends Component {
         this.setState(nextState);
     }
 
-    processor = (event) => {
-        switch(event.target.name) {
-            case 'label':
+    processor = async (mode) => {
+        switch(mode) {
             case 'modify':
-                if(this.state.label !== this.props.label)
-                    // this.props.modifyNode(this.state.label);
+                if(this.state.value !== this.props.value) {
+                    await this.props.modifyBoard(
+                        this.props.id, this.state.value);
+                }
                 break;
             case 'delete':
                 // this.props.deleteNode();
@@ -32,11 +36,17 @@ class BoardEdit extends Component {
             default:
                 break;
         }
-        this.props.togglePop();
+        if (this.props.success) {
+            let label = document.getElementById(this.props.id).children[1];
+            label.innerHTML = this.state.value;
+            this.props.action(ACK);
+            this.props.togglePop();
+        }
     }
 
     renderSaveIcon() {
         return(<svg className="board-modal-icon"
+        onClick={()=>{this.processor('modify');}}
         width="24" height="24" viewBox="0 0 24 24">
         <path d="M13 3h2.996v5h-2.996v-5zm11 
         1v20h-24v-24h20l4 4zm-17 
@@ -75,7 +85,7 @@ class BoardEdit extends Component {
                     onChange={this.changer}
                     onKeyPress={(e)=>{
                         if (e.key === "Enter")
-                            this.processor(e);
+                            this.processor('modify');
                     }}
                     onKeyDown={(e)=>{
                         if (e.key === "Escape")
@@ -90,5 +100,9 @@ class BoardEdit extends Component {
     }
 }
 
-export default BoardEdit;
+export default connect((state) => {
+    return {
+        success: state.boardReducer.success
+    };
+}, { action, modifyBoard })(BoardEdit);
 
