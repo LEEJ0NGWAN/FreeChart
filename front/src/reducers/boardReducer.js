@@ -1,5 +1,6 @@
 import { CLEAR } from '../actions/common';
-import { BOARD, BOARDS, UPDATE, ACK } from '../actions/board_api';
+import { GET_BOARD, GET_BOARDS, 
+    CREATE_BOARD, DELETE_BOARD, MODIFY_BOARD  } from '../actions/board_api';
 
 const initialState = {};
 
@@ -7,27 +8,41 @@ export default function (state = initialState, action) {
     switch(action.type) {
         case CLEAR:
             return {};
-        case BOARD:
+        case GET_BOARD:
             return {
                 ...state,
                 board: action.payload.board
             };
-        case BOARDS:
+        case GET_BOARDS:
             return {
                 ...state,
                 boards: action.payload.boards
             };
-        case UPDATE:
+        case CREATE_BOARD:
             return {
                 ...state,
-                success: true,
-            }
-        case ACK:
-            let nextState = {
-                ...state,
+                boards: [
+                    ...state.boards,
+                    action.payload.board
+                ]
             };
-            delete nextState.success;
-            return nextState;
+        case MODIFY_BOARD:
+            const {key, title} = action.payload;
+            state.boards[key].title = title;
+            return {
+                ...state,
+                baords: [
+                    ...state.boards,
+                ]
+            };
+        case DELETE_BOARD:
+            state.boards.splice(action.payload.key,1);
+            return {
+                ...state,
+                boards: [
+                    ...state.boards,
+                ]
+            };
         default:
             return state;
     }
