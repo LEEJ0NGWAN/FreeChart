@@ -7,6 +7,7 @@ class Board(models.Model):
         db_table = 'board'
         verbose_name = 'board'
     owner = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
+    parent = models.ForeignKey('self', on_delete=models.SET_NULL, null=True)
     title = models.CharField(max_length=256, verbose_name='제목')
     create_date = models.DateTimeField(auto_now_add=True, verbose_name='작성 날짜')
     modify_date = models.DateTimeField(auto_now=True, verbose_name='수정 날짜')
