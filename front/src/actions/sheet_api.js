@@ -1,17 +1,26 @@
-import { action, fetch, clearError, reportError } from './common';
+import { fetch, clearError, reportError } from './common';
 import axios from 'axios';
 axios.defaults.withCredentials = true;
 
-export const SAVED = 'SAVED';
-export const RESET = 'RESET';
-export const ELEMENTS = 'ELEMENTS';
+export const GET_SHEET = 'GET_SHEET';
+export const GET_SHEETS = 'GET_SHEETS';
+export const CREATE_SHEET = 'CREATE_SHEET';
+export const MODIFY_SHEET = 'MODIFY_SHEET';
+export const DELETE_SHEET = 'DELETE_SHEET';
 
-export function getElement(sheet_id) {
+export function getSheet(id=null, board_id=null) {
     return (dispatch) => {
-        let params = {sheet_id: sheet_id};
-        return axios.get('api/sheet/element/', {params})
+        let params = {};
+        if (id)
+            params.id = id;
+        if (board_id)
+            params.board_id = board_id;
+        return axios.get('api/sheet/', {params})
         .then(res => {
-            dispatch(fetch(ELEMENTS, res.data));
+            if (res.data.sheet)
+                dispatch(fetch(GET_SHEET, res.data));
+            else
+                dispatch(fetch(GET_SHEETS, res.data));
             dispatch(clearError());
         })
         .catch(err => {
@@ -20,20 +29,50 @@ export function getElement(sheet_id) {
     };
 }
 
-export function editElement(sheet_id, nodes, edges, nodeStates, edgeStates) {
+export function createSheet(title=null, boardId=null) {
     return (dispatch) => {
-        return axios.post(
-            'api/sheet/element/',
-            {
-                sheet_id: sheet_id,
-                nodes: nodes, edges:edges,
-                nodeStates: nodeStates,
-                edgeStates: edgeStates
-            })
-        .then(() => {
-            dispatch(action(SAVED));
+        return axios.post('api/sheet/',
+        {
+            title: title,
+            board_id: boardId
+        })
+        .then(res => {
+            dispatch(fetch(CREATE_SHEET, res.data));
             dispatch(clearError());
-        });
+        })
+        .catch(err => {
+            dispatch(reportError(err));
+        })
     }
+}
+
+export function modifySheet(id, key, title=null, boardId=null) {
+    return (dispatch) => {
+        return axios.put('api/sheet/', {
+            id: id, title: title, board_id: boardId })
+        .then(() => {
+            dispatch(
+                fetch(MODIFY_SHEET, 
+                    {key: key, title: title, boardId: boardId}));
+            dispatch(clearError());
+        })
+        .catch(err => {
+            dispatch(reportError(err));
+        });
+    };
+}
+
+export function deleteSheet(id, key) {
+    return (dispatch) => {
+        let params = {id: id};
+        return axios.delete('api/sheet/', {params})
+        .then(() => {
+            dispatch(fetch(DELETE_SHEET, {key:key}));
+            dispatch(clearError());
+        })
+        .catch(err => {
+            dispatch(reportError(err));
+        });
+    };
 }
 
