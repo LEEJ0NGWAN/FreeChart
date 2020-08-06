@@ -43,7 +43,12 @@
     margin: 10px;
 }
 
-.board-item {
+.sheet-list {
+    display: inline-block;
+    margin: 10px;
+}
+
+.bs-item {
     position: relative;
     display: inline-block;
     border: 1px solid #000000;
@@ -53,23 +58,18 @@
     background-color: transparent;
 }
 
-.board-title {
+.bs-title {
     display: inline-block;
     margin-left: 10px;
     margin-right: 10px;
     padding-right: 10px;
 }
 
-.board-item-edit {
+.bs-item-edit {
     background-color: transparent;
     position: absolute;
     top: 5px;
     left: calc(100% - 15px);
-}
-
-.sheet-list {
-    display: inline-block;
-    margin: 10px;
 }
 
 .control {
