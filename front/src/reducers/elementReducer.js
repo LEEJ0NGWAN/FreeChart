@@ -1,5 +1,5 @@
 import { CLEAR } from '../actions/common';
-import { ELEMENTS, SAVED, RESET } from '../actions/sheet_api';
+import { ELEMENTS, SAVED, RESET } from '../actions/element_api';
 
 const initialState = {};
 
