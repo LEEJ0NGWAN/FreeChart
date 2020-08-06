@@ -120,6 +120,7 @@ def board_parse(board, **kwargs):
     result = {
         'id': board.id,
         'title': board.title,
+        'parent_id': board.parent_id,
         'create_date': board.create_date,
         'modify_date': board.modify_date
     }
@@ -131,6 +132,7 @@ def sheet_parse(sheet, **kwargs):
     result = {
         'id': sheet.id,
         'title': sheet.title,
+        'board_id': sheet.board_id,
         'create_date': sheet.create_date,
         'modify_date': sheet.modify_date
     }

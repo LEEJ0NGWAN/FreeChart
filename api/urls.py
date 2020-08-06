@@ -1,10 +1,9 @@
 from django.urls import path
 from account.api.user import UserController
 from board.api.board import (
-    BoardController, SheetController, ElementController
+    BoardController, SheetController, ElementController, ChildController
 )
 
-# TODO: board
 urlpatterns = [
     path(
         'user/', 
@@ -22,5 +21,10 @@ urlpatterns = [
         'sheet/element/',
         ElementController.as_view(),
         name='ElementView'),
+    path(
+        'child/',
+        ChildController.as_view(),
+        name='ChildView'
+    )
 ]
 

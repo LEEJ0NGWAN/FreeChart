@@ -36,42 +36,41 @@ class BoardController(View):
                 'board': board
             }))
         
+        order = data.get('order', '-modify_date')
+        if order not in [
+            '-modify_date', '-create_date','-title',
+            'modify_date','create_date','title']:
+            order = '-modify_date'
+
+        if 'parent_id' in data:
+            boards = Board.objects\
+                .filter(
+                    owner_id=request.user.id,
+                    parent_id=data['parent_id'],
+                    deleted=False)\
+                .order_by(order).all()
+        
         else:
-            order = data.get('order', '-modify_date')
-            if order not in [
-                '-modify_date', '-create_date','-title',
-                'modify_date','create_date','title']:
-                order = '-modify_date'
-            
             boards = Board.objects\
                 .filter(
                     owner_id=request.user.id,
                     deleted=False)\
                 .order_by(order).all()
-            
-            sheets = Sheet.objects\
-                .filter(
-                    owner_id=request.user.id,
-                    board=None,
-                    deleted=False)\
-                .order_by(order).all()
 
-            return JsonResponse(serialize({
-                'boards': boards,
-                'sheets': sheets
-            }))
+        return JsonResponse(serialize({
+            'boards': boards
+        }))
 
     def post(self, request):
         if not request.user.is_authenticated:
             return JsonResponse({}, status=HTTP_401_UNAUTHORIZED)
         
         data = json.loads(request.body.decode("utf-8"))
-
-        title = data.get('title')
         
         new_board = Board.objects.create(
-            title=title,
-            owner_id=request.user.id
+            title=data.get('title'),
+            owner_id=request.user.id,
+            parent_id=data.get('parent_id')
         )
 
         return JsonResponse(serialize({
@@ -96,7 +95,12 @@ class BoardController(View):
         if not board:
             return JsonResponse({}, status=HTTP_404_NOT_FOUND)
         
-        board.title = data.get('title')
+        if 'title' in data:
+            board.title = data['title']
+        
+        if 'parent_id' in data:
+            board.parent_id = data['parent_id']
+
         board.save()
 
         return JsonResponse(serialize({
@@ -213,7 +217,7 @@ class SheetController(View):
             .filter(
                 id=data.get('id'),
                 owner_id=request.user.id,
-                deleted=False).fisrt()
+                deleted=False).first()
         
         if not sheet:
             return JsonResponse({}, status=HTTP_404_NOT_FOUND)
@@ -358,4 +362,50 @@ class ElementController(View):
         Edge.objects.bulk_create(new_edges)
 
         return JsonResponse({})
+
+@method_decorator(csrf_exempt, name='dispatch')
+class ChildController(View):
+    def get(self, request):
+        if not request.user.is_authenticated:
+            return JsonResponse({}, status=HTTP_401_UNAUTHORIZED)
+        data = request.GET
+
+        parent = None
+        if 'id' in data:
+            board = Board.objects\
+                .filter(
+                    id=data['id'],
+                    owner_id=request.user.id,
+                    deleted=False).first()
+            
+            if not board:
+                return JsonResponse({}, status=HTTP_404_NOT_FOUND)
+            
+            parent = board
+
+        order = data.get('order', '-modify_date')
+        if order not in [
+            '-modify_date', '-create_date','-title',
+            'modify_date','create_date','title']:
+            order = '-modify_date'
+        
+        boards = Board.objects\
+            .filter(
+                owner_id=request.user.id,
+                parent_id=data.get('id'),
+                deleted=False)\
+            .order_by(order).all()
+        
+        sheets = Sheet.objects\
+            .filter(
+                owner_id=request.user.id,
+                board_id=data.get('id'),
+                deleted=False)\
+            .order_by(order).all()
+
+        return JsonResponse(serialize({
+            'parent': parent,
+            'boards': boards,
+            'sheets': sheets
+        }))
 
