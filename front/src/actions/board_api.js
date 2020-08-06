@@ -1,16 +1,31 @@
-import { fetch, clearError, reportError, action } from './common';
+import { fetch, clearError, reportError } from './common';
+import { GET_SHEETS } from './sheet_api';
 import axios from 'axios';
 axios.defaults.withCredentials = true;
 
-export const SHEET = 'SHEET';
-export const SHEETS = 'SHEETS';
-
 export const GET_BOARD = 'GET_BOARD';
+export const GET_PARENT = 'GET_PARENT';
 export const GET_BOARDS = 'GET_BOARDS';
 export const CREATE_BOARD = 'CREATE_BOARD';
 export const MODIFY_BOARD = 'MODIFY_BOARD';
 export const DELETE_BOARD = 'DELETE_BOARD';
 
+
+export function getChild(id=null) {
+    return (dispatch) => {
+        let params = {id:id}
+        return axios.get('api/child/',{params})
+        .then(res=>{
+            dispatch(fetch(GET_PARENT, res.data));
+            dispatch(fetch(GET_BOARDS, res.data));
+            dispatch(fetch(GET_SHEETS, res.data));
+            dispatch(clearError());
+        })
+        .catch(err => {
+            dispatch(reportError(err));
+        })
+    }
+}
 
 export function getBoard(id=null) {
     return (dispatch) => {
@@ -23,30 +38,7 @@ export function getBoard(id=null) {
                 dispatch(fetch(GET_BOARD, res.data));
             else {
                 dispatch(fetch(GET_BOARDS, res.data));
-                if (res.data.sheets)
-                    dispatch(fetch(SHEETS, res.data));
             }
-            dispatch(clearError());
-        })
-        .catch(err => {
-            dispatch(reportError(err));
-        });
-    };
-}
-
-export function getSheet(id=null, board_id=null) {
-    return (dispatch) => {
-        let params = {};
-        if (id)
-            params.id = id;
-        if (board_id)
-            params.board_id = board_id;
-        return axios.get('api/sheet/', {params})
-        .then(res => {
-            if (res.data.sheet)
-                dispatch(fetch(SHEET, res.data));
-            else
-                dispatch(fetch(SHEETS, res.data));
             dispatch(clearError());
         })
         .catch(err => {

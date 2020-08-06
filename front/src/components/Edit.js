@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { action } from '../actions/common';
-import { ACK, createBoard, modifyBoard, deleteBoard } from '../actions/board_api';
+import { createSheet, modifySheet, deleteSheet } from '../actions/sheet_api';
+import { createBoard, modifyBoard, deleteBoard } from '../actions/board_api';
 
-class BoardEdit extends Component {
+class Edit extends Component {
     state = {
         value: "",
         ref: React.createRef()
@@ -16,6 +17,10 @@ class BoardEdit extends Component {
         });
     }
 
+    componentDidUpdate() {
+        console.log(this.props);
+    }
+
     changer = (event) => {
         let nextState = {};
         nextState[event.target.name] = event.target.value;
@@ -26,17 +31,32 @@ class BoardEdit extends Component {
         switch(mode) {
             case 'create':
                 if(this.state.value) {
-                    await this.props.createBoard(this.state.value);
+                    if (this.props.type)
+                        await this.props.createSheet(
+                            this.state.value, this.props.parentId);
+                    else
+                        await this.props.createBoard(this.state.value);
                 }
                 break;
             case 'modify':
                 if(this.state.value !== this.props.value) {
-                    await this.props.modifyBoard(
-                        this.props.id, this.props.key_, this.state.value);
+                    if (this.props.type)
+                        await this.props.modifySheet(
+                            this.props.id, this.props.key_, 
+                            this.state.value, this.props.parentId);
+                    else
+                        await this.props.modifyBoard(
+                            this.props.id, 
+                            this.props.key_, this.state.value);
                 }
                 break;
             case 'delete':
-                await this.props.deleteBoard(this.props.id, this.props.key_);
+                if (this.props.type)
+                    await this.props.deleteSheet(
+                        this.props.id, this.props.key_);
+                else
+                    await this.props.deleteBoard(
+                        this.props.id, this.props.key_);
                 break;
             default:
                 break;
@@ -110,5 +130,6 @@ export default connect((state) => {
         board: state.boardReducer.board,
         success: state.boardReducer.success
     };
-}, { action, createBoard, modifyBoard,deleteBoard })(BoardEdit);
+}, { action, createBoard, modifyBoard, deleteBoard, 
+    createSheet, modifySheet, deleteSheet })(Edit);
 

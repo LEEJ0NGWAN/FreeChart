@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { clearError, fetch } from '../actions/common';
-import { getBoard, getSheet } from '../actions/board_api';
+import { getChild } from '../actions/board_api';
 import { getCookie, setCookie, deleteCookie } from '../utils';
 import Sheet from './Sheet';
-import BoardEdit from './BoardEdit';
+import Edit from './Edit';
 
 class Home extends Component {
     state = {
@@ -14,7 +14,8 @@ class Home extends Component {
         sheetId: null,
         targetId: null,
         targetKey: null,
-        targetValue: null
+        targetType: null,
+        targetValue: null,
     }
 
     initialize = async (event) => {
@@ -25,14 +26,14 @@ class Home extends Component {
             deleteCookie('boardId');
             deleteCookie('sheetId');
             this.setState({boardId: null});
-            this.props.getBoard();
+            this.props.getChild();
         }
         else {
             this.setState({
                 boardId: boardId,
                 sheetId: sheetId
             });
-            this.props.getSheet(null, boardId);
+            this.props.getChild(boardId);
         }
     }
 
@@ -53,27 +54,36 @@ class Home extends Component {
         }
     }
 
+    back = async () => {
+        await this.props.getChild(this.props.parent.parent_id);
+        setCookie('boardId', this.props.parent.id);
+        this.setState({
+            boardId: this.props.parent.id,
+        });
+    }
+
     finder = async (event) => {
-        const board_id = event.target.id;
-        if (!board_id)
+        const boardId = event.target.id;
+        if (!boardId)
             return;
         
-        await this.props.getSheet(null, board_id);
-        setCookie('boardId',board_id);
-        this.setState({boardId: board_id});
+        await this.props.getChild(boardId);
+        setCookie('boardId', boardId);
+        this.setState({boardId: boardId});
     }
 
     processer = (event) => {
-        const sheet_id = event.target.id;
-        setCookie('sheetId',sheet_id);
-        this.setState({sheetId:sheet_id});
+        const sheetId = event.target.id;
+        setCookie('sheetId', sheetId);
+        this.setState({sheetId: sheetId});
     }
 
-    togglePop = (id=null, key=null, value=null) => {
+    togglePop = (id=null, key=null, type=null, value=null) => {
         this.setState({
             popped: !this.state.popped,
             targetId: (this.state.targetId)? null: id,
             targetKey: (this.state.targetKey)? null: key,
+            targetType: (this.state.targetType)? null: type,
             targetValue: (value)? value: ""
         });
     }
@@ -81,15 +91,16 @@ class Home extends Component {
     renderFolderIcon(boardId) {
         return (<svg id={boardId}
         width="24" height="24" viewBox="0 0 24 24">
-        <path id={boardId} d="M0 10v12h24v-12h-24zm22 
+        <path id={boardId}
+        d="M0 10v12h24v-12h-24zm22 
         10h-20v-8h20v8zm-22-12v-6h7c1.695 
         1.942 2.371 3 4 3h13v3h-2v-1h-11c-2.34 
         0-3.537-1.388-4.916-3h-4.084v4h-2z"/></svg>);
     }
 
     renderNewFolderIcon() {
-        return (<svg className="board-item"
-        onClick={()=>{this.togglePop();}}
+        return (<svg className="bs-item"
+        onClick={()=>{this.togglePop(null,null,0);}}
         width="24" height="24" 
         fillRule="evenodd" clipRule="evenodd">
         <path d="M7 2c1.695 1.942 2.371 3 4 
@@ -98,13 +109,33 @@ class Home extends Component {
         6h3v2h-3v3h-2v-3h-3v-2h3v-3h2v3z"/></svg>);
     }
 
-    renderEditIcon(boardId, boardKey, boardTitle) {
-        return (<svg className="board-item-edit" id={boardId}
+    renderFileIcon(sheetId) {
+        return(<svg id={sheetId}
+        width="24" height="24" viewBox="0 0 24 24">
+        <path id={sheetId} d="M11.362 2c4.156 0 2.638 6 2.638 6s6-1.65 6 
+        2.457v11.543h-16v-20h7.362zm.827-2h
+        -10.189v24h20v-14.386c0-2.391-6.648
+        -9.614-9.811-9.614zm4.811 13h-10v-1h10v1zm0 
+        2h-10v1h10v-1zm0 3h-10v1h10v-1z"/></svg>);
+    }
+
+    renderNewFileIcon() {
+        return (<svg className="bs-item"
+        onClick={()=>{this.togglePop(null,null,1);}}
+        width="24" height="24" viewBox="0 0 24 24">
+        <path d="M23 17h-3v-3h-2v3h-3v2h3v3h2v-3h3v-2zm-7 
+        5v2h-15v-24h10.189c3.163 0 9.811 7.223 9.811 
+        9.614v2.386h-2v-1.543c0-4.107
+        -6-2.457-6-2.457s1.518-6-2.638-6h-7.362v20h13z"/></svg>);
+    }
+
+    renderEditIcon(id, key, type, title, parentId) {
+        return (<svg className="bs-item-edit" id={id}
         onClick={(e)=>{
             e.stopPropagation();
-            this.togglePop(boardId, boardKey, boardTitle);}}
+            this.togglePop(id, key, type, title, parentId);}}
         width="18" height="18" viewBox="0 0 24 24">
-        <path id={boardId} d="M12 18c1.657 0 3 1.343 3 
+        <path id={id} d="M12 18c1.657 0 3 1.343 3 
         3s-1.343 3-3 3-3-1.343-3-3 1.343-3 3-3zm0-9c1.657 
         0 3 1.343 3 3s-1.343 3-3 3-3-1.343-3-3 
         1.343-3 3-3zm0-9c1.657 0 3 1.343 3 3s-1.343 
@@ -121,15 +152,17 @@ class Home extends Component {
         boards.forEach((board, key)=>{
             boardList.push(
                 <div 
-                className="board-item"
+                className="bs-item"
                 onClick={this.finder} 
                 key={board.id}
                 id={board.id}>
                     {this.renderFolderIcon(board.id)}
                     <label 
-                    className="board-title" 
+                    className="bs-title"
                     id={board.id}>{board.title}</label>
-                    {this.renderEditIcon(board.id, key, board.title)}</div>);
+                    {this.renderEditIcon(
+                        board.id, key, 0, board.title, board.parent_id)}
+                </div>);
         });
         return boardList;
     }
@@ -140,14 +173,22 @@ class Home extends Component {
             return;
 
         let sheetList = [];
-        for (let sheet of sheets) {
+
+        sheets.forEach((sheet, key)=>{
             sheetList.push(
-            <p className="item"
-            onClick={this.processer} key={sheet.id} id={sheet.id}>
-                <label>{sheet.title}</label>
-                <button className="board-item-edit">편집</button> 
-            </p>)
-        }
+                <div
+                className="bs-item"
+                onClick={this.processer}
+                key={sheet.id}
+                id={sheet.id}>
+                    {this.renderFileIcon()}
+                    <label
+                    className="bs-title"
+                    id={sheet.id}>{sheet.title}</label>
+                    {this.renderEditIcon(
+                        sheet.id, key, 1, sheet.title, sheet.board_id)}
+                </div>);
+        });
         return sheetList;
     }
 
@@ -157,28 +198,34 @@ class Home extends Component {
     }
 
     render() {
+        const back = (
+            <label className="bs-item" 
+            style={{display:'block'}}
+            onClick={this.initialize}>←</label>
+        )
         const menu = (
             <div className="home-menu">
+            {(this.state.boardId && !this.state.sheetId) && back}
             {this.renderNewFolderIcon()}
+            {this.renderNewFileIcon()}
             </div> 
-        )
-        const back = (
-            <label className="item" onClick={this.initialize}>←</label>
         )
         return (
             <div>
                 {!this.state.boardId && menu}
+                {(this.state.boardId && !this.state.sheetId) && back}
                 {this.state.popped && 
-                <BoardEdit 
+                <Edit 
                     togglePop={this.togglePop}
                     id={this.state.targetId}
                     key_={this.state.targetKey}
-                    value={this.state.targetValue}/>}
+                    type={this.state.targetType}
+                    value={this.state.targetValue}
+                    parentId={this.state.boardId}/>}
                 <div className="board-list">
                     {!this.state.boardId && this.renderBoards()}
                 </div>
                 <div className="sheet-list">
-                    {(this.state.boardId && !this.state.sheetId) && back}
                     {!this.state.sheetId && this.renderSheets()}
                 </div>
                 {this.state.sheetId && 
@@ -194,8 +241,9 @@ export default connect((state) => {
     return {
       user: state.userReducer.user,
       logged: state.userReducer.logged,
+      parent: state.boardReducer.parent,
       boards: state.boardReducer.boards,
       sheets: state.sheetReducer.sheets,
     };
-}, { clearError, fetch, getBoard, getSheet })(Home);
+}, { clearError, fetch, getChild })(Home);
 
