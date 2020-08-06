@@ -142,6 +142,17 @@ class Home extends Component {
         3-3 3-3-1.343-3-3 1.343-3 3-3z"/></svg>);
     }
 
+    renderUndoIcon() {
+        return(<svg className="bs-item"
+        onClick={this.initialize}
+        width="24" height="24" viewBox="0 0 24 24">
+        <path d="M13.427 3.021h-7.427v-3.021l-6 5.39 6 
+        5.61v-3h7.427c3.071 0 5.561 2.356 5.561 5.427 0 
+        3.071-2.489 5.573-5.561 5.573h-7.427v5h7.427c5.84 0 
+        10.573-4.734 10.573-10.573s-4.733-10.406-10.573-10.406z"/>
+        </svg>);
+    }
+
     renderBoards() {
         const {boards} = this.props;
         if (!boards)
@@ -198,22 +209,22 @@ class Home extends Component {
     }
 
     render() {
-        const back = (
-            <label className="bs-item" 
-            style={{display:'block'}}
-            onClick={this.initialize}>←</label>
-        )
+        // TODO: 나중에 홈버튼으로 쓰기
+        // const back = (
+        //     <label className="bs-item" 
+        //     style={{display:'block'}}
+        //     onClick={this.initialize}>←</label>
+        // )
         const menu = (
             <div className="home-menu">
-            {(this.state.boardId && !this.state.sheetId) && back}
+            {this.state.boardId && this.renderUndoIcon()}
             {this.renderNewFolderIcon()}
             {this.renderNewFileIcon()}
             </div> 
         )
         return (
             <div>
-                {!this.state.boardId && menu}
-                {(this.state.boardId && !this.state.sheetId) && back}
+                {!this.state.sheetId && menu}
                 {this.state.popped && 
                 <Edit 
                     togglePop={this.togglePop}

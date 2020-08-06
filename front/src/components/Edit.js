@@ -17,10 +17,6 @@ class Edit extends Component {
         });
     }
 
-    componentDidUpdate() {
-        console.log(this.props);
-    }
-
     changer = (event) => {
         let nextState = {};
         nextState[event.target.name] = event.target.value;
