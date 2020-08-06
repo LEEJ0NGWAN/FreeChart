@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { clearError } from '../actions/common';
-import { getElement, editElement, RESET } from '../actions/sheet_api';
+import { getElement, editElement, RESET } from '../actions/element_api';
 import { action, fetch } from '../actions/common';
 import Graph from 'react-graph-vis';
 import NodeEdit from './NodeEdit';
