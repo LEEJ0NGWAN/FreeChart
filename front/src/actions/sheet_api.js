@@ -52,8 +52,11 @@ export function modifySheet(id, key, title=null, boardId=null) {
             id: id, title: title, board_id: boardId })
         .then(() => {
             dispatch(
-                fetch(MODIFY_SHEET, 
-                    {key: key, title: title, boardId: boardId}));
+                fetch(MODIFY_SHEET, {
+                    key: key, 
+                    title: title, 
+                    board_id: boardId
+                }));
             dispatch(clearError());
         })
         .catch(err => {

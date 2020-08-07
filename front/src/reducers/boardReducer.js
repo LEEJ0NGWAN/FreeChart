@@ -32,8 +32,12 @@ export default function (state = initialState, action) {
                 ]
             };
         case MODIFY_BOARD:
-            const {key, title} = action.payload;
+            const {key, title, parent_id} = action.payload;
+            const pre_parent_id = state.boards[key].parent_id;
+            
             state.boards[key].title = title;
+            if (pre_parent_id !== parent_id)
+                state.boards.splice(key,1);
             return {
                 ...state,
                 baords: [
