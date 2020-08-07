@@ -87,11 +87,11 @@ export function modifyBoard(id, key, title=null, parentId=null) {
     };
 }
 
-export function deleteBoard(id, key, saveSheets=null) {
+export function deleteBoard(id, key, saveChild=null) {
     return (dispatch) => {
         let params = {
             id: id,
-            save_sheets: saveSheets
+            save_child: saveChild
         };
         return axios.delete('api/board/', {params})
         .then(() => {
