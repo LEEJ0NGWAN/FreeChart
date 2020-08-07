@@ -27,8 +27,13 @@ export default function (state = initialState, action) {
                 ]
             };
         case MODIFY_SHEET:
-            const {key, title, boardId} = action.payload;
+            const {key, title, board_id} = action.payload;
+            const pre_board_id = state.sheets[key].board_id;
+
             state.sheets[key].title = title;
+
+            if (pre_board_id !== board_id)
+                state.sheets.splice(key,1);
             return {
                 ...state,
                 sheets: [
