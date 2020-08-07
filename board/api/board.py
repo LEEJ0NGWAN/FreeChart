@@ -128,12 +128,17 @@ class BoardController(View):
         board.deleted = True
         board.save()
 
-        if data.get('save_sheets', False):
+        if data.get('save_child', False):
+            Board.objects\
+                .filter(
+                    parent=board,
+                    deleted=False).all()\
+                .update(parent_id=board.parent_id)
             Sheet.objects\
                 .filter(
                     board=board,
                     deleted=False).all()\
-                .update(board=None)
+                .update(board_id=board.parent_id)
 
         return JsonResponse(serialize({
             'board': board
