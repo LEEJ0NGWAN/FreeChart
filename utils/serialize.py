@@ -125,6 +125,9 @@ def board_parse(board, **kwargs):
         'modify_date': board.modify_date
     }
 
+    if kwargs.get('change_parent'):
+        result['parent_id'] = kwargs.get('new_parent_id')
+
     return serialize(result, **kwargs)
 
 @serialize.register(Sheet)
@@ -136,6 +139,9 @@ def sheet_parse(sheet, **kwargs):
         'create_date': sheet.create_date,
         'modify_date': sheet.modify_date
     }
+
+    if kwargs.get('change_parent'):
+        result['board_id'] = kwargs.get('new_parent_id')
 
     return serialize(result, **kwargs)
 
