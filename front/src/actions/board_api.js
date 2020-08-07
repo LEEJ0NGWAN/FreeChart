@@ -47,9 +47,12 @@ export function getBoard(id=null) {
     };
 }
 
-export function createBoard(title=null) {
+export function createBoard(title=null, parentId=null) {
     return (dispatch) => {
-        return axios.post('api/board/', {title: title})
+        return axios.post('api/board/', {
+            title: title, 
+            parent_id: parentId
+        })
         .then(res => {
             dispatch(fetch(CREATE_BOARD, res.data));
             dispatch(clearError());
@@ -60,14 +63,22 @@ export function createBoard(title=null) {
     }
 }
 
-export function modifyBoard(id, key, title=null) {
+export function modifyBoard(id, key, title=null, parentId=null) {
     return (dispatch) => {
-        return axios.put('api/board/', {
-            id: id, title: title
-        })
+        let params = {id: id};
+        if (title)
+            params.title = title;
+        if (parentId)
+            params.parent_id = (parentId > 0)? parentId: null; // -1: root
+
+        return axios.put('api/board/', params)
         .then(() => {
             dispatch(
-                fetch(MODIFY_BOARD, {key: key, title: title}));
+                fetch(MODIFY_BOARD, {
+                    key: key, 
+                    title: title,
+                    parent_id: parentId
+                }));
             dispatch(clearError());
         })
         .catch(err => {
@@ -76,9 +87,12 @@ export function modifyBoard(id, key, title=null) {
     };
 }
 
-export function deleteBoard(id, key) {
+export function deleteBoard(id, key, saveSheets=null) {
     return (dispatch) => {
-        let params = {id: id};
+        let params = {
+            id: id,
+            save_sheets: saveSheets
+        };
         return axios.delete('api/board/', {params})
         .then(() => {
             dispatch(fetch(DELETE_BOARD, {key:key}));
