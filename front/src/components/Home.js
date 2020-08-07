@@ -21,8 +21,8 @@ class Home extends Component {
     initialize = async (event) => {
         const boardId = getCookie('boardId');
         const sheetId = getCookie('sheetId');
-        
-        if (!boardId || event){
+
+        if (event){
             deleteCookie('boardId');
             deleteCookie('sheetId');
             this.setState({boardId: null});
@@ -117,7 +117,8 @@ class Home extends Component {
     renderFileIcon(sheetId) {
         return(<svg id={sheetId}
         width="24" height="24" viewBox="0 0 24 24">
-        <path id={sheetId} d="M11.362 2c4.156 0 2.638 6 2.638 6s6-1.65 6 
+        <path id={sheetId} 
+        d="M11.362 2c4.156 0 2.638 6 2.638 6s6-1.65 6 
         2.457v11.543h-16v-20h7.362zm.827-2h
         -10.189v24h20v-14.386c0-2.391-6.648
         -9.614-9.811-9.614zm4.811 13h-10v-1h10v1zm0 
@@ -147,7 +148,7 @@ class Home extends Component {
         3-3 3-3-1.343-3-3 1.343-3 3-3z"/></svg>);
     }
 
-    renderUndoIcon() {
+    renderBackIcon() {
         return(<svg className="bs-item"
         onClick={this.back}
         width="24" height="24" viewBox="0 0 24 24">
@@ -206,7 +207,7 @@ class Home extends Component {
                 onClick={this.processer}
                 key={sheet.id}
                 id={sheet.id}>
-                    {this.renderFileIcon()}
+                    {this.renderFileIcon(sheet.id)}
                     <label
                     className="bs-title"
                     id={sheet.id}>{sheet.title}</label>
@@ -225,16 +226,25 @@ class Home extends Component {
     render() {
         const menu = (
             <div className="home-menu">
-            {this.state.boardId && this.renderUndoIcon()}
+            {this.state.boardId && this.renderBackIcon()}
             {this.renderNewFolderIcon()}
             {this.renderNewFileIcon()}
             {this.state.boardId && this.renderHomeIcon()}
             </div> 
         )
-        return (
+        const boardList = (
+            <div className="board-list">
+                {this.renderBoards()}
+            </div>
+        )
+        const sheetList = (
+            <div className="sheet-list">
+                {this.renderSheets()}
+            </div>   
+        )
+        const selectPanel = (
             <div>
-                {!this.state.sheetId && menu}
-                {this.state.popped && 
+                {this.state.popped &&
                 <Edit 
                     togglePop={this.togglePop}
                     id={this.state.targetId}
@@ -242,16 +252,18 @@ class Home extends Component {
                     type={this.state.targetType}
                     value={this.state.targetValue}
                     parentId={this.state.boardId}/>}
-                <div className="board-list">
-                    {!this.state.sheetId && this.renderBoards()}
-                </div>
-                <div className="sheet-list">
-                    {!this.state.sheetId && this.renderSheets()}
-                </div>
-                {this.state.sheetId && 
+                {menu}
+                {boardList}
+                {sheetList}
+            </div>
+        )
+        return (
+            <div>
+                {!this.state.sheetId ? 
+                selectPanel: 
                 <Sheet
-                    sheet_id={this.state.sheetId}
-                    escape={this.escape.bind(this)}/>}
+                sheet_id={this.state.sheetId}
+                escape={this.escape.bind(this)}/>}
             </div>
         );
     }
