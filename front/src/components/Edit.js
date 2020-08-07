@@ -31,7 +31,8 @@ class Edit extends Component {
                         await this.props.createSheet(
                             this.state.value, this.props.parentId);
                     else
-                        await this.props.createBoard(this.state.value);
+                        await this.props.createBoard(
+                            this.state.value, this.props.parentId);
                 }
                 break;
             case 'modify':

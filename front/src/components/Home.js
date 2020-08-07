@@ -56,10 +56,15 @@ class Home extends Component {
 
     back = async () => {
         await this.props.getChild(this.props.parent.parent_id);
-        setCookie('boardId', this.props.parent.id);
-        this.setState({
-            boardId: this.props.parent.id,
-        });
+
+        let nextState = {boardId:null};
+        if(this.props.parent){
+            setCookie('boardId', this.props.parent.id);
+            nextState.boardId = this.props.parent.id;
+        }
+        else
+            deleteCookie('boardId');
+        this.setState(nextState);
     }
 
     finder = async (event) => {
@@ -144,7 +149,7 @@ class Home extends Component {
 
     renderUndoIcon() {
         return(<svg className="bs-item"
-        onClick={this.initialize}
+        onClick={this.back}
         width="24" height="24" viewBox="0 0 24 24">
         <path d="M13.427 3.021h-7.427v-3.021l-6 5.39 6 
         5.61v-3h7.427c3.071 0 5.561 2.356 5.561 5.427 0 
@@ -234,7 +239,7 @@ class Home extends Component {
                     value={this.state.targetValue}
                     parentId={this.state.boardId}/>}
                 <div className="board-list">
-                    {!this.state.boardId && this.renderBoards()}
+                    {!this.state.sheetId && this.renderBoards()}
                 </div>
                 <div className="sheet-list">
                     {!this.state.sheetId && this.renderSheets()}
