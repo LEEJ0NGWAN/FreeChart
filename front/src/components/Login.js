@@ -100,14 +100,10 @@ class Login extends Component {
                         onClick={this.processer}>로그인</p>
                     <NavLink 
                     className="button-link"
-                    to="/register">
-                        <p className="button-item">회원가입</p>
-                    </NavLink>
+                    to="/password">비밀번호 찾기</NavLink>
                     <NavLink 
                     className="button-link"
-                    to="/password">
-                        <p className="button-item">비밀번호 찾기</p>
-                    </NavLink>
+                    to="/register">회원가입</NavLink>
                 </div>
             </div>
         );
