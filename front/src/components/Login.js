@@ -69,46 +69,43 @@ class Login extends Component {
     }
     render() {
         const error = (
-            <b>{this.state.error}</b>
-        );
-        const inputs = (
-            <div>
-                <div className="padding1">
-                    <input
-                    name="email"
-                    type="text"
-                    className="login"
-                    placeholder="email"
-                    onChange={this.changer}
-                    value={this.state.email}/>
-                </div>
-                <div className="padding1">
-                    <input
-                    name="password"
-                    type="password"
-                    className="login"
-                    placeholder="password"
-                    onChange={this.changer}
-                    value={this.state.password}/>
-                </div>
+            <div className="error-box">
+                <b>{this.state.error}</b>
             </div>
         );
-
+        const input = (
+            <div className="input-box">
+                <input
+                name="email"
+                type="text"
+                className="login-input"
+                placeholder="email"
+                onChange={this.changer}
+                value={this.state.email}/>
+                <input
+                name="password"
+                type="password"
+                className="login-input"
+                placeholder="password"
+                onChange={this.changer}
+                value={this.state.password}/>
+            </div>
+        )
         return (
             <div className="view">
-                {inputs}
-                <br/>{error}<br/>
-                <div style={{display:'block'}}>
-                <p className="item"
-                    onClick={this.processer}>로그인</p>
-                <button className="padding1 margin2 item">
-                    <NavLink to="/register" 
-                    style={{textDecoration:'none'}}>회원가입</NavLink>
-                </button>
-                <button className="padding1 margin2 item">
-                    <NavLink to="/password" 
-                    style={{textDecoration:'none'}}>비밀번호 찾기</NavLink>
-                </button>
+                {input}
+                {error}
+                <div className="button-box">
+                    <p className="button-item"
+                        onClick={this.processer}>로그인</p>
+                    <p className="button-item">
+                        <NavLink className="button-link"
+                        to="/register">회원가입</NavLink>
+                    </p>
+                    <p className="button-item">
+                        <NavLink className="button-link"
+                        to="/password">비밀번호 찾기</NavLink>
+                    </p>
                 </div>
             </div>
         );
