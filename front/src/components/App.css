@@ -1,7 +1,7 @@
 
 .App-header {
     position: absolute;
-    top: 30%;
+    top: 20%;
     left: 50%;
     transform: translate(-50%, -50%);
     text-align: center;
@@ -10,8 +10,7 @@
 .item {
     border-radius: 1em;
     border: 1px solid #000000;
-    padding: 3px;
-    background-color: transparent;
+    padding: 5px;
 }
 
 .padding1 {
@@ -23,6 +22,7 @@
 }
 
 .view {
+    display: block;
     position: absolute;
     top: 50%;
     left: 50%;
@@ -94,8 +94,8 @@
     z-index: 1;
     background-color: rgba(0, 0, 0, 0.25);
     left: 5px; right: 5px; bottom: 5px;
-    height: calc(100% - 68px);
-    border-radius: 1em;
+    height: calc(100% - 98px);
+    border-radius: 0.25em;
 }
   
 .node-modal-content {
@@ -138,5 +138,37 @@
     left: calc(50% - 30px);
     top: 5px;
     margin: 5px;
+}
+
+.login-input {
+    display: block;
+    font-size: 130%;
+    margin-bottom: 5%;
+}
+
+.input-box {
+    margin: 5px;
+}
+
+.error-box {
+    position: relative;
+    top: 5px;
+    margin: 5px;
+}
+
+.button-box {
+    margin: 5px;
+    padding: 5px;
+}
+
+.button-item {
+    border-radius: 1em;
+    padding: 5px;
+    background-color: antiquewhite;
+}
+
+.button-link {
+    text-decoration: none;
+    color: black;
 }
 

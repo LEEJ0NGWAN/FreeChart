@@ -14,7 +14,7 @@ const style = {
     bottom: '5px',
     height: 'calc(100% - 100px)',
     border: '1px solid #000000',
-    borderRadius: '1em'
+    borderRadius: '0.25em'
 };
 
 const options = {
