@@ -43,7 +43,7 @@ class Register extends Component {
         }
         else {
             nextState.email_pattern_validity = false;
-            nextState.email_msg = "이메일 형식을 확인해주세요! [ ex: abc@abc.com ]";
+            nextState.email_msg = "이메일 형식을 확인해주세요!";
         }
 
         this.setState(nextState);
@@ -77,9 +77,11 @@ class Register extends Component {
     checker = async (event) => {
         const {email, username} = this.state;
         if (!email.length && !username.length) return;
+
+        const name = event.target.getAttribute('name');
         let nextState = {};
         
-        if (event.target.name === 'email' && email.length){
+        if (name === 'email' && email.length){
             await this.props.check(email);
 
             if (!this.props.email_validity)
@@ -88,7 +90,7 @@ class Register extends Component {
                 nextState.email_msg = "가능한 이메일 입니다!";
         }
 
-        else if (event.target.name === 'username' && username.length){
+        else if (name === 'username' && username.length){
             await this.props.check(null,username);
 
             if (!this.props.username_validity)
@@ -137,77 +139,116 @@ class Register extends Component {
             this.setState(nextState);
         }
     }
+
+    renderSearchIcon(name) {
+        return (<svg className="register-icon"
+        name={name}
+        onClick={this.checker}
+        width="24" height="24" viewBox="0 0 24 24">
+        <path name={name}
+        d="M23.822 20.88l-6.353-6.354c.93-1.465 
+        1.467-3.2 1.467-5.059.001-5.219-4.247-9.467
+        -9.468-9.467s-9.468 4.248-9.468 9.468c0 
+        5.221 4.247 9.469 9.468 9.469 1.768 0 
+        3.421-.487 4.839-1.333l6.396 6.396 3.119
+        -3.12zm-20.294-11.412c0-3.273 2.665-5.938 
+        5.939-5.938 3.275 0 5.94 2.664 5.94 5.938 0 
+        3.275-2.665 5.939-5.94 5.939-3.274 0-5.939
+        -2.664-5.939-5.939z"/></svg>);
+    }
+
+    renderCheckIcon() {
+        return (<svg className="register-icon"
+        width="24" height="24" viewBox="0 0 24 24">
+        <path d="M12 2c5.514 0 10 4.486 10 10s-4.486 
+        10-10 10-10-4.486-10-10 4.486-10 10-10zm0
+        -2c-6.627 0-12 5.373-12 12s5.373 12 12 12 
+        12-5.373 12-12-5.373-12-12-12zm4.393 7.5l-5.643 
+        5.784-2.644-2.506-1.856 1.858 4.5 4.364 
+        7.5-7.643-1.857-1.857z"/></svg>);
+    }
   
     render() {
-        const error = (
-            <label>
-                <b>{this.state.error}</b>
-            </label>
-        );
         const inputs = (
-            <div>
+            <div className="input-box">
                 <div className="input-field email">
                     <input
                     name="email"
                     type="text"
-                    className="register"
+                    className="register-input"
                     placeholder="[이메일] abc@abc.com"
                     onChange={this.email_checker}
                     value={this.state.email}/>
                     {(this.state.email_pattern_validity &&
-                    !this.props.email_validity) &&
-                    <button
-                    className="item check-button"
-                    name="email"
-                    onClick={this.checker}>검사</button>}<br/>
+                    !this.props.email_validity) && 
+                    this.renderSearchIcon('email')}
+                    {(this.state.email_pattern_validity &&
+                    this.props.email_validity) && 
+                    this.renderCheckIcon()}
                     {!this.props.email_validity && 
-                    this.state.email_msg}<br/>
+                    <label className="message-label">
+                        {this.state.email_msg}
+                    </label>}
                 </div>
                 <div className="input-field username">
                     <input
                     name="username"
                     type="text"
-                    className="register"
+                    className="register-input"
                     placeholder="[닉네임] 깜순이"
                     onChange={this.changer}
                     value={this.state.username}/>
                     {(Boolean(this.state.username.length) &&
                     !this.props.username_validity) &&
-                    <button
-                    className="item check-button"
-                    name="username"
-                    onClick={this.checker}>검사</button>}<br/>
+                    this.renderSearchIcon('username')}
+                    {(Boolean(this.state.username.length) &&
+                    this.props.username_validity) &&
+                    this.renderCheckIcon()}
                     {!this.props.username_validity && 
-                    this.state.username_msg}<br/>
+                    <label className="message-label">
+                        {this.state.username_msg}
+                    </label>}
                 </div>
                 <div className="input-field password">
                     <input
                     name="password"
                     type="password"
-                    className="register"
-                    placeholder="[비밀번호]"
+                    className="register-input"
+                    placeholder="[비밀번호] 8자리 이상"
                     onChange={this.password_checker}
-                    value={this.state.password}/><br/>
-                    {this.state.password_msg}
+                    value={this.state.password}/>
+                    {this.state.password_validity &&
+                    this.renderCheckIcon()}
+                    <label className="message-label">
+                        {this.state.password_msg}
+                    </label>
                 </div>
             </div>
         );
-        const submitButton = (
-            <button 
-            className="submit-button"
-            onClick={this.processor}>회원가입</button>
-        )
+        const buttons = (
+            <div className="button-box">
+                {this.state.email_pattern_validity &&
+                this.props.email_validity && 
+                this.props.username_validity &&
+                this.state.password_validity &&
+                <p 
+                className="button-item"
+                onClick={this.processor}>회원가입</p>}
+                <span>
+                <NavLink to="/login" 
+                className="button-link">돌아가기</NavLink>
+                </span>
+            </div>
+        );
+        const error = (
+            <div className="error-box">
+                <b>{this.state.error}</b>
+            </div>
+        );
         return (
             <div className="view">
                 {inputs}
-                {(this.state.email_pattern_validity &&
-                this.props.email_validity && 
-                this.props.username_validity &&
-                this.state.password_validity) && submitButton}<br/>
-                <button>
-                    <NavLink to="/login"
-                    style={{textDecoration:'none'}}>돌아가기</NavLink>
-                </button>
+                {buttons}
                 {error}
             </div>
         );
