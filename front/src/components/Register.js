@@ -234,10 +234,8 @@ class Register extends Component {
                 <p 
                 className="button-item"
                 onClick={this.processor}>회원가입</p>}
-                <span>
                 <NavLink to="/login" 
                 className="button-link">돌아가기</NavLink>
-                </span>
             </div>
         );
         const error = (
@@ -246,7 +244,7 @@ class Register extends Component {
             </div>
         );
         return (
-            <div className="view">
+            <div className="content-wrapper">
                 {inputs}
                 {buttons}
                 {error}
