@@ -31,7 +31,7 @@ class Password extends Component {
         }
         else {
             nextState.email_pattern_validity = false;
-            nextState.email_msg = "이메일 형식을 확인해주세요! [ ex: abc@abc.com ]";
+            nextState.email_msg = "이메일 형식을 확인해주세요!";
         }
 
         this.setState(nextState);
@@ -73,45 +73,61 @@ class Password extends Component {
             this.setState(nextState);
         }
     }
+
+    renderSearchIcon() {
+        return (<svg className="password-icon"
+        onClick={this.processor}
+        width="24" height="24" viewBox="0 0 24 24">
+        <path d="M23.822 20.88l-6.353-6.354c.93-1.465 
+        1.467-3.2 1.467-5.059.001-5.219-4.247-9.467
+        -9.468-9.467s-9.468 4.248-9.468 9.468c0 
+        5.221 4.247 9.469 9.468 9.469 1.768 0 
+        3.421-.487 4.839-1.333l6.396 6.396 3.119
+        -3.12zm-20.294-11.412c0-3.273 2.665-5.938 
+        5.939-5.938 3.275 0 5.94 2.664 5.94 5.938 0 
+        3.275-2.665 5.939-5.94 5.939-3.274 0-5.939
+        -2.664-5.939-5.939z"/></svg>);
+    }
   
+    renderCheckIcon() {
+        return (<svg className="password-icon"
+        width="24" height="24" viewBox="0 0 24 24">
+        <path d="M12 2c5.514 0 10 4.486 10 10s-4.486 
+        10-10 10-10-4.486-10-10 4.486-10 10-10zm0
+        -2c-6.627 0-12 5.373-12 12s5.373 12 12 12 
+        12-5.373 12-12-5.373-12-12-12zm4.393 7.5l-5.643 
+        5.784-2.644-2.506-1.856 1.858 4.5 4.364 
+        7.5-7.643-1.857-1.857z"/></svg>);
+    }
+
     render() {
-        const error = (
-            <label>
-                <b>{this.state.error}</b>
-            </label>
-        );
         const inputs = (
-            <div>
-                <div className="input-field email">
-                    <label>email</label><br/>
-                    <input
-                    name="email"
-                    type="text"
-                    className="password"
-                    onChange={this.pattern_checker}
-                    value={this.state.email}/>
-                    {this.state.email_msg}<br/>
-                </div>
+            <div className="input-field email">
+                <input
+                name="email"
+                type="text"
+                className="email-input"
+                onChange={this.pattern_checker}
+                placeholder="[이메일] abc@abc.com"
+                value={this.state.email}/>
+                {!this.state.processed &&
+                this.state.email_pattern_validity &&
+                this.renderSearchIcon()}
+                {this.state.processed &&
+                this.state.email_pattern_validity &&
+                this.renderCheckIcon()}
+                <label className="message-label">
+                    {this.state.email_msg}
+                </label>
             </div>
         );
-        const submitButton = (
-            <button 
-            className="submit-button"
-            onClick={this.processor}>확인</button>
-        )
         return (
-            <div className="passwordView">
-                <div className="row">
-                    {inputs}
-                    {!this.state.processed &&
-                    this.state.email_pattern_validity &&
-                    submitButton}<br/>
-                    <button>
-                        <NavLink to="/login"
-                        style={{textDecoration:'none'}}>돌아가기</NavLink>
-                    </button>
-                </div><br/>
-                {error}
+            <div className="content-wrapper">
+                {inputs}
+                <div className="button-box">
+                    <NavLink to="/login" 
+                    className="button-link">돌아가기</NavLink>
+                </div>
             </div>
         );
     }
