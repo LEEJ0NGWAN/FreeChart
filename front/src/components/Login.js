@@ -92,7 +92,7 @@ class Login extends Component {
             </div>
         )
         return (
-            <div className="view">
+            <div className="content-wrapper">
                 {input}
                 {error}
                 <div className="button-box">
