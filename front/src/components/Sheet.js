@@ -29,16 +29,8 @@ const options = {
     autoResize: true,
 };
 
-class Sheet extends Component {
-    state = {
-        networkRef: React.createRef(),
-        popped: false,
-        nodeStates: {},
-        edgeStates: {},
-        from: null,
-    };
-
-    events = {
+function eventGenerator() {
+    const events = {
         click: function(event) {
             const {nodes} = event;
             if (!nodes.length && this.state.from)
@@ -127,6 +119,17 @@ class Sheet extends Component {
                 this.fetchInfo(nodeId,x,y,label,edges);
             }
         }.bind(this),
+    };
+    return events;
+}
+
+class Sheet extends Component {
+    state = {
+        networkRef: React.createRef(),
+        popped: false,
+        nodeStates: {},
+        edgeStates: {},
+        from: null,
     };
 
     togglePop = () => {
@@ -322,7 +325,7 @@ class Sheet extends Component {
                 ref={this.state.networkRef}
                 graph={this.state.graph} 
                 options={options} 
-                events={this.events}
+                events={eventGenerator.bind(this)()}
                 style={style}/>}
             </div>
         )
