@@ -106,7 +106,7 @@
     text-align: center;
 }
 
-.node-modal {
+.element-modal {
     position: absolute;
     z-index: 1;
     background-color: rgba(0, 0, 0, 0.25);
@@ -115,7 +115,7 @@
     border-radius: 0.25em;
 }
   
-.node-modal-content {
+.element-modal-content {
     background-color: white;
     position: absolute;
     width: max-content;
@@ -125,7 +125,7 @@
     border: 2px solid black;
 }
 
-.node-modal-edit-input {
+.element-modal-edit-input {
     margin: 5px;
     display: block;
     font-size: 130%;
@@ -133,7 +133,7 @@
     top: 5px;
 }
 
-.node-modal-icon {
+.element-modal-icon {
     position: relative;
     left: calc(50% - 30px);
     top: 5px;

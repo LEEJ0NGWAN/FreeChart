@@ -42,10 +42,10 @@ class NodeEdit extends Component {
             case 'label':
             case 'modify':
                 if(this.state.label !== this.props.label)
-                    this.props.modifyNode(this.state.label);
+                    this.props.modify(this.state.label);
                 break;
             case 'delete':
-                this.props.deleteNode();
+                this.props.delete();
                 break;
             default:
                 break;
@@ -55,7 +55,7 @@ class NodeEdit extends Component {
 
     renderSaveIcon() {
         return(<svg name="modify"
-        className="node-modal-icon"
+        className="element-modal-icon"
         onClick={this.processor}
         width="24" height="24" viewBox="0 0 24 24">
         <path name="modify"
@@ -67,7 +67,7 @@ class NodeEdit extends Component {
 
     renderDeleteIcon() {
         return(<svg name="delete"
-        className="node-modal-icon"
+        className="element-modal-icon"
         onClick={this.processor}
         width="24" height="24" viewBox="0 0 24 24">
         <path name="delete"
@@ -91,10 +91,10 @@ class NodeEdit extends Component {
 
         return(
             <div 
-            className="node-modal" 
+            className="element-modal" 
             onClick={()=>{this.props.togglePop();}}>
                 <div
-                className="node-modal-content"
+                className="element-modal-content"
                 onClick={(e)=>{e.stopPropagation();}}
                 ref={this.state.ref}
                 style={{
@@ -105,7 +105,7 @@ class NodeEdit extends Component {
                     name="label" 
                     type="text"
                     value={this.state.label}
-                    className="node-modal-edit-input"
+                    className="element-modal-edit-input"
                     onChange={this.changer}
                     onKeyPress={(e)=>{
                         if (e.key === "Enter")

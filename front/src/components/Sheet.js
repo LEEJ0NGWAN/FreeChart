@@ -4,7 +4,7 @@ import { clearError } from '../actions/common';
 import { getElement, editElement, RESET } from '../actions/element_api';
 import { action, fetch } from '../actions/common';
 import Graph from 'react-graph-vis';
-import NodeEdit from './NodeEdit';
+import ElementEdit from './ElementEdit';
 import { v4 as uuid } from 'uuid';
 
 const style = {
@@ -46,7 +46,6 @@ function eventGenerator() {
                         this.setState({from: null});
                     }
                     else {
-                        const edges_ = network.edges;
                         let edge = {
                             id: uuid(),
                             from: this.state.from,
@@ -63,7 +62,7 @@ function eventGenerator() {
                         nextState.edgeStates[edge.id] = 1;
     
                         this.setState(nextState);
-                        edges_.add(edge);
+                        network.edges.add(edge);
                     }
                     network.Network.unselectAll();
                 }
@@ -84,29 +83,11 @@ function eventGenerator() {
                     this.setState(nextState);
                 }
             }
-            else if (edges.length) {
-                const edgeId = edges[0];
-                const _edges = network.edges;
-
-                let nextState = {
-                    edgeStates: {
-                        ...this.state.edgeStates
-                    }
-                };
-                if (this.state.from)
-                    nextState.from = null;
-                if (nextState.edgeStates[edgeId] === 1)
-                    delete nextState.edgeStates[edgeId];
-                else
-                    nextState.edgeStates[edgeId] = 0;
-                this.setState(nextState);
-                _edges.remove(edgeId);
-            }
         }.bind(this),
         doubleClick: function(event) {
-            const {nodes} = event;
-            if (!nodes.length) {
-                const nodes = this.state.networkRef.current.nodes;
+            const network = this.state.networkRef.current;
+            const {nodes, edges} = event;
+            if (!nodes.length && !edges.length) {
                 const {x, y} = event.pointer.canvas;
                 let node = {
                     id: uuid(),
@@ -126,16 +107,22 @@ function eventGenerator() {
                 nextState.nodeStates[node.id] = 1;
                 
                 this.setState(nextState);
-                nodes.add(node);
+                network.nodes.add(node);
+            }
+            else if (!nodes.length && edges.length) {
+                const edgeId = edges[0];
+                const {x, y} = event.pointer.DOM;
+                const label = network.edges._data[edgeId].label;
+
+                this.setElementInfo(edgeId,1,x,y,label);
             }
             else {
                 const nodeId = nodes[0];
                 const {x, y} = event.pointer.DOM;
-                const label = this.state.networkRef
-                                .current.nodes._data[nodeId].label;
+                const label = network.nodes._data[nodeId].label;
                 const {edges} = event;
 
-                this.fetchInfo(nodeId,x,y,label,edges);
+                this.setElementInfo(nodeId,0,x,y,label,edges);
             }
         }.bind(this),
     };
@@ -156,22 +143,19 @@ class Sheet extends Component {
         this.setState({popped: !this.state.popped});
     }
 
-    fetchInfo = (nodeId, x=null, y=null, label=null, edges=null) => {        
+    setElementInfo = 
+    (elementId, elementType, x=null, y=null, label=null, edges=null) => {        
         let nextState = {
             popped: !this.state.popped,
-            nodeId: nodeId,
+            elementId: elementId,
+            elementType: elementType,
+            x: x, y: y,
+            label: label,
+            edges: edges
         };
 
         if (this.state.from)
             nextState.from = null;
-        if (x)
-            nextState.x = x;
-        if (y)
-            nextState.y = y;
-        if (label)
-            nextState.label = label;
-        if (edges)
-            nextState.edges = edges;
         
         this.setState(nextState);
     }
@@ -204,50 +188,88 @@ class Sheet extends Component {
         return (nodeLength+edgeLength)? true: false;
     }
 
-    modifyNode = (label) => {
-        const {nodeId} = this.state;
-        const nodes = this.state.networkRef.current.nodes;
-        nodes.update({
-            id: nodeId,
-            label: label
-        });
+    modifyElement = (label) => {
+        const network = this.state.networkRef.current;
+        const {elementId, elementType} = this.state;
 
-        let nextState = {popped: !this.state.popped};
-        
-        if (!this.state.nodeStates[nodeId]) {
-            nextState['nodeStates'] = {
-                ...this.state.nodeStates
-            };
-            nextState.nodeStates[nodeId] = 2;
+        let nextState = {};
+
+        if (elementType) {
+            network.edges.update({
+                id: elementId,
+                label: label
+            });
+
+            if (!this.state.edgeStates[elementId]) {
+                nextState['edgeStates'] = {
+                    ...this.state.edgeStates,
+                };
+                nextState.edgeStates[elementId] = 2;
+            }
         }
+        else {
+            network.nodes.update({
+                id: elementId,
+                label: label
+            });
+
+            if (!this.state.nodeStates[elementId]) {
+                nextState['nodeStates'] = {
+                    ...this.state.nodeStates,
+                };
+                nextState.nodeStates[elementId] = 2;
+            }
+        }
+
         this.setState(nextState);
     }
 
-    deleteNode = () => {
-        const {nodeId, edges} = this.state;
-        const nodes = this.state.networkRef.current.nodes;
+    deleteElement = () => {
+        const {elementId, elementType} = this.state;
+        const network = this.state.networkRef.current;
 
-        let nextState = {
-            nodeStates: {
-                ...this.state.nodeStates
-            },
-            edgeStates: {
-                ...this.state.edgeStates
-            }
-        };
-        if (nextState.nodeStates[nodeId] === 1)
-            delete nextState.nodeStates[nodeId];
-        else
-            nextState.nodeStates[nodeId] = 0;
-        edges.forEach((key)=>{
-            if (nextState.edgeStates[key] === 1)
-                delete nextState.edgeStates[key];
+        let nextState = {};
+        if (elementType) {
+            nextState = {
+                edgeStates: {
+                    ...this.state.edgeStates
+                }
+            };
+
+            if (nextState.edgeStates[elementId] === 1)
+                delete nextState.edgeStates[elementId];
             else
-                nextState.edgeStates[key] = 0;
-        });
-        
+                nextState.edgeStates[elementId] = 0;
+
+            network.edges.remove(elementId);
+        }
+
+        else {
+            const {edges} = this.state;
+            nextState = {
+                nodeStates: {
+                    ...this.state.nodeStates
+                },
+                edgeStates: {
+                    ...this.state.edgeStates
+                }
+            };
+
+            if (nextState.nodeStates[elementId] === 1)
+                delete nextState.nodeStates[elementId];
+            else
+                nextState.nodeStates[elementId] = 0;
+            edges.forEach((key)=>{
+                if (nextState.edgeStates[key] === 1)
+                    delete nextState.edgeStates[key];
+                else
+                    nextState.edgeStates[key] = 0;
+            });
+            
+            network.nodes.remove(elementId);
+        }
+
         this.setState(nextState);
-        nodes.remove(nodeId);
     }
 
     delete = () => {
@@ -340,11 +362,10 @@ class Sheet extends Component {
             <div>
                 {menu}
                 {this.state.popped && 
-                <NodeEdit 
+                <ElementEdit 
                 togglePop={this.togglePop}
-                modifyNode={this.modifyNode}
-                deleteNode={this.deleteNode}
-                nodeId={this.state.nodeId}
+                modify={this.modifyElement}
+                delete={this.deleteElement}
                 x={this.state.x}
                 y={this.state.y}
                 label={this.state.label}/>}
