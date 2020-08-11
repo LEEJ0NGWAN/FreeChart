@@ -197,7 +197,7 @@ class Sheet extends Component {
         if (elementType) {
             network.edges.update({
                 id: elementId,
-                label, label
+                label: label
             });
 
             if (!this.state.edgeStates[elementId]) {
