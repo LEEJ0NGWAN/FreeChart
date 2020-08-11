@@ -21,12 +21,22 @@ const options = {
     layout: {
         hierarchical: false
     },
+    nodes: {
+        shape: "circle"
+    },
     edges: {
         color: "#000000",
         arrowStrikethrough: false,
-        width: 5,
+        width: 3,
+        smooth: {
+            type: "continuous",
+            forceDirection: "none"
+        },
     },
     autoResize: true,
+    physics: {
+        solver: 'repulsion',
+    }
 };
 
 function eventGenerator() {
