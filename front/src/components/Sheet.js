@@ -29,53 +29,64 @@ const options = {
     autoResize: true,
 };
 
-class Sheet extends Component {
-    state = {
-        networkRef: React.createRef(),
-        popped: false,
-        nodeStates: {},
-        edgeStates: {},
-        from: null,
-    };
-
-    events = {
+function eventGenerator() {
+    const events = {
         click: function(event) {
             const {nodes} = event;
             if (!nodes.length && this.state.from)
                 this.setState({from: null});
         }.bind(this),
         hold: function(event) {
+            const network = this.state.networkRef.current;
             const {nodes, edges} = event;
             if (nodes.length) {
+                const nodeId = nodes[0];
                 if (this.state.from) {
-                    const edges = this.state.networkRef.current.edges;
-                    let edge = {
-                        id: uuid(),
-                        from: this.state.from,
-                        to: nodes[0],
-                        label: ""
-                    };
-
-                    let nextState = {
-                        from: null,
-                        edgeStates: {
-                            ...this.state.edgeStates
-                        }
-                    };
-                    nextState.edgeStates[edge.id] = 1;
-
-                    this.setState(nextState);
-                    edges.add(edge);
+                    if (this.state.to[nodeId]) {
+                        this.setState({from: null});
+                    }
+                    else {
+                        const edges_ = network.edges;
+                        let edge = {
+                            id: uuid(),
+                            from: this.state.from,
+                            to: nodeId,
+                            label: ""
+                        };
+    
+                        let nextState = {
+                            from: null,
+                            edgeStates: {
+                                ...this.state.edgeStates
+                            }
+                        };
+                        nextState.edgeStates[edge.id] = 1;
+    
+                        this.setState(nextState);
+                        edges_.add(edge);
+                    }
+                    network.Network.unselectAll();
                 }
                 else {
-                    this.setState({
-                        from: nodes[0]
+                    let nextState = {
+                        from: nodeId,
+                        to: {}
+                    };
+                    
+                    edges.forEach((edgeId)=>{
+                        const edge = network.edges._data[edgeId];
+
+                        if (edge.from === nodeId) {
+                            nextState.to[edge.to] = true;
+                        }
                     });
+
+                    this.setState(nextState);
                 }
             }
             else if (edges.length) {
                 const edgeId = edges[0];
-                const _edges = this.state.networkRef.current.edges;
+                const _edges = network.edges;
 
                 let nextState = {
                     edgeStates: {
@@ -128,6 +139,18 @@ class Sheet extends Component {
             }
         }.bind(this),
     };
+    return events;
+}
+
+class Sheet extends Component {
+    state = {
+        networkRef: React.createRef(),
+        popped: false,
+        nodeStates: {},
+        edgeStates: {},
+        from: null,
+        to: {},
+    };
 
     togglePop = () => {
         this.setState({popped: !this.state.popped});
@@ -156,13 +179,21 @@ class Sheet extends Component {
     fetchElements = async () => {
         const {sheet_id} = this.props;
         await this.props.getElement(sheet_id);
+    }
 
+    graphInitializer = () => {
+        const {nodes, edges} = this.props;
         this.setState({
             graph: {
-                nodes: this.props.nodes,
-                edges: this.props.edges
+                nodes: nodes,
+                edges: edges
             }
         });
+    }
+
+    initializer = async () => {
+        await this.fetchElements();
+        this.graphInitializer();
     }
 
     isEdited = () => {
@@ -229,10 +260,10 @@ class Sheet extends Component {
         const edges = this.state.networkRef.current.edges._data;
         const {nodeStates, edgeStates} = this.state;
         await this.props.editElement(sheet_id,nodes,edges,nodeStates,edgeStates);
+        await this.fetchElements();
     }
 
-    cancel = () => {
-        this.fetchElements();
+    reset = () => {
         const {nodes, edges} = this.state.networkRef.current;
 
         this.setState({
@@ -248,7 +279,7 @@ class Sheet extends Component {
     }
 
     componentDidMount() {
-        this.fetchElements();
+        this.initializer();
     }
 
     componentDidUpdate(prevProps, prevStates) {
@@ -285,7 +316,7 @@ class Sheet extends Component {
 
     renderRefreshIcon() {
         return(<svg className="bs-item"
-        onClick={this.cancel}
+        onClick={this.reset}
         width="24" height="24" viewBox="0 0 24 24">
         <path d="M20.944 12.979c-.489 4.509-4.306 
         8.021-8.944 8.021-2.698 0-5.112-1.194-6.763
@@ -320,9 +351,10 @@ class Sheet extends Component {
                 {this.state.graph &&
                 <Graph
                 ref={this.state.networkRef}
+                nodes={this.props.nodes}
                 graph={this.state.graph} 
                 options={options} 
-                events={this.events}
+                events={eventGenerator.bind(this)()}
                 style={style}/>}
             </div>
         )
