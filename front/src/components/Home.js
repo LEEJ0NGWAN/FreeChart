@@ -183,6 +183,14 @@ class Home extends Component {
                 key={board.id}
                 id={board.id}>
                     {this.renderFolderIcon(board.id)}
+                    <div className="bs-date-box">
+                        <label id={board.id} className="bs-date-item">
+                            생성: {board.create_date.substr(0,10)}
+                        </label>
+                        <label id={board.id} className="bs-date-item">
+                            수정: {board.modify_date.substr(0,10)}
+                        </label>
+                    </div>
                     <label 
                     className="bs-title"
                     id={board.id}>{board.title}</label>
@@ -208,6 +216,14 @@ class Home extends Component {
                 key={sheet.id}
                 id={sheet.id}>
                     {this.renderFileIcon(sheet.id)}
+                    <div className="bs-date-box">
+                        <label id={sheet.id} className="bs-date-item">
+                            생성: {sheet.create_date.substr(0,10)}
+                        </label>
+                        <label id={sheet.id} className="bs-date-item">
+                            수정: {sheet.modify_date.substr(0,10)}
+                        </label>
+                    </div>
                     <label
                     className="bs-title"
                     id={sheet.id}>{sheet.title}</label>
