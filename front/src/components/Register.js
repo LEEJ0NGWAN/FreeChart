@@ -11,25 +11,25 @@ function checkEmail(email) {
     return regExp.test(email);	
 }
 
+function checkUsername(username) {
+    let regExp =  /^[\wㄱ-ㅎㅏ-ㅣ가-힣]+$/;
+
+    return regExp.test(username);
+}
+
 class Register extends Component {
     state = {
+        error: "",
         email: "",
         password: "",
         username: "",
-        error: "",
         email_msg: "",
         password_msg: "",
         username_msg: "",
+        username_validity: false,
         password_validity: false,
         email_pattern_validity: false,
     };
-
-    changer = (event) => {
-        let nextState = (this.state.username_msg)? {username_msg: ""}: {};
-        nextState[event.target.name] = event.target.value;
-        this.setState(nextState);
-        this.props.action(CLEAR_USERNAME_VALIDITY);
-    }
 
     email_pattern_checker = (event) => {
         const email = event.target.value;
@@ -65,6 +65,37 @@ class Register extends Component {
 
         this.setState(nextState);
     }
+
+    username_checker = (event) => {
+        const username = event.target.value;
+        let nextState = {
+            username: username
+        };
+
+        if (!username.length) {
+            nextState.username_msg = "";
+            nextState.username_validity = false;
+        }
+
+        else if (checkUsername(username)) {
+            if (username.length < 10) {
+                nextState.username_msg = "";
+                nextState.username_validity = true;
+            }
+
+            else {
+                nextState.username_msg = "9자리 이하로 부탁드립니다!";
+                nextState.username_validity = false;
+            }
+        }
+
+        else {
+            nextState.username_msg = "특수 문자는 안됩니다!";
+            nextState.username_validity = false;
+        }
+
+        this.setState(nextState);
+    }
     
     password_checker = (event) => {
         const password = event.target.value;
@@ -77,14 +108,19 @@ class Register extends Component {
             nextState.password_validity = false;
         }
 
-        else if (password.length && password.length < 8){
+        else if (password.length < 8) {
             nextState.password_msg = "8자리 이상이어야 합니다!";
             nextState.password_validity = false;
         }
             
-        else if (password.length >= 8){
+        else if (password.length <= 16){
             nextState.password_msg = "";
             nextState.password_validity = true;
+        }
+
+        else {
+            nextState.password_msg = "16자리 이하로 부탁드립니다!"
+            nextState.password_validity = false;
         }
 
         this.setState(nextState);
@@ -164,7 +200,7 @@ class Register extends Component {
                     name="email"
                     type="text"
                     className="register-input"
-                    placeholder="[이메일] abc@abc.com"
+                    placeholder="[이메일]"
                     onChange={this.email_pattern_checker}
                     value={this.state.email}/>
                     {(this.state.email_pattern_validity &&
@@ -183,10 +219,10 @@ class Register extends Component {
                     name="username"
                     type="text"
                     className="register-input"
-                    placeholder="[닉네임] 깜순이"
-                    onChange={this.changer}
+                    placeholder="[닉네임]"
+                    onChange={this.username_checker}
                     value={this.state.username}/>
-                    {Boolean(this.state.username.length) &&
+                    {this.state.username_validity &&
                     this.renderCheckIcon()}
                     {!this.props.username_validity && 
                     <label className="message-label">
@@ -198,7 +234,7 @@ class Register extends Component {
                     name="password"
                     type="password"
                     className="register-input"
-                    placeholder="[비밀번호] 8자리 이상"
+                    placeholder="[비밀번호]"
                     onChange={this.password_checker}
                     value={this.state.password}/>
                     {this.state.password_validity &&
@@ -213,7 +249,7 @@ class Register extends Component {
             <div className="button-box">
                 {this.state.email_pattern_validity &&
                 this.props.email_validity && 
-                Boolean(this.state.username.length) &&
+                this.state.username_validity &&
                 this.state.password_validity &&
                 <p 
                 className="button-item"
