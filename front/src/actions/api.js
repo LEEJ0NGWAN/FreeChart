@@ -41,19 +41,11 @@ export function logout() {
     };
 }
 
-export function check(email=null, username=null) {
+export function check(email) {
     return (dispatch) => {
-        let data = {};
-        if (email){
-            data.email = email;
-        }
-
-        if (username){
-            data.username = username;
-        }
-
-        let length = Object.keys(data).length;
-        if (!length) return;
+        let data = {
+            email: email
+        };
         
         return axios.post('api/account/check/', data)
         .then(res => {

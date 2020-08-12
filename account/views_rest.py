@@ -230,7 +230,7 @@ class Check(View):
     def post(self, request):
         data = json.loads(request.body.decode('utf-8'))
 
-        if not data or 'email' not in data and 'username' not in data:
+        if not data or 'email' not in data:
             return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
 
         res = {}
@@ -239,11 +239,6 @@ class Check(View):
             res['email'] = True
             if User.objects.filter(email=data['email']).exists():
                 res['email'] = False
-        
-        if 'username' in data:
-            res['username'] = True
-            if User.objects.filter(username=data['username']).exists():
-                res['username'] = False
         
         return JsonResponse(serialize(res))
 
