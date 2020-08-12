@@ -31,7 +31,7 @@ class Register extends Component {
         this.props.action(CLEAR_USERNAME_VALIDITY);
     }
 
-    email_checker = (event) => {
+    email_pattern_checker = (event) => {
         const email = event.target.value;
         let nextState = {
             email: email
@@ -48,6 +48,22 @@ class Register extends Component {
 
         this.setState(nextState);
         this.props.action(CLEAR_EMAIL_VALIDITY);
+    }
+
+    email_checker = async () => {
+        const {email} = this.state;
+        if (!email.length) return;
+
+        let nextState = {};
+        
+        await this.props.check(email);
+
+        if (!this.props.email_validity)
+            nextState.email_msg = "이미 존재하는 이메일입니다!";
+        else
+            nextState.email_msg = "가능한 이메일 입니다!";
+
+        this.setState(nextState);
     }
     
     password_checker = (event) => {
@@ -69,34 +85,6 @@ class Register extends Component {
         else if (password.length >= 8){
             nextState.password_msg = "";
             nextState.password_validity = true;
-        }
-
-        this.setState(nextState);
-    }
-
-    checker = async (event) => {
-        const {email, username} = this.state;
-        if (!email.length && !username.length) return;
-
-        const name = event.target.getAttribute('name');
-        let nextState = {};
-        
-        if (name === 'email' && email.length){
-            await this.props.check(email);
-
-            if (!this.props.email_validity)
-                nextState.email_msg = "이미 존재하는 이메일입니다!";
-            else
-                nextState.email_msg = "가능한 이메일 입니다!";
-        }
-
-        else if (name === 'username' && username.length){
-            await this.props.check(null,username);
-
-            if (!this.props.username_validity)
-            nextState.username_msg = "이미 존재하는 닉네임입니다!";
-            else
-                nextState.username_msg = "가능한 닉네임 입니다!";
         }
 
         this.setState(nextState);
@@ -143,7 +131,7 @@ class Register extends Component {
     renderSearchIcon(name) {
         return (<svg className="register-icon"
         name={name}
-        onClick={this.checker}
+        onClick={this.email_checker}
         width="24" height="24" viewBox="0 0 24 24">
         <path name={name}
         d="M23.822 20.88l-6.353-6.354c.93-1.465 
@@ -177,7 +165,7 @@ class Register extends Component {
                     type="text"
                     className="register-input"
                     placeholder="[이메일] abc@abc.com"
-                    onChange={this.email_checker}
+                    onChange={this.email_pattern_checker}
                     value={this.state.email}/>
                     {(this.state.email_pattern_validity &&
                     !this.props.email_validity) && 
@@ -198,11 +186,7 @@ class Register extends Component {
                     placeholder="[닉네임] 깜순이"
                     onChange={this.changer}
                     value={this.state.username}/>
-                    {(Boolean(this.state.username.length) &&
-                    !this.props.username_validity) &&
-                    this.renderSearchIcon('username')}
-                    {(Boolean(this.state.username.length) &&
-                    this.props.username_validity) &&
+                    {Boolean(this.state.username.length) &&
                     this.renderCheckIcon()}
                     {!this.props.username_validity && 
                     <label className="message-label">
@@ -229,7 +213,7 @@ class Register extends Component {
             <div className="button-box">
                 {this.state.email_pattern_validity &&
                 this.props.email_validity && 
-                this.props.username_validity &&
+                Boolean(this.state.username.length) &&
                 this.state.password_validity &&
                 <p 
                 className="button-item"
@@ -258,7 +242,6 @@ export default connect((state) => {
       user: state.userReducer.user,
       logged: state.userReducer.logged,
       email_validity: state.checkReducer.email_validity,
-      username_validity: state.checkReducer.username_validity,
       error_msg: state.commonReducer.error_msg,
       error_code: state.commonReducer.error_code,
     };
