@@ -243,7 +243,7 @@ class Home extends Component {
             </div>   
         )
         const selectPanel = (
-            <div>
+            <div className="home">
                 {this.state.popped &&
                 <Edit 
                     togglePop={this.togglePop}
@@ -257,15 +257,12 @@ class Home extends Component {
                 {sheetList}
             </div>
         )
-        return (
-            <div>
-                {!this.state.sheetId ? 
-                selectPanel: 
-                <Sheet
-                sheet_id={this.state.sheetId}
-                escape={this.escape.bind(this)}/>}
-            </div>
-        );
+        const sheet = (
+            <Sheet
+            sheet_id={this.state.sheetId}
+            escape={this.escape.bind(this)}/>
+        )
+        return (!this.state.sheetId? selectPanel: sheet);
     }
 }
 
