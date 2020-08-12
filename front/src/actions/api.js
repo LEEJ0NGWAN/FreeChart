@@ -5,10 +5,9 @@ axios.defaults.withCredentials = true;
 export const USER = 'USER';
 export const LOGIN = 'LOGIN';
 export const LOGOUT = 'LOGOUT';
-export const CHECK = 'CHECK';
 export const CLEAR_SESSION = 'CLEAR_SESSION';
+export const CHECK_EMAIL_VALIDITY = 'CHECK_EMAIL_VALIDITY';
 export const CLEAR_EMAIL_VALIDITY = 'CLEAR_EMAIL_VALIDITY';
-export const CLEAR_USERNAME_VALIDITY = 'CLEAR_USERNAME_VALIDITY';
 
 export function login(email, password) {
     return (dispatch) => {
@@ -49,7 +48,7 @@ export function check(email) {
         
         return axios.post('api/account/check/', data)
         .then(res => {
-            dispatch(fetch(CHECK, res.data));
+            dispatch(fetch(CHECK_EMAIL_VALIDITY, res.data));
             dispatch(clearError());
         })
         .catch(err => {

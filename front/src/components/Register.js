@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { clear, clearError, action } from '../actions/common';
-import { check, register_,
-    CLEAR_EMAIL_VALIDITY, CLEAR_USERNAME_VALIDITY } from '../actions/api';
+import { check, register_, CLEAR_EMAIL_VALIDITY } from '../actions/api';
 import { NavLink } from 'react-router-dom';
 
 function checkEmail(email) {
