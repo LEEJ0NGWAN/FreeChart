@@ -33,7 +33,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     email = models.EmailField(blank=False, unique=True, max_length=254, verbose_name='email address')
     password = models.CharField(max_length=128, verbose_name='password')
-    username = models.CharField(max_length=150, unique=True, validators=[UnicodeUsernameValidator()], verbose_name='username')
+    username = models.CharField(max_length=150, verbose_name='username')
     is_active = models.BooleanField(default=True,verbose_name='active')
     email_verified = models.BooleanField(default=False, null=False)
     date_updated = models.DateTimeField(auto_now=True)
