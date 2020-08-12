@@ -58,6 +58,7 @@
 }
 
 .bs-item {
+    word-break:break-all;
     position: relative;
     display: inline-block;
     border: 1px solid #000000;
