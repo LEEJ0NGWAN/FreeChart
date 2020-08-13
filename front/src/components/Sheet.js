@@ -204,8 +204,8 @@ class Sheet extends Component {
     }
 
     fetchElements = async () => {
-        const {sheet_id} = this.props;
-        await this.props.getElement(sheet_id);
+        const {sheetId} = this.props;
+        await this.props.getElement(sheetId);
     }
 
     graphInitializer = () => {
@@ -320,7 +320,7 @@ class Sheet extends Component {
     }
 
     save = async () => {
-        const {sheet_id} = this.props;
+        const {sheetId} = this.props;
         const {nodeStates, edgeStates} = this.state;
 
         const nodes = getSubset(
@@ -330,7 +330,7 @@ class Sheet extends Component {
             this.state.networkRef.current.edges._data, 
             ...Object.keys(edgeStates));
 
-        await this.props.editElement(sheet_id,nodes,edges,nodeStates,edgeStates);
+        await this.props.editElement(sheetId,nodes,edges,nodeStates,edgeStates);
         await this.fetchElements();
     }
 
@@ -400,9 +400,10 @@ class Sheet extends Component {
     }
 
     render() {
-        const sheetName = (
-            <label className="sheet-title">
-                
+        const pwd = (
+            <label className="pwd">
+                {(this.props.pwd.length <= 50)? this.props.pwd:
+                `...`+this.props.pwd.substring(this.props.pwd.length-50)}
             </label>
         )
         const menu = (
@@ -415,6 +416,7 @@ class Sheet extends Component {
         return (
             <div>
                 {menu}
+                {pwd}
                 {this.state.popped && 
                 <ElementEdit 
                 togglePop={this.togglePop}

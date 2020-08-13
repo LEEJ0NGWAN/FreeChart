@@ -8,6 +8,7 @@ import Edit from './Edit';
 
 class Home extends Component {
     state = {
+        pwd: '/',
         error: null,
         popped: false,
         boardId: null,
@@ -21,19 +22,30 @@ class Home extends Component {
     initialize = async (event) => {
         const boardId = getCookie('boardId');
         const sheetId = getCookie('sheetId');
+        const sheetTitle = getCookie('sheetTitle');
 
         if (event){
             deleteCookie('boardId');
             deleteCookie('sheetId');
-            this.setState({boardId: null});
             this.props.getChild();
+            this.setState({
+                pwd: '/',
+                boardId: null
+            });
         }
         else {
-            this.setState({
+            await this.props.getChild(boardId);
+
+            let nextState = {
                 boardId: boardId,
-                sheetId: sheetId
-            });
-            this.props.getChild(boardId);
+                sheetId: sheetId,
+            };
+
+            nextState.pwd = (boardId)? 
+                `.../${this.props.parent.title}/`: '/';
+            nextState.pwd += (sheetTitle)? sheetTitle: '';
+
+            this.setState(nextState);
         }
     }
 
@@ -57,9 +69,14 @@ class Home extends Component {
     back = async () => {
         await this.props.getChild(this.props.parent.parent_id);
 
-        let nextState = {boardId:null};
+        let nextState = {
+            pwd: '/',
+            boardId: null
+        };
+        
         if(this.props.parent){
             setCookie('boardId', this.props.parent.id);
+            nextState.pwd = `.../${this.props.parent.title}/`;
             nextState.boardId = this.props.parent.id;
         }
         else
@@ -72,15 +89,31 @@ class Home extends Component {
         if (!boardId)
             return;
         
+        const boardTitle = document
+            .querySelector(`div.bs-item.board[id="${boardId}"]`)
+            .getAttribute('title');
+
         await this.props.getChild(boardId);
         setCookie('boardId', boardId);
-        this.setState({boardId: boardId});
+        this.setState({
+            pwd: `.../${boardTitle}/`,
+            boardId: boardId});
     }
 
     processer = (event) => {
         const sheetId = event.target.id;
+        if (!sheetId)
+            return;
+
+        const sheetTitle = document
+            .querySelector(`div.bs-item.sheet[id="${sheetId}"]`)
+            .getAttribute('title');
+
         setCookie('sheetId', sheetId);
-        this.setState({sheetId: sheetId});
+        setCookie('sheetTitle', sheetTitle);
+        this.setState({
+            pwd: this.state.pwd+sheetTitle,
+            sheetId: sheetId});
     }
 
     togglePop = (id=null, key=null, type=null, value=null) => {
@@ -178,8 +211,9 @@ class Home extends Component {
         boards.forEach((board, key)=>{
             boardList.push(
                 <div 
-                className="bs-item"
+                className="bs-item board"
                 onClick={this.finder} 
+                title={board.title}
                 key={board.id}
                 id={board.id}>
                     {this.renderFolderIcon(board.id)}
@@ -211,8 +245,9 @@ class Home extends Component {
         sheets.forEach((sheet, key)=>{
             sheetList.push(
                 <div
-                className="bs-item"
+                className="bs-item sheet"
                 onClick={this.processer}
+                title={sheet.title}
                 key={sheet.id}
                 id={sheet.id}>
                     {this.renderFileIcon(sheet.id)}
@@ -235,11 +270,25 @@ class Home extends Component {
     }
 
     escape() {
+        const sheetTitle = getCookie('sheetTitle');
+        const pivot = this.state.pwd.lastIndexOf(sheetTitle);
+        const nextPwd = this.state.pwd.substring(0,pivot);
+
         deleteCookie('sheetId');
-        this.setState({sheetId:null});
+        deleteCookie('sheetTitle');
+        this.setState({
+            pwd: nextPwd,
+            sheetId:null,
+        });
     }
 
     render() {
+        const pwd = (
+            <label className="pwd">
+                {(this.state.pwd.length <= 50)? this.state.pwd:
+                `...`+this.state.pwd.substring(this.state.pwd.length-50)}
+            </label>
+        )
         const menu = (
             <div className="home-menu">
             {this.state.boardId && this.renderBackIcon()}
@@ -269,13 +318,15 @@ class Home extends Component {
                     value={this.state.targetValue}
                     parentId={this.state.boardId}/>}
                 {menu}
+                {pwd}
                 {boardList}
                 {sheetList}
             </div>
         )
         const sheet = (
             <Sheet
-            sheet_id={this.state.sheetId}
+            pwd={this.state.pwd}
+            sheetId={this.state.sheetId}
             escape={this.escape.bind(this)}/>
         )
         return (!this.state.sheetId? selectPanel: sheet);
