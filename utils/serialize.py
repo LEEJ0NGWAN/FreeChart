@@ -150,6 +150,8 @@ def node_parse(node, **kwargs):
     result = {
         'id': node.id,
         'label': node.label,
+        'x': node.x,
+        'y': node.y,
     }
 
     return serialize(result, **kwargs)

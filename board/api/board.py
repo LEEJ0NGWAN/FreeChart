@@ -340,13 +340,17 @@ class ElementController(View):
                 new_app(Node(
                 id=node_id,
                 sheet_id=sheet_id,
-                label=data['nodes'][node_id]['label']))
+                label=data['nodes'][node_id]['label'],
+                x=data['nodes'][node_id]['x'],
+                y=data['nodes'][node_id]['y']))
             else:
                 nodes[UUID(node_id)].label = data['nodes'][node_id]['label']
+                nodes[UUID(node_id)].x = data['nodes'][node_id]['x']
+                nodes[UUID(node_id)].y = data['nodes'][node_id]['y']
                 nodes[UUID(node_id)].modify = now
 
         nodes = list(nodes.values())
-        Node.objects.bulk_update(nodes,['label','deleted','modify'])
+        Node.objects.bulk_update(nodes,['label','deleted','modify','x','y'])
         Node.objects.bulk_create(new_nodes)
 
         new_edges = list()
@@ -375,7 +379,7 @@ class ElementController(View):
         
         edges = list(edges.values())
         Edge.objects.bulk_update(
-            edges,['node_from_id', 'node_to_id', 'deleted','modify'])
+            edges,['node_from_id', 'node_to_id', 'deleted', 'modify'])
         Edge.objects.bulk_create(new_edges)
 
         return JsonResponse({})

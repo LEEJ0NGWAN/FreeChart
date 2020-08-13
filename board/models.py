@@ -34,6 +34,8 @@ class Node(models.Model):
     create = models.DateTimeField(auto_now_add=True, verbose_name='작성 날짜')
     modify = models.DateTimeField(auto_now=True, verbose_name='수정 날짜')
     deleted = models.BooleanField(default=False, null=False)
+    x = models.IntegerField(null=True)
+    y = models.IntegerField(null=True)
 
 class Edge(models.Model):
     class Meta:

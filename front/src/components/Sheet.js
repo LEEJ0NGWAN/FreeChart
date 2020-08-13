@@ -7,22 +7,23 @@ import Graph from 'react-graph-vis';
 import ElementEdit from './ElementEdit';
 import { v4 as uuid } from 'uuid';
 
+const getSubset = 
+    (obj, ...keys) => keys.reduce(
+        (a, c) => ({ ...a, [c]: obj[c] }), {});
+
 const style = {
     position: 'absolute',
     left: '5px',
     right: '5px',
-    bottom: '5px',
+    bottom: '25px',
     height: 'calc(100% - 100px)',
     border: '1px solid #000000',
     borderRadius: '0.25em'
 };
 
 const options = {
-    layout: {
-        hierarchical: false
-    },
     nodes: {
-        shape: "circle"
+        shape: "circle",
     },
     edges: {
         color: "#000000",
@@ -35,8 +36,18 @@ const options = {
     },
     autoResize: true,
     physics: {
-        solver: 'repulsion',
-    }
+        enabled: false,
+        // stabilization: true,
+        // solver: 'repulsion',
+        // repulsion: {
+        //     nodeDistance: 150,
+        //     springConstant: 0.0000,
+        //     springLength: 200
+        // }
+    },
+    layout: {
+        randomSeed: 0
+    },
 };
 
 function eventGenerator() {
@@ -134,6 +145,28 @@ function eventGenerator() {
 
                 this.setElementInfo(nodeId,0,x,y,label,edges);
             }
+        }.bind(this),
+        dragEnd: function(event) {
+            const nodeId = event.nodes[0];
+            if (!nodeId)
+                return;
+
+            const {x, y} = event.pointer.canvas;
+            const network = this.state.networkRef.current;
+
+            network.nodes._data[nodeId].x = x;
+            network.nodes._data[nodeId].y = y;
+
+            let nextState = {
+                nodeStates: {
+                    ...this.state.nodeStates
+                }
+            };
+
+            if (!nextState.nodeStates[nodeId])
+                nextState.nodeStates[nodeId] = 2;
+            
+            this.setState(nextState);
         }.bind(this),
     };
     return events;
@@ -288,9 +321,15 @@ class Sheet extends Component {
 
     save = async () => {
         const {sheet_id} = this.props;
-        const nodes = this.state.networkRef.current.nodes._data;
-        const edges = this.state.networkRef.current.edges._data;
         const {nodeStates, edgeStates} = this.state;
+
+        const nodes = getSubset(
+            this.state.networkRef.current.nodes._data, 
+            ...Object.keys(nodeStates));
+        const edges = getSubset(
+            this.state.networkRef.current.edges._data, 
+            ...Object.keys(edgeStates));
+
         await this.props.editElement(sheet_id,nodes,edges,nodeStates,edgeStates);
         await this.fetchElements();
     }
@@ -314,7 +353,7 @@ class Sheet extends Component {
         this.initializer();
     }
 
-    componentDidUpdate(prevProps, prevStates) {
+    componentDidUpdate(prevProps) {
         const {saved} = this.props;
         if (!prevProps.saved && saved) {
             this.setState({
@@ -361,6 +400,11 @@ class Sheet extends Component {
     }
 
     render() {
+        const sheetName = (
+            <label className="sheet-title">
+                
+            </label>
+        )
         const menu = (
             <div className="sheet-menu">
                 {this.renderBackIcon()}
@@ -382,7 +426,6 @@ class Sheet extends Component {
                 {this.state.graph &&
                 <Graph
                 ref={this.state.networkRef}
-                nodes={this.props.nodes}
                 graph={this.state.graph} 
                 options={options} 
                 events={eventGenerator.bind(this)()}
