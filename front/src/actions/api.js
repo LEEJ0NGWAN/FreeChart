@@ -99,7 +99,46 @@ export function checkSession() {
         })
         .catch(() => {
             dispatch(action(CLEAR_SESSION));
-        })
+        });
     }
+}
+
+export function modifyUsername(username) {
+    return (dispatch) => {
+        return axios.put('api/user/',{username: username})
+        .then(res => {
+            dispatch(fetch(USER, res.data.user));
+            dispatch(clearError());
+        })
+        .catch(err => {
+            dispatch(reportError(err));
+        });
+    }
+}
+
+export function modifyPassword(password) {
+    return (dispatch) => {
+        return axios.put('api/user/',{password: password})
+        .then(res => {
+            dispatch(fetch(USER, res.data.user));
+            dispatch(clearError());
+        })
+        .catch(err => {
+            dispatch(reportError(err));
+        });
+    };
+}
+
+export function deleteUser(id) {
+    return (dispatch) => {
+        let params = {id: id};
+        return axios.delete('api/user/', params)
+        .then(()=> {
+            dispatch(action(LOGOUT));
+        })
+        .catch(err=> {
+            dispatch(reportError(err));
+        });
+    };
 }
 

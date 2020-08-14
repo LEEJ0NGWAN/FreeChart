@@ -1,7 +1,7 @@
 import json
 import datetime
 from django.contrib.auth import (
-    login, logout
+    login, logout, update_session_auth_hash
 )
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -77,12 +77,13 @@ class UserController(View):
         user = request.user
         data = json.loads(request.body.decode("utf-8"))
 
-        if 'usesrname' in data:
+        if 'username' in data:
             user.username = data['username']
         
         if 'password' in data:
-            user.password = data['password']
-        
+            user.set_password(data['password'])
+            update_session_auth_hash(request, request.user)
+            
         user.save()
 
         return JsonResponse(serialize({
