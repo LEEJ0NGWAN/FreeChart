@@ -12,32 +12,46 @@ function checkUsername(username) {
 
 class Profile extends Component {
     state = {
-        selectedOption: null,
+        selectedEditOption: null,
         editValue: "",
         editMsg: "",
-        readyToProcess: false
+        readyToProcess: false,
+        signOutSelected: false
     }
 
     componentDidUpdate(prevProps, prevStates) {
-        if (!prevStates.selectedOption && 
-            this.state.selectedOption) {
+        if (!prevStates.selectedEditOption && 
+            this.state.selectedEditOption) {
+            this.editInput.focus();
+        }
+
+        if (!prevStates.signOutSelected && 
+            this.state.signOutSelected) {
             this.editInput.focus();
         }
     }
 
     escape = () => {
-        if (this.state.selectedOption)
+        if (this.state.selectedEditOption)
             return;
         this.props.togglePop();
     }
 
     escapeEdit = () => {
         this.setState({
-            selectedOption: null,
+            selectedEditOption: null,
             editValue: "",
             editMsg: "",
             readyToProcess: false
         });
+    }
+
+    escapeSignOut = () => {
+        this.setState({
+            editValue: "",
+            editMsg: "",
+            readyToProcess: false,
+            signOutSelected: false });
     }
     
     changer = (event) => {
@@ -46,7 +60,7 @@ class Profile extends Component {
             editValue: nextValue
         };
 
-        if (this.state.selectedOption === "1") {
+        if (this.state.selectedEditOption === "1") {
             if (!nextValue.length) {
                 nextState.readyToProcess = false;
                 nextState.editMsg = "";
@@ -93,11 +107,11 @@ class Profile extends Component {
         if (!id)
             return;
         
-        this.setState({selectedOption: id});
+        this.setState({selectedEditOption: id});
     }
 
     processor = async () => {
-        if (this.state.selectedOption === "1") {
+        if (this.state.selectedEditOption === "1") {
             if(this.state.editValue !== this.props.user.username) {
                 await this.props.modifyUsername(this.state.editValue);
             }
@@ -135,7 +149,9 @@ class Profile extends Component {
                 className="profile-option-item">닉네임 변경</p>
                 <p id="2"
                 className="profile-option-item">비밀번호 변경</p>
-                <p
+                <p onClick={(e)=>{
+                    e.stopPropagation();
+                    this.setState({signOutSelected:true});}}
                 className="profile-option-item">회원 탈퇴</p>
             </div>
         )
@@ -182,6 +198,13 @@ class Profile extends Component {
         </svg>);
     }
 
+    renderCheckIcon() {
+        return (<svg className="profile-sign-out-icon"
+        width="24" height="24" viewBox="0 0 24 24">
+        <path d="M20.285 2l-11.285 11.567-5.286
+        -5.011-3.714 3.716 9 8.728 15-15.285z"/></svg>);
+    }
+
     renderEdit() {
         return (
             <div className="profile-edit-modal"
@@ -211,12 +234,43 @@ class Profile extends Component {
         )
     }
 
+    renderSignOut() {
+        return (
+            <div className="profile-sign-out-modal"
+            onClick={e=>{
+                e.stopPropagation();
+                this.escapeSignOut();}}>
+                <div 
+                className="profile-sign-out-box"
+                onClick={e=>e.stopPropagation()}>
+                    <input 
+                    name="editValue"
+                    value={this.state.editValue}
+                    onChange={this.changer}
+                    onKeyPress={(e)=>{
+                        if (e.key === "Enter")
+                            this.processor();
+                    }}
+                    onKeyDown={(e)=>{
+                        if (e.key === "Escape")
+                            this.escapeEdit();
+                    }}
+                    className="profile-edit-input"
+                    placeholder="비밀번호를 입력해주세요"
+                    ref={(input)=>{this.editInput = input}}/>
+                    {this.state.readyToProcess && this.renderCheckIcon()}
+                </div>
+            </div>
+        );
+    }
+
     render() {
         return(
             <div 
             className="profile-modal" 
             onClick={this.escape}>
-                {this.state.selectedOption && this.renderEdit()}
+                {this.state.signOutSelected && this.renderSignOut()}
+                {this.state.selectedEditOption && this.renderEdit()}
                 <div
                 className="profile-modal-content"
                 onClick={(e)=>{e.stopPropagation();}}>
