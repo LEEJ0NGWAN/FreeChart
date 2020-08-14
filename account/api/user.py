@@ -97,11 +97,14 @@ class UserController(View):
         data = request.GET
         user = request.user
 
-        if 'id' not in data:
+        if 'id' not in data or 'password' not in data:
             return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
 
         if int(data['id']) != user.id:
             return JsonResponse({}, status=HTTP_403_FORBIDDEN)
+        
+        if data['password'] != request.user.password:
+            return JsonResponse({}, status=HTTP_401_UNAUTHORIZED)
 
         user.is_active = False
         user.set_unusable_password()
@@ -110,7 +113,5 @@ class UserController(View):
         user.save()
         logout(request)
         
-        return JsonResponse(serialize({
-            'user': user
-        }))
+        return JsonResponse({})
 
