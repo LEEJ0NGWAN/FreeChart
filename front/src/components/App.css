@@ -329,7 +329,7 @@
     float: right;
 }
 
-.profile-edit-modal {
+.profile-edit-modal, .profile-sign-out-modal {
     z-index: 2;
     position: absolute;
     background-color: rgba(0, 0, 0, 0.25);
@@ -337,7 +337,7 @@
     width: 100%; height: 100%;
 }
 
-.profile-edit-box {
+.profile-edit-box, .profile-sign-out-box {
     margin: 5px;
     background-color: white;
     position: absolute;
@@ -365,7 +365,7 @@
     transform: translate(-50%, 0px);
 }
 
-.profile-edit-icon {
+.profile-edit-icon, .profile-sign-out-icon {
     position: absolute;
     top: 50px;
     left: 50%;
