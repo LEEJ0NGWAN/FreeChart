@@ -311,6 +311,11 @@
     margin: 5px;
 }
 
+.profile-option-item {
+    margin: 10px;
+    font-size: 70%;
+}
+
 .profile-logout {
     font-size: 50%;
     text-decoration: none;
@@ -324,6 +329,14 @@
     float: right;
 }
 
+.profile-edit-modal {
+    z-index: 2;
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.25);
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+}
+
 .profile-edit-box {
     margin: 5px;
     background-color: white;
@@ -335,6 +348,28 @@
     padding: 5px;
     border-radius: 5px;
     border: 2px solid black;
+}
+
+.profile-edit-input {
+    display: block;
+    font-size: 130%;
+    margin: 5px;
+    margin-bottom: 45px;
+}
+
+.profile-edit-msg {
+    position: absolute;
+    font-size: 50%;
+    top: 45px;
+    left: 50%;
+    transform: translate(-50%, 0px);
+}
+
+.profile-edit-icon {
+    position: absolute;
+    top: 50px;
+    left: 50%;
+    transform: translate(-50%, 0px);
 }
 
 .pwd {

@@ -1,10 +1,28 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { NavLink } from 'react-router-dom';
+import { 
+    modifyUsername, modifyPassword, deleteUser } from '../actions/api';
+
+function checkUsername(username) {
+    let regExp =  /^[\wㄱ-ㅎㅏ-ㅣ가-힣]+$/;
+
+    return regExp.test(username);
+}
 
 class Profile extends Component {
     state = {
-        selectedOption: null
+        selectedOption: null,
+        editValue: "",
+        editMsg: "",
+        readyToProcess: false
+    }
+
+    componentDidUpdate(prevProps, prevStates) {
+        if (!prevStates.selectedOption && 
+            this.state.selectedOption) {
+            this.editInput.focus();
+        }
     }
 
     escape = () => {
@@ -12,11 +30,83 @@ class Profile extends Component {
             return;
         this.props.togglePop();
     }
+
+    escapeEdit = () => {
+        this.setState({
+            selectedOption: null,
+            editValue: "",
+            editMsg: "",
+            readyToProcess: false
+        });
+    }
     
     changer = (event) => {
-        let nextState = {};
-        nextState[event.target.name] = event.target.value;
+        const nextValue = event.target.value;
+        let nextState = {
+            editValue: nextValue
+        };
+
+        if (this.state.selectedOption === "1") {
+            if (!nextValue.length) {
+                nextState.readyToProcess = false;
+                nextState.editMsg = "";
+            }
+            else if (checkUsername(nextValue)) {
+                if (nextValue.length <= 9) {
+                    nextState.readyToProcess = true;
+                    nextState.editMsg = "";
+                }
+                else {
+                    nextState.readyToProcess = false;
+                    nextState.editMsg = "9자리 이하로 부탁드립니다!"
+                }
+            }
+            else {
+                nextState.readyToProcess = false;
+                nextState.editMsg = "특수 문자는 안됩니다!";
+            }
+        }
+
+        else {
+            if (!nextValue.length) {
+                nextState.readyToProcess = false;
+                nextState.editMsg = "";
+            }
+            else if (nextValue.length < 8) {
+                nextState.readyToProcess = false;
+                nextState.editMsg = "8자리 이상이어야 합니다!";
+            }
+            else if (nextValue.length <= 16) {
+                nextState.readyToProcess = true;
+                nextState.editMsg = "";
+            }
+            else {
+                nextState.readyToProcess = false;
+                nextState.editMsg = "16자리 이하로 부탁드립니다!";
+            }
+        }
         this.setState(nextState);
+    }
+
+    selector = (event) => {
+        const id = event.target.id;
+        if (!id)
+            return;
+        
+        this.setState({selectedOption: id});
+    }
+
+    processor = async () => {
+        if (this.state.selectedOption === "1") {
+            if(this.state.editValue !== this.props.user.username) {
+                await this.props.modifyUsername(this.state.editValue);
+            }
+        }
+
+        else {
+            await this.props.modifyPassword(this.state.editValue);
+        }
+        this.escapeEdit();
     }
 
     renderUser() {
@@ -39,11 +129,14 @@ class Profile extends Component {
 
     renderOption() {
         return (
-            <div className="profile-option-box">
-                <p id="1" 
-                onClick={(e)=>this.setState({selectedOption: e.target.id})}>
-                    테스트
-                </p>
+            <div onClick={this.selector}
+            className="profile-option-box">
+                <p id="1"
+                className="profile-option-item">닉네임 변경</p>
+                <p id="2"
+                className="profile-option-item">비밀번호 변경</p>
+                <p
+                className="profile-option-item">회원 탈퇴</p>
             </div>
         )
     }
@@ -79,15 +172,41 @@ class Profile extends Component {
         );
     }
 
+    renderSaveIcon() {
+        return(<svg className="profile-edit-icon"
+        onClick={this.processor}
+        width="24" height="24" viewBox="0 0 24 24">
+        <path d="M13 3h2.996v5h-2.996v-5zm11 
+        1v20h-24v-24h20l4 4zm-17 
+        5h10v-7h-10v7zm15-4.171l-2.828-2.829h-.172v9h-14v-9h-3v20h20v-17.171z"/>
+        </svg>);
+    }
+
     renderEdit() {
         return (
-            <div className="profile-edit-box"
-            onClick={e=>e.stopPropagation()}>
-                <button 
-                onClick={()=>{this.setState({selectedOption: null});}}>
-                    asdf
-                </button>
-                asdfasdfasdf
+            <div className="profile-edit-modal"
+            onClick={this.escapeEdit}>
+                <div className="profile-edit-box"
+                onClick={e=>e.stopPropagation()}>
+                    <input 
+                    name="editValue"
+                    value={this.state.editValue}
+                    onChange={this.changer}
+                    onKeyPress={(e)=>{
+                        if (e.key === "Enter")
+                            this.processor();
+                    }}
+                    onKeyDown={(e)=>{
+                        if (e.key === "Escape")
+                            this.escapeEdit();
+                    }}
+                    className="profile-edit-input"
+                    ref={(input)=>{this.editInput = input}}/>
+                    <label className="profile-edit-msg">
+                        {this.state.editMsg}
+                    </label>
+                    {this.state.readyToProcess && this.renderSaveIcon()}
+                </div>
             </div>
         )
     }
@@ -114,5 +233,5 @@ export default connect((state) => {
     return {
         user: state.userReducer.user
     };
-}, {})(Profile);
+}, { modifyUsername, modifyPassword, deleteUser })(Profile);
 
