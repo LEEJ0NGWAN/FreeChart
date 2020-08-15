@@ -141,6 +141,8 @@ class Register extends Component {
         this.props.clear();
         const {logged, history} = this.props;
         if (logged) history.push('/');
+
+        this.emailInput.focus();
     }
 
     componentDidUpdate(prevProps, prevStates) {
@@ -208,6 +210,7 @@ class Register extends Component {
                                 this.email_checker();
                         }
                     }}
+                    ref={(input)=>{this.emailInput = input}}
                     autoComplete="off"
                     value={this.state.email}/>
                     {(this.state.email_pattern_validity &&

@@ -37,7 +37,7 @@ class Password extends Component {
         this.setState(nextState);
     }
 
-    processor = async (event) => {
+    processor = async () => {
         const {email} = this.state;
         if (!email.length) return;
 
@@ -60,6 +60,8 @@ class Password extends Component {
         this.props.clear();
         const {logged, history} = this.props;
         if (logged) history.push('/');
+
+        this.emailInput.focus();
     }
 
     componentDidUpdate() {
@@ -110,6 +112,11 @@ class Password extends Component {
                 onChange={this.pattern_checker}
                 placeholder="[이메일] abc@abc.com"
                 autoComplete="off"
+                ref={(input)=>{this.emailInput = input}}
+                onKeyPress={(e)=>{
+                    if (e.key === "Enter")
+                        this.processor();
+                }}
                 value={this.state.email}/>
                 {!this.state.processed &&
                 this.state.email_pattern_validity &&
