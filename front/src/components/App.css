@@ -314,6 +314,8 @@
 .profile-option-item {
     margin: 10px;
     font-size: 70%;
+    cursor: pointer;
+    width: fit-content;
 }
 
 .profile-logout {
