@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { NavLink } from 'react-router-dom';
+import { clearError } from '../actions/common';
 import { 
     modifyUsername, modifyPassword, deleteUser } from '../actions/api';
 
@@ -34,6 +35,20 @@ class Profile extends Component {
         if (!prevStates.signOutSelected && 
             this.state.signOutSelected) {
             this.editInput.focus();
+        }
+
+        if (!prevProps.error_msg && this.props.error_code) {
+            this.setState({
+                readyToProcess: false,
+                editMsg: (this.props.error_msg === "password")?
+                    "비밀번호가 틀렸습니다": "[ERROR CODE] " + this.props.error_code,
+                editValue: ""
+            });
+            this.props.clearError();
+        }
+
+        if (prevProps.user && !this.props.user) {
+            this.props.togglePop();
         }
     }
 
@@ -135,7 +150,16 @@ class Profile extends Component {
         this.escapeEdit();
     }
 
+    signOutProcessor = () => {
+        this.props.deleteUser(
+            this.props.user.id, this.state.editValue);
+    }
+
     renderUser() {
+        if (!this.props.user){
+            return;
+        }
+
         const {username, email} = this.props.user;
 
         return (
@@ -212,6 +236,7 @@ class Profile extends Component {
 
     renderCheckIcon() {
         return (<svg className="profile-sign-out-icon"
+        onClick={this.signOutProcessor}
         width="24" height="24" viewBox="0 0 24 24">
         <path d="M20.285 2l-11.285 11.567-5.286
         -5.011-3.714 3.716 9 8.728 15-15.285z"/></svg>);
@@ -268,7 +293,7 @@ class Profile extends Component {
                     onChange={this.changer}
                     onKeyPress={(e)=>{
                         if (e.key === "Enter")
-                            this.processor();
+                            this.signOutProcessor();
                     }}
                     onKeyDown={(e)=>{
                         if (e.key === "Escape")
@@ -307,7 +332,9 @@ class Profile extends Component {
 
 export default connect((state) => {
     return {
-        user: state.userReducer.user
+        user: state.userReducer.user,
+        error_code: state.commonReducer.error_code,
+        error_msg: state.commonReducer.error_msg
     };
-}, { modifyUsername, modifyPassword, deleteUser })(Profile);
+}, { modifyUsername, modifyPassword, deleteUser, clearError })(Profile);
 
