@@ -201,6 +201,7 @@ class Register extends Component {
                     className="register-input"
                     placeholder="[이메일]"
                     onChange={this.email_pattern_checker}
+                    autoComplete="off"
                     value={this.state.email}/>
                     {(this.state.email_pattern_validity &&
                     !this.props.email_validity) && 
@@ -220,6 +221,7 @@ class Register extends Component {
                     className="register-input"
                     placeholder="[닉네임]"
                     onChange={this.username_checker}
+                    autoComplete="off"
                     value={this.state.username}/>
                     {this.state.username_validity &&
                     this.renderCheckIcon()}
@@ -235,6 +237,7 @@ class Register extends Component {
                     className="register-input"
                     placeholder="[비밀번호]"
                     onChange={this.password_checker}
+                    autoComplete="off"
                     value={this.state.password}/>
                     {this.state.password_validity &&
                     this.renderCheckIcon()}

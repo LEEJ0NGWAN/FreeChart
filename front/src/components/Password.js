@@ -109,6 +109,7 @@ class Password extends Component {
                 className="email-input"
                 onChange={this.pattern_checker}
                 placeholder="[이메일] abc@abc.com"
+                autoComplete="off"
                 value={this.state.email}/>
                 {!this.state.processed &&
                 this.state.email_pattern_validity &&

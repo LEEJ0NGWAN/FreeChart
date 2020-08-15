@@ -88,6 +88,7 @@ class Login extends Component {
                 className="login-input"
                 placeholder="password"
                 onChange={this.changer}
+                autoComplete="off"
                 value={this.state.password}/>
             </div>
         )

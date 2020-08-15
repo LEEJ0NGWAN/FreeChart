@@ -101,6 +101,7 @@ class Edit extends Component {
                     className="board-modal-edit-input"
                     name="value" 
                     type="text"
+                    autoComplete="off"
                     value={this.state.value}
                     onChange={this.changer}
                     onKeyPress={(e)=>{

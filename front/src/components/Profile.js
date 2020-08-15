@@ -262,6 +262,7 @@ class Profile extends Component {
                     회원 탈퇴
                     <input 
                     name="editValue"
+                    type="password"
                     value={this.state.editValue}
                     autoComplete="off"
                     onChange={this.changer}
