@@ -129,10 +129,13 @@ export function modifyPassword(password) {
     };
 }
 
-export function deleteUser(id) {
+export function deleteUser(id, password) {
     return (dispatch) => {
-        let params = {id: id};
-        return axios.delete('api/user/', params)
+        let params = {
+            id: id,
+            password: password
+        };
+        return axios.post('api/account/delete/', params)
         .then(()=> {
             dispatch(action(LOGOUT));
         })
