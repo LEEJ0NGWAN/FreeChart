@@ -1,5 +1,4 @@
 import json
-import datetime
 from django.contrib.auth import (
     login, logout, update_session_auth_hash
 )
@@ -13,8 +12,6 @@ from rest_framework.status import (
 )
 from account.models import User
 from utils.serialize import serialize
-
-now = datetime.datetime.now
 
 @method_decorator(csrf_exempt, name='dispatch')
 class UserController(View):
@@ -89,29 +86,4 @@ class UserController(View):
         return JsonResponse(serialize({
             'user': user
         }))
-
-    def delete(self, request):
-        if not request.user.is_authenticated:
-            return JsonResponse({}, status=HTTP_401_UNAUTHORIZED)
-
-        data = request.GET
-        user = request.user
-
-        if 'id' not in data or 'password' not in data:
-            return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
-
-        if int(data['id']) != user.id:
-            return JsonResponse({}, status=HTTP_403_FORBIDDEN)
-        
-        if data['password'] != request.user.password:
-            return JsonResponse({}, status=HTTP_401_UNAUTHORIZED)
-
-        user.is_active = False
-        user.set_unusable_password()
-        user.email = f'{user.email}@leave'+str(now())
-        user.username = f'{user.username}@leave'+str(now())
-        user.save()
-        logout(request)
-        
-        return JsonResponse({})
 
