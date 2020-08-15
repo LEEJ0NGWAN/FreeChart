@@ -10,6 +10,12 @@ function checkUsername(username) {
     return regExp.test(username);
 }
 
+function checkPassword(password) {
+    let regExp = /^[\w!@#$%^*+=-]+$/;
+
+    return regExp.test(password);
+}
+
 class Profile extends Component {
     state = {
         selectedEditOption: null,
@@ -86,17 +92,23 @@ class Profile extends Component {
                 nextState.readyToProcess = false;
                 nextState.editMsg = "";
             }
-            else if (nextValue.length < 8) {
-                nextState.readyToProcess = false;
-                nextState.editMsg = "8자리 이상이어야 합니다!";
-            }
-            else if (nextValue.length <= 16) {
-                nextState.readyToProcess = true;
-                nextState.editMsg = "";
+            else if (checkPassword(nextValue)) {
+                if (nextValue.length < 8) {
+                    nextState.readyToProcess = false;
+                    nextState.editMsg = "8자리 이상이어야 합니다!";
+                }
+                else if (nextValue.length <= 16) {
+                    nextState.readyToProcess = true;
+                    nextState.editMsg = "";
+                }
+                else {
+                    nextState.readyToProcess = false;
+                    nextState.editMsg = "16자리 이하로 부탁드립니다!";
+                }
             }
             else {
                 nextState.readyToProcess = false;
-                nextState.editMsg = "16자리 이하로 부탁드립니다!";
+                nextState.editMsg = "영어,숫자,특수기호(!@#$%^*+=-)만 사용가능합니다";
             }
         }
         this.setState(nextState);
@@ -211,9 +223,13 @@ class Profile extends Component {
             onClick={this.escapeEdit}>
                 <div className="profile-edit-box"
                 onClick={e=>e.stopPropagation()}>
+                    {(this.state.selectedEditOption === "1")?
+                    "닉네임 변경": "비밀번호 변경"
+                    }
                     <input 
                     name="editValue"
                     value={this.state.editValue}
+                    autoComplete="off"
                     onChange={this.changer}
                     onKeyPress={(e)=>{
                         if (e.key === "Enter")
@@ -243,9 +259,11 @@ class Profile extends Component {
                 <div 
                 className="profile-sign-out-box"
                 onClick={e=>e.stopPropagation()}>
+                    회원 탈퇴
                     <input 
                     name="editValue"
                     value={this.state.editValue}
+                    autoComplete="off"
                     onChange={this.changer}
                     onKeyPress={(e)=>{
                         if (e.key === "Enter")
@@ -258,6 +276,9 @@ class Profile extends Component {
                     className="profile-edit-input"
                     placeholder="비밀번호를 입력해주세요"
                     ref={(input)=>{this.editInput = input}}/>
+                    <label className="profile-edit-msg">
+                        {this.state.editMsg}
+                    </label>
                     {this.state.readyToProcess && this.renderCheckIcon()}
                 </div>
             </div>

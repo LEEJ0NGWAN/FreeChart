@@ -338,38 +338,31 @@
 }
 
 .profile-edit-box, .profile-sign-out-box {
+    text-align: center;
     margin: 5px;
     background-color: white;
     position: absolute;
-    width: max-content;
     top: 30%;
     left: 50%;
     transform: translate(-50%, -50%);
     padding: 5px;
     border-radius: 5px;
     border: 2px solid black;
+    padding: 15px;
 }
 
 .profile-edit-input {
     display: block;
     font-size: 130%;
-    margin: 5px;
-    margin-bottom: 45px;
+    position: relative;
+    left: 50%;
+    transform: translate(-50%, 0px);
+    margin-top: 10px;
+    margin-bottom: 10px;
 }
 
 .profile-edit-msg {
-    position: absolute;
-    font-size: 50%;
-    top: 45px;
-    left: 50%;
-    transform: translate(-50%, 0px);
-}
-
-.profile-edit-icon, .profile-sign-out-icon {
-    position: absolute;
-    top: 50px;
-    left: 50%;
-    transform: translate(-50%, 0px);
+    word-break:break-all;
 }
 
 .pwd {
