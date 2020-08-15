@@ -17,7 +17,7 @@ class Login extends Component {
         this.setState(nextState);
     }
 
-    processer = () => {
+    processor = () => {
         const {email, password} = this.state;
 
         if (!email.length || !password.length) {
@@ -88,6 +88,10 @@ class Login extends Component {
                 className="login-input"
                 placeholder="password"
                 onChange={this.changer}
+                onKeyPress={(e)=>{
+                    if (e.key === "Enter")
+                        this.processor();
+                }}
                 autoComplete="off"
                 value={this.state.password}/>
             </div>
@@ -98,7 +102,7 @@ class Login extends Component {
                 {error}
                 <div className="button-box">
                     <p className="button-item"
-                        onClick={this.processer}>로그인</p>
+                        onClick={this.processor}>로그인</p>
                     <NavLink 
                     className="button-link"
                     to="/password">비밀번호 찾기</NavLink>
