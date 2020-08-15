@@ -104,6 +104,7 @@ class NodeEdit extends Component {
                     <input
                     name="label" 
                     type="text"
+                    autoComplete="off"
                     value={this.state.label}
                     className="element-modal-edit-input"
                     onChange={this.changer}

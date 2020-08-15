@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { NavLink } from 'react-router-dom';
+import { clearError } from '../actions/common';
 import { 
     modifyUsername, modifyPassword, deleteUser } from '../actions/api';
 
@@ -8,6 +9,12 @@ function checkUsername(username) {
     let regExp =  /^[\wㄱ-ㅎㅏ-ㅣ가-힣]+$/;
 
     return regExp.test(username);
+}
+
+function checkPassword(password) {
+    let regExp = /^[\w!@#$%^*+=-]+$/;
+
+    return regExp.test(password);
 }
 
 class Profile extends Component {
@@ -28,6 +35,20 @@ class Profile extends Component {
         if (!prevStates.signOutSelected && 
             this.state.signOutSelected) {
             this.editInput.focus();
+        }
+
+        if (!prevProps.error_msg && this.props.error_code) {
+            this.setState({
+                readyToProcess: false,
+                editMsg: (this.props.error_msg === "password")?
+                    "비밀번호가 틀렸습니다": "[ERROR CODE] " + this.props.error_code,
+                editValue: ""
+            });
+            this.props.clearError();
+        }
+
+        if (prevProps.user && !this.props.user) {
+            this.props.togglePop();
         }
     }
 
@@ -86,17 +107,23 @@ class Profile extends Component {
                 nextState.readyToProcess = false;
                 nextState.editMsg = "";
             }
-            else if (nextValue.length < 8) {
-                nextState.readyToProcess = false;
-                nextState.editMsg = "8자리 이상이어야 합니다!";
-            }
-            else if (nextValue.length <= 16) {
-                nextState.readyToProcess = true;
-                nextState.editMsg = "";
+            else if (checkPassword(nextValue)) {
+                if (nextValue.length < 8) {
+                    nextState.readyToProcess = false;
+                    nextState.editMsg = "8자리 이상이어야 합니다!";
+                }
+                else if (nextValue.length <= 16) {
+                    nextState.readyToProcess = true;
+                    nextState.editMsg = "";
+                }
+                else {
+                    nextState.readyToProcess = false;
+                    nextState.editMsg = "16자리 이하로 부탁드립니다!";
+                }
             }
             else {
                 nextState.readyToProcess = false;
-                nextState.editMsg = "16자리 이하로 부탁드립니다!";
+                nextState.editMsg = "영어,숫자,특수기호(!@#$%^*+=-)만 사용가능합니다";
             }
         }
         this.setState(nextState);
@@ -123,7 +150,16 @@ class Profile extends Component {
         this.escapeEdit();
     }
 
+    signOutProcessor = () => {
+        this.props.deleteUser(
+            this.props.user.id, this.state.editValue);
+    }
+
     renderUser() {
+        if (!this.props.user){
+            return;
+        }
+
         const {username, email} = this.props.user;
 
         return (
@@ -200,6 +236,7 @@ class Profile extends Component {
 
     renderCheckIcon() {
         return (<svg className="profile-sign-out-icon"
+        onClick={this.signOutProcessor}
         width="24" height="24" viewBox="0 0 24 24">
         <path d="M20.285 2l-11.285 11.567-5.286
         -5.011-3.714 3.716 9 8.728 15-15.285z"/></svg>);
@@ -211,9 +248,13 @@ class Profile extends Component {
             onClick={this.escapeEdit}>
                 <div className="profile-edit-box"
                 onClick={e=>e.stopPropagation()}>
+                    {(this.state.selectedEditOption === "1")?
+                    "닉네임 변경": "비밀번호 변경"
+                    }
                     <input 
                     name="editValue"
                     value={this.state.editValue}
+                    autoComplete="off"
                     onChange={this.changer}
                     onKeyPress={(e)=>{
                         if (e.key === "Enter")
@@ -243,13 +284,16 @@ class Profile extends Component {
                 <div 
                 className="profile-sign-out-box"
                 onClick={e=>e.stopPropagation()}>
+                    회원 탈퇴
                     <input 
                     name="editValue"
+                    type="password"
                     value={this.state.editValue}
+                    autoComplete="off"
                     onChange={this.changer}
                     onKeyPress={(e)=>{
                         if (e.key === "Enter")
-                            this.processor();
+                            this.signOutProcessor();
                     }}
                     onKeyDown={(e)=>{
                         if (e.key === "Escape")
@@ -258,6 +302,9 @@ class Profile extends Component {
                     className="profile-edit-input"
                     placeholder="비밀번호를 입력해주세요"
                     ref={(input)=>{this.editInput = input}}/>
+                    <label className="profile-edit-msg">
+                        {this.state.editMsg}
+                    </label>
                     {this.state.readyToProcess && this.renderCheckIcon()}
                 </div>
             </div>
@@ -285,7 +332,9 @@ class Profile extends Component {
 
 export default connect((state) => {
     return {
-        user: state.userReducer.user
+        user: state.userReducer.user,
+        error_code: state.commonReducer.error_code,
+        error_msg: state.commonReducer.error_msg
     };
-}, { modifyUsername, modifyPassword, deleteUser })(Profile);
+}, { modifyUsername, modifyPassword, deleteUser, clearError })(Profile);
 

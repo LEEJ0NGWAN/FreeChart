@@ -1,5 +1,5 @@
 import json
-
+import datetime
 from django.contrib.auth import (
     authenticate, login, logout, update_session_auth_hash
 )
@@ -21,6 +21,8 @@ from account.models import User
 from utils.serialize import serialize
 from django.core.mail import send_mail
 from utils import id_generator, redis
+
+now = datetime.datetime.now
 
 @api_view(["POST"])
 @csrf_exempt
@@ -241,4 +243,33 @@ class Check(View):
                 res['email'] = False
         
         return JsonResponse(serialize(res))
+
+@method_decorator(csrf_exempt, name='dispatch')
+class UserDelete(View):
+    def post(self, request):
+        if not request.user.is_authenticated:
+            return JsonResponse({}, status=HTTP_401_UNAUTHORIZED)
+
+        data = json.loads(request.body.decode('utf-8'))
+        user = request.user
+
+        if 'id' not in data or 'password' not in data:
+            return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
+
+        if int(data['id']) != user.id:
+            return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
+        
+        if not request.user.check_password(data['password']):
+            return JsonResponse({
+                'error': 'password'
+            }, status=HTTP_400_BAD_REQUEST)
+
+        user.is_active = False
+        user.set_unusable_password()
+        user.email = f'{user.email}@leave'+str(now())
+        user.username = f'{user.username}@leave'+str(now())
+        user.save()
+        logout(request)
+        
+        return JsonResponse({})
 
