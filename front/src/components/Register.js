@@ -201,6 +201,13 @@ class Register extends Component {
                     className="register-input"
                     placeholder="[이메일]"
                     onChange={this.email_pattern_checker}
+                    onKeyPress={(e)=>{
+                        if (e.key === "Enter") {
+                            if (this.state.email_pattern_validity &&
+                                !this.props.email_validity)
+                                this.email_checker();
+                        }
+                    }}
                     autoComplete="off"
                     value={this.state.email}/>
                     {(this.state.email_pattern_validity &&

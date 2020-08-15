@@ -31,7 +31,8 @@ export function reportError(err) {
     return {
         type: ERROR,
         payload: {
-            error_msg: err.response.data.error,
+            error_msg: (err.response.data.error)? 
+                        err.response.data.error: null,
             error_code: err.response.status          
         }
     };

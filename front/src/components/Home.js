@@ -45,7 +45,8 @@ class Home extends Component {
                 `.../${this.props.parent.title}/`: '/';
             nextState.pwd += (sheetTitle)? sheetTitle: '';
 
-            this.setState(nextState);
+            if(this.props.logged)
+                this.setState(nextState);
         }
     }
 
