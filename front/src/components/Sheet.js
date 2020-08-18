@@ -65,7 +65,7 @@ function makeEvent(elementId, elementType, state, data=null) {
     }
     if (state && data) {
         Object.keys(data).forEach((key)=> {
-            newEvent.key = data[key];
+            newEvent[key] = data[key];
         });
     }
 
@@ -332,6 +332,7 @@ class Sheet extends Component {
         const network = this.state.networkRef.current;
 
         let nextState = {
+            edgeStates: { ...this.state.edgeStates},
             history: [
                 ...this.state.history,
                 makeEvent(elementId, elementType, 0)
@@ -341,12 +342,6 @@ class Sheet extends Component {
         truncHistory(nextState.history);
 
         if (elementType) {
-            nextState = {
-                edgeStates: {
-                    ...this.state.edgeStates
-                }
-            };
-
             if (nextState.edgeStates[elementId] === 1)
                 delete nextState.edgeStates[elementId];
             else
@@ -356,15 +351,8 @@ class Sheet extends Component {
         }
 
         else {
+            nextState.nodeStates = { ...this.state.nodeStates};
             const {edges} = this.state;
-            nextState = {
-                nodeStates: {
-                    ...this.state.nodeStates
-                },
-                edgeStates: {
-                    ...this.state.edgeStates
-                }
-            };
 
             if (nextState.nodeStates[elementId] === 1)
                 delete nextState.nodeStates[elementId];
@@ -426,6 +414,7 @@ class Sheet extends Component {
             });
             this.props.action(RESET);
         }
+        console.log(this.state)
     }
 
     renderBackIcon() {
