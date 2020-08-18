@@ -281,6 +281,7 @@ class Home extends Component {
             pwd: nextPwd,
             sheetId:null,
         });
+        this.props.toggleProfile();
     }
 
     render() {
@@ -328,7 +329,8 @@ class Home extends Component {
             <Sheet
             pwd={this.state.pwd}
             sheetId={this.state.sheetId}
-            escape={this.escape.bind(this)}/>
+            escape={this.escape.bind(this)}
+            toggleProfile={this.props.toggleProfile}/>
         )
         return (!this.state.sheetId? selectPanel: sheet);
     }
