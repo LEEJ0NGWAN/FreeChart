@@ -98,19 +98,17 @@ function eventGenerator() {
     
                         let nextState = {
                             from: null,
-                            edgeStates: {
-                                ...this.state.edgeStates
-                            },
-                            history: [
-                                ...this.state.history,
-                                makeEvent(edge.id,1,1,{
+                            edgeStates: { ...this.state.edgeStates},
+                            history: [ ...this.state.history],
+                            historyPivot: this.nextPivot(),
+                        };
+                        nextState.history[this.state.historyPivot] =
+                            makeEvent(
+                                edge.id,1,1,
+                                {
                                     label: "",
                                     from: edge.from,
-                                    to: edge.to
-                                })
-                            ],
-                            historyPivot: this.state.historyPivot+1,
-                        };
+                                    to: edge.to });
                         nextState.edgeStates[edge.id] = 1;
                         truncHistory(nextState.history);
     
@@ -149,18 +147,17 @@ function eventGenerator() {
                 };
 
                 let nextState = {
-                    nodeStates: {
-                        ...this.state.nodeStates
-                    },
-                    history: [
-                        ...this.state.history,
-                        makeEvent(node.id,0,1,{
-                            label: node.label,
-                            x: node.x, y: node.y
-                        })
-                    ],
-                    historyPivot: this.state.historyPivot+1,
+                    nodeStates: { ...this.state.nodeStates},
+                    history: [ ...this.state.history],
+                    historyPivot: this.nextPivot(),
                 };
+                nextState.history[this.state.historyPivot] =
+                    makeEvent(
+                        node.id,0,1,
+                        {
+                            label: node.label,
+                            x: node.x,
+                            y: node.y });
                 truncHistory(nextState.history);
 
                 if (this.state.from)
@@ -204,15 +201,15 @@ function eventGenerator() {
                 nodeStates: {
                     ...this.state.nodeStates
                 },
-                history: [
-                    ...this.state.history,
-                    makeEvent(nodeId, 0, 2, {
-                        x: [_x, x],
-                        y: [_y, y]
-                    })
-                ],
-                historyPivot: this.state.historyPivot+1,
+                history: [ ...this.state.history],
+                historyPivot: this.nextPivot(),
             };
+            nextState.history[this.state.historyPivot] =
+                makeEvent(
+                    nodeId, 0, 2, 
+                    {
+                        x: [_x, x],
+                        y: [_y, y] });
             truncHistory(nextState.history);
 
             if (!nextState.nodeStates[nodeId])
@@ -227,7 +224,7 @@ function eventGenerator() {
 class Sheet extends Component {
     state = {
         history: [],
-        historyPivot: -1,
+        historyPivot: 0,
         networkRef: React.createRef(),
         popped: false,
         nodeStates: {},
@@ -235,6 +232,17 @@ class Sheet extends Component {
         from: null,
         to: {},
     };
+
+    prevPivot = () => {
+        const {historyPivot} = this.state;
+        return (!historyPivot)? historyPivot: historyPivot-1;
+    }
+
+    nextPivot = () => {
+        const {historyPivot} = this.state;
+        return (historyPivot === historySize)? 
+                historyPivot: historyPivot+1;
+    }
 
     togglePop = () => {
         this.setState({popped: !this.state.popped});
@@ -292,7 +300,7 @@ class Sheet extends Component {
         let data = {};
         let preValue;
         let nextState = {
-            historyPivot: this.state.historyPivot+1,
+            historyPivot: this.nextPivot()
         };
 
         if (elementType) {
@@ -327,10 +335,9 @@ class Sheet extends Component {
         }
 
         data.label = [preValue, label];
-        nextState.history = [
-            ...this.state.history,
-            makeEvent(elementId, elementType, 2, data)
-        ];
+        nextState.history = [ ...this.state.history];
+        nextState.history[this.state.historyPivot] =
+            makeEvent(elementId, elementType, 2, data);
         truncHistory(nextState.history);
 
         this.setState(nextState);
@@ -342,12 +349,11 @@ class Sheet extends Component {
 
         let nextState = {
             edgeStates: { ...this.state.edgeStates},
-            history: [
-                ...this.state.history,
-                makeEvent(elementId, elementType, 0)
-            ],
-            historyPivot: this.state.historyPivot+1,
+            history: [ ...this.state.history],
+            historyPivot: this.nextPivot()
         };
+        nextState.history[this.state.historyPivot] = 
+            makeEvent(elementId, elementType, 0);
         truncHistory(nextState.history);
 
         if (elementType) {
@@ -402,7 +408,7 @@ class Sheet extends Component {
             nodeStates: {},
             edgeStates: {},
             history: [],
-            historyPivot: -1,
+            historyPivot: 0,
             from: null,
         });
         this.props.action(RESET);
