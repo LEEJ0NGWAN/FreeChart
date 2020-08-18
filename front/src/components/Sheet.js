@@ -285,14 +285,6 @@ class Sheet extends Component {
         this.graphInitializer();
     }
 
-    isEdited = () => {
-        const {nodeStates, edgeStates} = this.state;
-        const nodeLength = Object.keys(nodeStates).length;
-        const edgeLength = Object.keys(edgeStates).length;
-
-        return (nodeLength+edgeLength)? true: false;
-    }
-
     modifyElement = (label) => {
         const network = this.state.networkRef.current;
         const {elementId, elementType} = this.state;
@@ -480,8 +472,10 @@ class Sheet extends Component {
         const menu = (
             <div className="sheet-menu">
                 {this.renderBackIcon()}
-                {this.isEdited() && this.renderSaveIcon()}
-                {this.isEdited() && this.renderRefreshIcon()}<br/>
+                {Boolean(this.state.historyPivot) && 
+                this.renderSaveIcon()}
+                {Boolean(this.state.historyPivot) && 
+                this.renderRefreshIcon()}
             </div>
         )
         return (
