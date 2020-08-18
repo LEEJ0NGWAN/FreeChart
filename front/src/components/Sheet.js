@@ -392,6 +392,9 @@ class Sheet extends Component {
         this.setState({
             nodeStates: {},
             edgeStates: {},
+            history: [],
+            historyPivot: -1,
+            from: null,
         });
         this.props.action(RESET);
 
