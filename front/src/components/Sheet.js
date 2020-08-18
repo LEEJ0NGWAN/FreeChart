@@ -415,7 +415,7 @@ class Sheet extends Component {
         this.initializer();
     }
 
-    componentDidUpdate(prevProps) {
+    componentDidUpdate(prevProps, prevStates) {
         const {saved} = this.props;
         if (!prevProps.saved && saved) {
             this.setState({
@@ -424,11 +424,13 @@ class Sheet extends Component {
             });
             this.props.action(RESET);
         }
-        console.log(this.state)
+
+        this.undoIcon.style.fill = 
+            (this.state.historyPivot)? 'black': 'darkgray';
     }
 
     renderBackIcon() {
-        return(<svg className="bs-item"
+        return(<svg className="bs-item icon"
         onClick={()=>{this.props.escape();}}
         width="24" height="24" viewBox="0 0 24 24">
         <path d="M13.427 3.021h-7.427v-3.021l-6 5.39 6 
@@ -439,7 +441,7 @@ class Sheet extends Component {
     }
 
     renderSaveIcon() {
-        return(<svg className="bs-item"
+        return(<svg className="bs-item icon"
         onClick={this.save}
         width="24" height="24" viewBox="0 0 24 24">
         <path d="M13 3h2.996v5h-2.996v-5zm11 
@@ -449,7 +451,7 @@ class Sheet extends Component {
     }
 
     renderRefreshIcon() {
-        return(<svg className="bs-item"
+        return(<svg className="bs-item icon"
         onClick={this.reset}
         width="24" height="24" viewBox="0 0 24 24">
         <path d="M20.944 12.979c-.489 4.509-4.306 
@@ -462,7 +464,27 @@ class Sheet extends Component {
         0-8.443 3.501-8.941 8h-3.059l4 5.25 4-5.25h-2.92z"/></svg>);
     }
 
+    renderUndoIcon() {
+        return(<svg className="bs-item do-icon"
+        ref={(undo)=>{this.undoIcon = undo}}
+        width="24" height="24" viewBox="0 0 24 24"
+        onClick={e=>{
+            e.target.style.fill='darkgray';
+            e.target.style.border='none';}}>
+        <path d="M16.67 0l2.83 2.829-9.339 9.175 9.339 
+        9.167-2.83 2.829-12.17-11.996z"/></svg>);
+    }
+
+    renderRedoIcon() {
+        return(<svg className="bs-item do-icon"
+        ref={(redo)=>{this.redoIcon = redo}}
+        width="24" height="24" viewBox="0 0 24 24">
+        <path d="M7.33 24l-2.83-2.829 9.339-9.175-9.339-9.167 
+        2.83-2.829 12.17 11.996z"/></svg>);
+    }
+
     render() {
+        const {history, historyPivot} = this.state;
         const pwd = (
             <label className="pwd">
                 {(this.props.pwd.length <= 50)? this.props.pwd:
@@ -472,10 +494,13 @@ class Sheet extends Component {
         const menu = (
             <div className="sheet-menu">
                 {this.renderBackIcon()}
-                {Boolean(this.state.historyPivot) && 
+                {Boolean(historyPivot) && 
                 this.renderSaveIcon()}
-                {Boolean(this.state.historyPivot) && 
+                {Boolean(historyPivot) &&
                 this.renderRefreshIcon()}
+                {this.renderRedoIcon()}
+                {this.renderUndoIcon()}
+                
             </div>
         )
         return (

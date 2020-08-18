@@ -138,7 +138,7 @@ class Home extends Component {
     }
 
     renderNewFolderIcon() {
-        return (<svg className="bs-item"
+        return (<svg className="bs-item icon"
         onClick={()=>{this.togglePop(null,null,0);}}
         width="24" height="24" 
         fillRule="evenodd" clipRule="evenodd">
@@ -160,7 +160,7 @@ class Home extends Component {
     }
 
     renderNewFileIcon() {
-        return (<svg className="bs-item"
+        return (<svg className="bs-item icon"
         onClick={()=>{this.togglePop(null,null,1);}}
         width="24" height="24" viewBox="0 0 24 24">
         <path d="M23 17h-3v-3h-2v3h-3v2h3v3h2v-3h3v-2zm-7 
@@ -183,7 +183,7 @@ class Home extends Component {
     }
 
     renderBackIcon() {
-        return(<svg className="bs-item"
+        return(<svg className="bs-item icon"
         onClick={this.back}
         width="24" height="24" viewBox="0 0 24 24">
         <path d="M13.427 3.021h-7.427v-3.021l-6 5.39 6 
@@ -194,7 +194,7 @@ class Home extends Component {
     }
 
     renderHomeIcon() {
-        return(<svg className="bs-item"
+        return(<svg className="bs-item icon"
         onClick={this.initialize}
         width="24" height="24" viewBox="0 0 24 24">
         <path d="M20 7.093v-5.093h-3v2.093l3 3zm4 
