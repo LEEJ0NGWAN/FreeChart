@@ -50,6 +50,28 @@ const options = {
     },
 };
 
+const historySize = 15;
+
+function truncHistory(history) {
+    if (history.length > historySize)
+        history.splice(0, 1);
+}
+
+function makeEvent(elementId, elementType, state, data=null) {
+    let newEvent = {
+        id: elementId,
+        type: elementType,
+        state: state,
+    }
+    if (state && data) {
+        Object.keys(data).forEach((key)=> {
+            newEvent.key = data[key];
+        });
+    }
+
+    return newEvent;
+}
+
 function eventGenerator() {
     const events = {
         click: function(event) {
@@ -174,6 +196,7 @@ function eventGenerator() {
 
 class Sheet extends Component {
     state = {
+        history: [],
         networkRef: React.createRef(),
         popped: false,
         nodeStates: {},
@@ -235,9 +258,13 @@ class Sheet extends Component {
         const network = this.state.networkRef.current;
         const {elementId, elementType} = this.state;
 
+        let data = {};
+        let preValue;
         let nextState = {};
 
         if (elementType) {
+            preValue = network.edges._data[elementId].label;
+
             network.edges.update({
                 id: elementId,
                 label: label
@@ -251,6 +278,8 @@ class Sheet extends Component {
             }
         }
         else {
+            preValue = network.nodes._data[elementId].label;
+
             network.nodes.update({
                 id: elementId,
                 label: label
@@ -264,6 +293,13 @@ class Sheet extends Component {
             }
         }
 
+        data.label = [preValue, label];
+        nextState.history = [
+            ...this.state.history,
+            makeEvent(elementId, elementType, 2, data)
+        ];
+        truncHistory(nextState.history);
+
         this.setState(nextState);
     }
 
@@ -271,7 +307,14 @@ class Sheet extends Component {
         const {elementId, elementType} = this.state;
         const network = this.state.networkRef.current;
 
-        let nextState = {};
+        let nextState = {
+            history: [
+                ...this.state.history,
+                makeEvent(elementId, elementType, 0)
+            ]
+        };
+        truncHistory(nextState.history);
+
         if (elementType) {
             nextState = {
                 edgeStates: {
@@ -313,10 +356,6 @@ class Sheet extends Component {
         }
 
         this.setState(nextState);
-    }
-
-    delete = () => {
-        //sheet 삭제
     }
 
     save = async () => {
