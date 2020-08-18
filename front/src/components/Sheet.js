@@ -50,6 +50,28 @@ const options = {
     },
 };
 
+const historySize = 15;
+
+function truncHistory(history) {
+    if (history.length > historySize)
+        history.splice(0, 1);
+}
+
+function makeEvent(elementId, elementType, state, data=null) {
+    let newEvent = {
+        id: elementId,
+        type: elementType,
+        state: state,
+    }
+    if (state && data) {
+        Object.keys(data).forEach((key)=> {
+            newEvent[key] = data[key];
+        });
+    }
+
+    return newEvent;
+}
+
 function eventGenerator() {
     const events = {
         click: function(event) {
@@ -76,11 +98,19 @@ function eventGenerator() {
     
                         let nextState = {
                             from: null,
-                            edgeStates: {
-                                ...this.state.edgeStates
-                            }
+                            edgeStates: { ...this.state.edgeStates},
+                            history: [ ...this.state.history],
+                            historyPivot: this.nextPivot(),
                         };
+                        nextState.history[this.state.historyPivot] =
+                            makeEvent(
+                                edge.id,1,1,
+                                {
+                                    label: "",
+                                    from: edge.from,
+                                    to: edge.to });
                         nextState.edgeStates[edge.id] = 1;
+                        truncHistory(nextState.history);
     
                         this.setState(nextState);
                         network.edges.add(edge);
@@ -117,10 +147,18 @@ function eventGenerator() {
                 };
 
                 let nextState = {
-                    nodeStates: {
-                        ...this.state.nodeStates
-                    }
+                    nodeStates: { ...this.state.nodeStates},
+                    history: [ ...this.state.history],
+                    historyPivot: this.nextPivot(),
                 };
+                nextState.history[this.state.historyPivot] =
+                    makeEvent(
+                        node.id,0,1,
+                        {
+                            label: node.label,
+                            x: node.x,
+                            y: node.y });
+                truncHistory(nextState.history);
 
                 if (this.state.from)
                     nextState.from = null;
@@ -153,6 +191,8 @@ function eventGenerator() {
 
             const {x, y} = event.pointer.canvas;
             const network = this.state.networkRef.current;
+            const _x = network.nodes._data[nodeId].x;
+            const _y = network.nodes._data[nodeId].y;
 
             network.nodes._data[nodeId].x = x;
             network.nodes._data[nodeId].y = y;
@@ -160,8 +200,17 @@ function eventGenerator() {
             let nextState = {
                 nodeStates: {
                     ...this.state.nodeStates
-                }
+                },
+                history: [ ...this.state.history],
+                historyPivot: this.nextPivot(),
             };
+            nextState.history[this.state.historyPivot] =
+                makeEvent(
+                    nodeId, 0, 2, 
+                    {
+                        x: [_x, x],
+                        y: [_y, y] });
+            truncHistory(nextState.history);
 
             if (!nextState.nodeStates[nodeId])
                 nextState.nodeStates[nodeId] = 2;
@@ -174,6 +223,8 @@ function eventGenerator() {
 
 class Sheet extends Component {
     state = {
+        history: [],
+        historyPivot: 0,
         networkRef: React.createRef(),
         popped: false,
         nodeStates: {},
@@ -181,6 +232,17 @@ class Sheet extends Component {
         from: null,
         to: {},
     };
+
+    prevPivot = () => {
+        const {historyPivot} = this.state;
+        return (!historyPivot)? historyPivot: historyPivot-1;
+    }
+
+    nextPivot = () => {
+        const {historyPivot} = this.state;
+        return (historyPivot === historySize)? 
+                historyPivot: historyPivot+1;
+    }
 
     togglePop = () => {
         this.setState({popped: !this.state.popped});
@@ -223,21 +285,19 @@ class Sheet extends Component {
         this.graphInitializer();
     }
 
-    isEdited = () => {
-        const {nodeStates, edgeStates} = this.state;
-        const nodeLength = Object.keys(nodeStates).length;
-        const edgeLength = Object.keys(edgeStates).length;
-
-        return (nodeLength+edgeLength)? true: false;
-    }
-
     modifyElement = (label) => {
         const network = this.state.networkRef.current;
         const {elementId, elementType} = this.state;
 
-        let nextState = {};
+        let data = {};
+        let preValue;
+        let nextState = {
+            historyPivot: this.nextPivot()
+        };
 
         if (elementType) {
+            preValue = network.edges._data[elementId].label;
+
             network.edges.update({
                 id: elementId,
                 label: label
@@ -251,6 +311,8 @@ class Sheet extends Component {
             }
         }
         else {
+            preValue = network.nodes._data[elementId].label;
+
             network.nodes.update({
                 id: elementId,
                 label: label
@@ -264,6 +326,12 @@ class Sheet extends Component {
             }
         }
 
+        data.label = [preValue, label];
+        nextState.history = [ ...this.state.history];
+        nextState.history[this.state.historyPivot] =
+            makeEvent(elementId, elementType, 2, data);
+        truncHistory(nextState.history);
+
         this.setState(nextState);
     }
 
@@ -271,14 +339,16 @@ class Sheet extends Component {
         const {elementId, elementType} = this.state;
         const network = this.state.networkRef.current;
 
-        let nextState = {};
-        if (elementType) {
-            nextState = {
-                edgeStates: {
-                    ...this.state.edgeStates
-                }
-            };
+        let nextState = {
+            edgeStates: { ...this.state.edgeStates},
+            history: [ ...this.state.history],
+            historyPivot: this.nextPivot()
+        };
+        nextState.history[this.state.historyPivot] = 
+            makeEvent(elementId, elementType, 0);
+        truncHistory(nextState.history);
 
+        if (elementType) {
             if (nextState.edgeStates[elementId] === 1)
                 delete nextState.edgeStates[elementId];
             else
@@ -288,15 +358,8 @@ class Sheet extends Component {
         }
 
         else {
+            nextState.nodeStates = { ...this.state.nodeStates};
             const {edges} = this.state;
-            nextState = {
-                nodeStates: {
-                    ...this.state.nodeStates
-                },
-                edgeStates: {
-                    ...this.state.edgeStates
-                }
-            };
 
             if (nextState.nodeStates[elementId] === 1)
                 delete nextState.nodeStates[elementId];
@@ -313,10 +376,6 @@ class Sheet extends Component {
         }
 
         this.setState(nextState);
-    }
-
-    delete = () => {
-        //sheet 삭제
     }
 
     save = async () => {
@@ -340,6 +399,9 @@ class Sheet extends Component {
         this.setState({
             nodeStates: {},
             edgeStates: {},
+            history: [],
+            historyPivot: 0,
+            from: null,
         });
         this.props.action(RESET);
 
@@ -353,7 +415,7 @@ class Sheet extends Component {
         this.initializer();
     }
 
-    componentDidUpdate(prevProps) {
+    componentDidUpdate(prevProps, prevStates) {
         const {saved} = this.props;
         if (!prevProps.saved && saved) {
             this.setState({
@@ -362,10 +424,13 @@ class Sheet extends Component {
             });
             this.props.action(RESET);
         }
+
+        this.undoIcon.style.fill = 
+            (this.state.historyPivot)? 'black': 'darkgray';
     }
 
     renderBackIcon() {
-        return(<svg className="bs-item"
+        return(<svg className="bs-item icon"
         onClick={()=>{this.props.escape();}}
         width="24" height="24" viewBox="0 0 24 24">
         <path d="M13.427 3.021h-7.427v-3.021l-6 5.39 6 
@@ -376,7 +441,7 @@ class Sheet extends Component {
     }
 
     renderSaveIcon() {
-        return(<svg className="bs-item"
+        return(<svg className="bs-item icon"
         onClick={this.save}
         width="24" height="24" viewBox="0 0 24 24">
         <path d="M13 3h2.996v5h-2.996v-5zm11 
@@ -386,7 +451,7 @@ class Sheet extends Component {
     }
 
     renderRefreshIcon() {
-        return(<svg className="bs-item"
+        return(<svg className="bs-item icon"
         onClick={this.reset}
         width="24" height="24" viewBox="0 0 24 24">
         <path d="M20.944 12.979c-.489 4.509-4.306 
@@ -399,7 +464,27 @@ class Sheet extends Component {
         0-8.443 3.501-8.941 8h-3.059l4 5.25 4-5.25h-2.92z"/></svg>);
     }
 
+    renderUndoIcon() {
+        return(<svg className="bs-item do-icon"
+        ref={(undo)=>{this.undoIcon = undo}}
+        width="24" height="24" viewBox="0 0 24 24"
+        onClick={e=>{
+            e.target.style.fill='darkgray';
+            e.target.style.border='none';}}>
+        <path d="M16.67 0l2.83 2.829-9.339 9.175 9.339 
+        9.167-2.83 2.829-12.17-11.996z"/></svg>);
+    }
+
+    renderRedoIcon() {
+        return(<svg className="bs-item do-icon"
+        ref={(redo)=>{this.redoIcon = redo}}
+        width="24" height="24" viewBox="0 0 24 24">
+        <path d="M7.33 24l-2.83-2.829 9.339-9.175-9.339-9.167 
+        2.83-2.829 12.17 11.996z"/></svg>);
+    }
+
     render() {
+        const {history, historyPivot} = this.state;
         const pwd = (
             <label className="pwd">
                 {(this.props.pwd.length <= 50)? this.props.pwd:
@@ -409,8 +494,13 @@ class Sheet extends Component {
         const menu = (
             <div className="sheet-menu">
                 {this.renderBackIcon()}
-                {this.isEdited() && this.renderSaveIcon()}
-                {this.isEdited() && this.renderRefreshIcon()}<br/>
+                {Boolean(historyPivot) && 
+                this.renderSaveIcon()}
+                {Boolean(historyPivot) &&
+                this.renderRefreshIcon()}
+                {this.renderRedoIcon()}
+                {this.renderUndoIcon()}
+                
             </div>
         )
         return (
