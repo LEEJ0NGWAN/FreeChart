@@ -281,6 +281,7 @@ class Sheet extends Component {
     }
 
     initializer = async () => {
+        this.props.toggleProfile(false);
         await this.fetchElements();
         this.graphInitializer();
     }
@@ -411,22 +412,52 @@ class Sheet extends Component {
         edges.add(this.props.edges);
     }
 
+    undo = () => {
+        this.setState({
+            historyPivot: this.prevPivot()});
+    }
+
+    redo = () => {
+        this.setState({
+            historyPivot: this.nextPivot()});
+    }
+
     componentDidMount() {
         this.initializer();
     }
 
     componentDidUpdate(prevProps, prevStates) {
+        const {history, historyPivot} = this.state;
         const {saved} = this.props;
         if (!prevProps.saved && saved) {
             this.setState({
                 nodeStates: {},
-                edgeStates: {}
+                edgeStates: {},
+                history: [],
+                historyPivot: 0,
+                from: null,
             });
             this.props.action(RESET);
         }
 
-        this.undoIcon.style.fill = 
-            (this.state.historyPivot)? 'black': 'darkgray';
+        if (prevStates.historyPivot !== historyPivot) {
+            this.resetIcon.style.fill =
+                (historyPivot)? 'black': 'darkgray';
+            this.undoIcon.style.fill = 
+                (historyPivot)? 'black': 'darkgray';
+            this.redoIcon.style.fill =
+                (historyPivot !== history.length)? 
+                    'black': 'darkgray';
+            
+            this.resetIcon.onclick =
+                (historyPivot)? this.reset: null;
+            this.undoIcon.onclick = 
+                (historyPivot)? this.undo: null;
+            
+            this.redoIcon.onclick =
+                (historyPivot !== history.length)?
+                    this.redo: null;
+        }
     }
 
     renderBackIcon() {
@@ -451,8 +482,8 @@ class Sheet extends Component {
     }
 
     renderRefreshIcon() {
-        return(<svg className="bs-item icon"
-        onClick={this.reset}
+        return(<svg className="bs-item do-icon"
+        ref={(reset)=>{this.resetIcon = reset}}
         width="24" height="24" viewBox="0 0 24 24">
         <path d="M20.944 12.979c-.489 4.509-4.306 
         8.021-8.944 8.021-2.698 0-5.112-1.194-6.763
@@ -467,10 +498,7 @@ class Sheet extends Component {
     renderUndoIcon() {
         return(<svg className="bs-item do-icon"
         ref={(undo)=>{this.undoIcon = undo}}
-        width="24" height="24" viewBox="0 0 24 24"
-        onClick={e=>{
-            e.target.style.fill='darkgray';
-            e.target.style.border='none';}}>
+        width="24" height="24" viewBox="0 0 24 24">
         <path d="M16.67 0l2.83 2.829-9.339 9.175 9.339 
         9.167-2.83 2.829-12.17-11.996z"/></svg>);
     }
@@ -496,8 +524,7 @@ class Sheet extends Component {
                 {this.renderBackIcon()}
                 {Boolean(historyPivot) && 
                 this.renderSaveIcon()}
-                {Boolean(historyPivot) &&
-                this.renderRefreshIcon()}
+                {this.renderRefreshIcon()}
                 {this.renderRedoIcon()}
                 {this.renderUndoIcon()}
                 
