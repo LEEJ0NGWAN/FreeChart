@@ -13,7 +13,8 @@ import './App.css';
 
 class App extends Component {
     state = {
-        popped: false
+        popped: false,
+        profileIcon: true
     }
 
     componentDidMount() {
@@ -23,6 +24,12 @@ class App extends Component {
             history.push('/login');
             return;
         }
+    }
+
+    toggleProfile = (nextState=true) => {
+        this.setState({
+            profileIcon: nextState
+        });
     }
 
     togglePop = () => {
@@ -76,9 +83,13 @@ class App extends Component {
                     {this.renderFreelistIcon()}
                     <h1 style={{display: 'inline-block'}}>FreeList</h1>
                 </div>}
-                {this.props.logged && this.renderProfileIcon()}
+                {(this.props.logged && this.state.profileIcon) && 
+                this.renderProfileIcon()}
                 <Switch>
-                    <Route exact path="/" component={Home}/>
+                    <Route exact path="/" 
+                    render={(props)=>
+                        <Home {...props}
+                        toggleProfile={this.toggleProfile.bind(this)}/>}/>
                     <Route exact path="/login" component={Login}/>
                     <Route exact path="/logout" component={Logout}/>
                     <Route exact path="/register" component={Register}/>
