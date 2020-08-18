@@ -194,6 +194,8 @@ function eventGenerator() {
 
             const {x, y} = event.pointer.canvas;
             const network = this.state.networkRef.current;
+            const _x = network.nodes._data[nodeId].x;
+            const _y = network.nodes._data[nodeId].y;
 
             network.nodes._data[nodeId].x = x;
             network.nodes._data[nodeId].y = y;
@@ -201,8 +203,17 @@ function eventGenerator() {
             let nextState = {
                 nodeStates: {
                     ...this.state.nodeStates
-                }
+                },
+                history: [
+                    ...this.state.history,
+                    makeEvent(nodeId, 0, 2, {
+                        x: [_x, x],
+                        y: [_y, y]
+                    })
+                ],
+                historyPivot: this.state.historyPivot+1,
             };
+            truncHistory(nextState.history);
 
             if (!nextState.nodeStates[nodeId])
                 nextState.nodeStates[nodeId] = 2;
@@ -279,7 +290,7 @@ class Sheet extends Component {
         const {elementId, elementType} = this.state;
 
         let data = {};
-        let preValue, isFirst = false;
+        let preValue;
         let nextState = {
             historyPivot: this.state.historyPivot+1,
         };
@@ -293,7 +304,6 @@ class Sheet extends Component {
             });
 
             if (!this.state.edgeStates[elementId]) {
-                isFirst = true;
                 nextState['edgeStates'] = {
                     ...this.state.edgeStates,
                 };
@@ -309,7 +319,6 @@ class Sheet extends Component {
             });
 
             if (!this.state.nodeStates[elementId]) {
-                isFirst = true;
                 nextState['nodeStates'] = {
                     ...this.state.nodeStates,
                 };
@@ -317,7 +326,7 @@ class Sheet extends Component {
             }
         }
 
-        data.label = [preValue, label, isFirst];
+        data.label = [preValue, label];
         nextState.history = [
             ...this.state.history,
             makeEvent(elementId, elementType, 2, data)
