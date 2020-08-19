@@ -7,6 +7,15 @@ import Graph from 'react-graph-vis';
 import ElementEdit from './ElementEdit';
 import { v4 as uuid } from 'uuid';
 
+const DELETE = 0;
+const CREATE = 1;
+const MODIFY = 2;
+
+const NODE = 0;
+const EDGE = 1;
+
+const historySize = 15;
+
 const getSubset = 
     (obj, ...keys) => keys.reduce(
         (a, c) => ({ ...a, [c]: obj[c] }), {});
@@ -37,20 +46,11 @@ const options = {
     autoResize: true,
     physics: {
         enabled: false,
-        // stabilization: true,
-        // solver: 'repulsion',
-        // repulsion: {
-        //     nodeDistance: 150,
-        //     springConstant: 0.0000,
-        //     springLength: 200
-        // }
     },
     layout: {
         randomSeed: 0
     },
 };
-
-const historySize = 15;
 
 function truncHistory(history) {
     if (history.length > historySize)
@@ -63,7 +63,7 @@ function makeEvent(elementId, elementType, state, data=null) {
         type: elementType,
         state: state,
     }
-    if (state && data) {
+    if (data) {
         Object.keys(data).forEach((key)=> {
             newEvent[key] = data[key];
         });
@@ -104,12 +104,12 @@ function eventGenerator() {
                         };
                         nextState.history[this.state.historyPivot] =
                             makeEvent(
-                                edge.id,1,1,
+                                edge.id,EDGE,CREATE,
                                 {
                                     label: "",
                                     from: edge.from,
                                     to: edge.to });
-                        nextState.edgeStates[edge.id] = 1;
+                        nextState.edgeStates[edge.id] = CREATE;
                         truncHistory(nextState.history);
     
                         this.setState(nextState);
@@ -153,7 +153,7 @@ function eventGenerator() {
                 };
                 nextState.history[this.state.historyPivot] =
                     makeEvent(
-                        node.id,0,1,
+                        node.id,NODE,CREATE,
                         {
                             label: node.label,
                             x: node.x,
@@ -163,7 +163,7 @@ function eventGenerator() {
                 if (this.state.from)
                     nextState.from = null;
 
-                nextState.nodeStates[node.id] = 1;
+                nextState.nodeStates[node.id] = CREATE;
                 
                 this.setState(nextState);
                 network.nodes.add(node);
@@ -173,7 +173,7 @@ function eventGenerator() {
                 const {x, y} = event.pointer.DOM;
                 const label = network.edges._data[edgeId].label;
 
-                this.setElementInfo(edgeId,1,x,y,label);
+                this.setElementInfo(edgeId,EDGE,x,y,label);
             }
             else {
                 const nodeId = nodes[0];
@@ -181,7 +181,7 @@ function eventGenerator() {
                 const label = network.nodes._data[nodeId].label;
                 const {edges} = event;
 
-                this.setElementInfo(nodeId,0,x,y,label,edges);
+                this.setElementInfo(nodeId,NODE,x,y,label,edges);
             }
         }.bind(this),
         dragEnd: function(event) {
@@ -206,14 +206,14 @@ function eventGenerator() {
             };
             nextState.history[this.state.historyPivot] =
                 makeEvent(
-                    nodeId, 0, 2, 
+                    nodeId, NODE, MODIFY, 
                     {
                         x: [_x, x],
                         y: [_y, y] });
             truncHistory(nextState.history);
 
             if (!nextState.nodeStates[nodeId])
-                nextState.nodeStates[nodeId] = 2;
+                nextState.nodeStates[nodeId] = MODIFY;
             
             this.setState(nextState);
         }.bind(this),
@@ -305,10 +305,10 @@ class Sheet extends Component {
             });
 
             if (!this.state.edgeStates[elementId]) {
-                nextState['edgeStates'] = {
+                nextState.edgeStates = {
                     ...this.state.edgeStates,
                 };
-                nextState.edgeStates[elementId] = 2;
+                nextState.edgeStates[elementId] = MODIFY;
             }
         }
         else {
@@ -320,17 +320,17 @@ class Sheet extends Component {
             });
 
             if (!this.state.nodeStates[elementId]) {
-                nextState['nodeStates'] = {
+                nextState.nodeStates = {
                     ...this.state.nodeStates,
                 };
-                nextState.nodeStates[elementId] = 2;
+                nextState.nodeStates[elementId] = MODIFY;
             }
         }
 
         data.label = [preValue, label];
         nextState.history = [ ...this.state.history];
         nextState.history[this.state.historyPivot] =
-            makeEvent(elementId, elementType, 2, data);
+            makeEvent(elementId, elementType, MODIFY, data);
         truncHistory(nextState.history);
 
         this.setState(nextState);
@@ -341,37 +341,35 @@ class Sheet extends Component {
         const network = this.state.networkRef.current;
 
         let nextState = {
-            edgeStates: { ...this.state.edgeStates},
             history: [ ...this.state.history],
             historyPivot: this.nextPivot()
         };
+        const element = (elementType)? 
+        network.edges._data[elementId]:
+        network.nodes._data[elementId];
+
         nextState.history[this.state.historyPivot] = 
-            makeEvent(elementId, elementType, 0);
+            makeEvent(elementId, elementType, DELETE, element);
         truncHistory(nextState.history);
 
         if (elementType) {
-            if (nextState.edgeStates[elementId] === 1)
+            nextState.edgeStates = { ...this.state.edgeStates};
+
+            if (nextState.edgeStates[elementId] === CREATE)
                 delete nextState.edgeStates[elementId];
             else
-                nextState.edgeStates[elementId] = 0;
+                nextState.edgeStates[elementId] = DELETE;
 
             network.edges.remove(elementId);
         }
 
         else {
             nextState.nodeStates = { ...this.state.nodeStates};
-            const {edges} = this.state;
 
-            if (nextState.nodeStates[elementId] === 1)
+            if (nextState.nodeStates[elementId] === CREATE)
                 delete nextState.nodeStates[elementId];
             else
-                nextState.nodeStates[elementId] = 0;
-            edges.forEach((key)=>{
-                if (nextState.edgeStates[key] === 1)
-                    delete nextState.edgeStates[key];
-                else
-                    nextState.edgeStates[key] = 0;
-            });
+                nextState.nodeStates[elementId] = DELETE;
             
             network.nodes.remove(elementId);
         }
@@ -413,13 +411,59 @@ class Sheet extends Component {
     }
 
     undo = () => {
-        this.setState({
-            historyPivot: this.prevPivot()});
+        const network = this.state.networkRef.current;
+        const {history} = this.state;
+        let nextState = {
+            edgeStates: { ...this.state.edgeStates},
+            historyPivot: this.prevPivot()};
+    
+        let element = history[nextState.historyPivot];
+
+        switch (element.state) {
+            case DELETE:
+                if (element.type) {
+                    network.edges.add(element);
+                    nextState.edgeStates[element.id] =
+                    (this.state.edgeStates[element.id] === DELETE)?
+                    MODIFY: CREATE;
+                }
+                else {
+                    network.nodes.add(element);
+                    nextState.nodeStates =
+                        { ...this.state.nodeStates};
+                    nextState.nodeStates[element.id] =
+                    (this.state.nodeStates[element.id] === DELETE)?
+                    MODIFY: CREATE;
+                }
+                break;
+            case CREATE:
+
+                break;
+            case MODIFY:
+                
+                break;
+        }
+        this.setState(nextState);
     }
 
     redo = () => {
-        this.setState({
-            historyPivot: this.nextPivot()});
+        const network = this.state.networkRef.current;
+        const {history} = this.state;
+        let nextState = {
+            edgeStates: { ...this.state.edgeStates},
+            historyPivot: this.nextPivot()};
+        
+        let element = history[nextState.historyPivot];
+
+        switch (element.state) {
+            case DELETE:
+                break;
+            case CREATE:
+                break;
+            case MODIFY:
+                break;
+        }
+        this.setState(nextState);
     }
 
     componentDidMount() {
@@ -512,7 +556,7 @@ class Sheet extends Component {
     }
 
     render() {
-        const {history, historyPivot} = this.state;
+        const {historyPivot} = this.state;
         const pwd = (
             <label className="pwd">
                 {(this.props.pwd.length <= 50)? this.props.pwd:
