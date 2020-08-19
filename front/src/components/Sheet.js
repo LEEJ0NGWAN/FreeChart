@@ -409,81 +409,53 @@ class Sheet extends Component {
     }
 
     undo = () => {
+        let nextState = {historyPivot: this.prevPivot()};
         const network = this.state.networkRef.current;
         const {history} = this.state;
-        let nextState = {historyPivot: this.prevPivot()};
-    
-        let element = history[nextState.historyPivot];
+        const element = history[nextState.historyPivot];
+        let elements, elementStates;
+
+        if (element.type) {
+            elements = network.edges;
+            elementStates = { ...this.state.edgeStates};
+            nextState.edgeStates = elementStates;
+        }
+        else {
+            elements = network.nodes;
+            elementStates = { ...this.state.nodeStates};
+            nextState.nodeStates = elementStates;
+        }
 
         switch (element.state) {
             case DELETE:
-                if (element.type) {
-                    network.edges.add(element);
-                    nextState.edgeStates = { ...this.state.edgeStates};
-
-                    if (this.state.edgeStates[element.id] === DELETE) {
-                        if (element.isFirstUpdate)
-                            delete nextState.edgeStates[element.id];
-                        else
-                            nextState.edgeStates[element.id] = MODIFY;
-                    }
+                elements.add(element);
+                if (elementStates[element.id] === DELETE) {
+                    if (element.isFirstUpdate)
+                        delete elementStates[element.id];
                     else
-                        nextState.edgeStates[element.id] = CREATE;
+                        elementStates[element.id] = MODIFY;
                 }
-                else {
-                    network.nodes.add(element);
-                    nextState.nodeStates = { ...this.state.nodeStates};
-                    
-                    if (this.state.nodeStates[element.id] === DELETE) {
-                        if (element.isFirstUpdate)
-                            delete nextState.nodeStates[element.id];
-                        else
-                            nextState.nodeStates[element.id] = MODIFY;
-                    }
-                    else
-                        nextState.nodeStates[element.id] = CREATE;
-                }
+                else
+                    elementStates[element.id] = CREATE;
                 break;
             case CREATE:
-                if (element.type) {
-                    network.edges.remove(element.id);
-                    nextState.edgeStates = { ...this.state.edgeStates};
-                    delete nextState.edgeStates[element.id];
-                }
-                else {
-                    network.nodes.remove(element.id);
-                    nextState.nodeStates = { ...this.state.nodeStates};
-                    delete nextState.nodeStates[element.id];
-                }
+                elements.remove(element.id);
+                delete elementStates[element.id];
                 break;
             case MODIFY:
-                if (element.type) {
-                    network.edges.update({
+                if (element.label)
+                    elements.update({
                         id: element.id,
                         label: element.label[0]
                     });
-                    if (element.isFirstUpdate) {
-                        nextState.edgeStates = { ...this.state.edgeStates};
-                        delete nextState.edgeStates[element.id];
-                    }
-                }
-                else {
-                    if (element.label)
-                        network.nodes.update({
-                            id: element.id,
-                            label: element.label[0]
-                        });
-                    else 
-                        network.nodes.update({
-                            id: element.id,
-                            x: element.x[0],
-                            y: element.y[0]
-                        });
-                    if (element.isFirstUpdate) {
-                        nextState.nodeStates = { ...this.state.nodeStates};
-                        delete nextState.nodeStates[element.id];
-                    }
-                }
+                else
+                    elements.update({
+                        id: element.id,
+                        x: element.x[0],
+                        y: element.y[0]
+                    });
+                if (element.isFirstUpdate)
+                    delete elementStates[element.id];
                 break;
             default:
                 break;
@@ -492,73 +464,49 @@ class Sheet extends Component {
     }
 
     redo = () => {
+        let nextState = {historyPivot: this.nextPivot()};
         const network = this.state.networkRef.current;
         const {history} = this.state;
-        let nextState = {historyPivot: this.nextPivot()};
-        
         let element = history[this.state.historyPivot];
+        let elements, elementStates;
+
+        if (element.type) {
+            elements = network.edges;
+            elementStates = { ...this.state.edgeStates};
+            nextState.edgeStates = elementStates;
+        }
+        else {
+            elements = network.nodes;
+            elementStates = { ...this.state.nodeStates};
+            nextState.nodeStates = elementStates;
+        }
 
         switch (element.state) {
             case DELETE:
-                if (element.type) {
-                    network.edges.remove(element.id);
-                    nextState.edgeStates = { ...this.state.edgeStates};
-
-                    if (this.state.edgeStates[element.id] === CREATE)
-                        delete nextState.edgeStates[element.id];
-                    else
-                        nextState.edgeStates[element.id] = DELETE;
-                }
-                else {
-                    network.nodes.remove(element.id);
-                    nextState.nodeStates = { ...this.state.nodeStates};
-
-                    if (this.state.nodeStates[element.id] === CREATE)
-                        delete nextState.nodeStates[element.id];
-                    else
-                        nextState.nodeStates[element.id] = DELETE;
-                }
+                elements.remove(element.id);
+                if (elementStates[element.id] === CREATE)
+                    delete elementStates[element.id];
+                else
+                    elementStates[element.id] = DELETE;
                 break;
             case CREATE:
-                if (element.type) {
-                    network.edges.add(element);
-                    nextState.edgeStates = { ...this.state.edgeStates};
-                    nextState.edgeStates[element.id] = CREATE;
-                }
-                else {
-                    network.nodes.add(element);
-                    nextState.nodeStates = { ...this.state.nodeStates};
-                    nextState.nodeStates[element.id] = CREATE;
-                }
+                elements.add(element);
+                elementStates[element.id] = CREATE;
                 break;
             case MODIFY:
-                if (element.type) {
-                    network.edges.update({
+                if (element.label)
+                    elements.update({
                         id: element.id,
                         label: element.label[1]
                     });
-                    if (element.isFirstUpdate) {
-                        nextState.edgeStates = { ...this.state.edgeStates};
-                        nextState.edgeStates[element.id] = MODIFY;
-                    }
-                }
-                else {
-                    if (element.label)
-                        network.nodes.update({
-                            id: element.id,
-                            label: element.label[1]
-                        });
-                    else 
-                        network.nodes.update({
-                            id: element.id,
-                            x: element.x[1],
-                            y: element.y[1]
-                        });
-                    if (element.isFirstUpdate) {
-                        nextState.nodeStates = { ...this.state.nodeStates};
-                        nextState.nodeStates[element.id] = MODIFY;
-                    }
-                }
+                else
+                    elements.update({
+                        id: element.id,
+                        x: element.x[1],
+                        y: element.y[1]
+                    });
+                if (element.isFirstUpdate)
+                    elementStates[element.id] = MODIFY;
                 break;
             default:
                 break;
