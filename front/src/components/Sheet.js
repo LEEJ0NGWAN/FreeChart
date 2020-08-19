@@ -103,12 +103,7 @@ function eventGenerator() {
                             historyPivot: this.nextPivot(),
                         };
                         nextState.history[this.state.historyPivot] =
-                            makeEvent(
-                                edge.id,EDGE,CREATE,
-                                {
-                                    label: "",
-                                    from: edge.from,
-                                    to: edge.to });
+                            makeEvent(edge.id,EDGE,CREATE,edge);
                         nextState.edgeStates[edge.id] = CREATE;
                         truncHistory(nextState.history);
     
@@ -152,12 +147,7 @@ function eventGenerator() {
                     historyPivot: this.nextPivot(),
                 };
                 nextState.history[this.state.historyPivot] =
-                    makeEvent(
-                        node.id,NODE,CREATE,
-                        {
-                            label: node.label,
-                            x: node.x,
-                            y: node.y });
+                    makeEvent(node.id,NODE,CREATE,node);
                 truncHistory(nextState.history);
 
                 if (this.state.from)
@@ -453,7 +443,16 @@ class Sheet extends Component {
                 }
                 break;
             case CREATE:
-
+                if (element.type) {
+                    network.edges.remove(element.id);
+                    nextState.edgeStates = { ...this.state.edgeStates};
+                    delete nextState.edgeStates[element.id];
+                }
+                else {
+                    network.nodes.remove(element.id);
+                    nextState.nodeStates = { ...this.state.nodeStates};
+                    delete nextState.nodeStates[element.id];
+                }
                 break;
             case MODIFY:
                 
@@ -476,6 +475,7 @@ class Sheet extends Component {
                 if (element.type) {
                     network.edges.remove(element.id);
                     nextState.edgeStates = { ...this.state.edgeStates};
+
                     if (this.state.edgeStates[element.id] === CREATE)
                         delete nextState.edgeStates[element.id];
                     else
@@ -484,6 +484,7 @@ class Sheet extends Component {
                 else {
                     network.nodes.remove(element.id);
                     nextState.nodeStates = { ...this.state.nodeStates};
+
                     if (this.state.nodeStates[element.id] === CREATE)
                         delete nextState.nodeStates[element.id];
                     else
@@ -491,6 +492,16 @@ class Sheet extends Component {
                 }
                 break;
             case CREATE:
+                if (element.type) {
+                    network.edges.add(element);
+                    nextState.edgeStates = { ...this.state.edgeStates};
+                    nextState.edgeStates[element.id] = CREATE;
+                }
+                else {
+                    network.nodes.add(element);
+                    nextState.nodeStates = { ...this.state.nodeStates};
+                    nextState.nodeStates[element.id] = CREATE;
+                }
                 break;
             case MODIFY:
                 break;
