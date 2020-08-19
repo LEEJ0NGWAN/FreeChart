@@ -429,7 +429,7 @@ class Sheet extends Component {
                     network.edges.add(element);
                     nextState.edgeStates = { ...this.state.edgeStates};
 
-                    if (this.state.edgeStates[element.id]) {
+                    if (this.state.edgeStates[element.id] === DELETE) {
                         if (element.isFirstUpdate)
                             delete nextState.edgeStates[element.id];
                         else
@@ -442,7 +442,7 @@ class Sheet extends Component {
                     network.nodes.add(element);
                     nextState.nodeStates = { ...this.state.nodeStates};
                     
-                    if (this.state.nodeStates[element.id]) {
+                    if (this.state.nodeStates[element.id] === DELETE) {
                         if (element.isFirstUpdate)
                             delete nextState.nodeStates[element.id];
                         else
