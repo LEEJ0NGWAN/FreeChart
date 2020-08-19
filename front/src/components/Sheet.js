@@ -194,17 +194,17 @@ function eventGenerator() {
                 history: [ ...this.state.history],
                 historyPivot: this.nextPivot(),
             };
+            let data = {x: [_x, x], y: [_y, y]};
+
+            if (!nextState.nodeStates[nodeId]) {
+                nextState.nodeStates[nodeId] = MODIFY;
+                data.isFirstUpdate = true;
+            }
+            
             nextState.history[this.state.historyPivot] =
-                makeEvent(
-                    nodeId, NODE, MODIFY, 
-                    {
-                        x: [_x, x],
-                        y: [_y, y] });
+                makeEvent(nodeId, NODE, MODIFY, data);
             truncHistory(nextState.history);
 
-            if (!nextState.nodeStates[nodeId])
-                nextState.nodeStates[nodeId] = MODIFY;
-            
             this.setState(nextState);
         }.bind(this),
     };
@@ -299,6 +299,7 @@ class Sheet extends Component {
                     ...this.state.edgeStates,
                 };
                 nextState.edgeStates[elementId] = MODIFY;
+                data.isFirstUpdate = true;
             }
         }
         else {
@@ -314,6 +315,7 @@ class Sheet extends Component {
                     ...this.state.nodeStates,
                 };
                 nextState.nodeStates[elementId] = MODIFY;
+                data.isFirstUpdate = true;
             }
         }
 
@@ -455,7 +457,33 @@ class Sheet extends Component {
                 }
                 break;
             case MODIFY:
-                
+                if (element.type) {
+                    network.edges.update({
+                        id: element.id,
+                        label: element.label[0]
+                    });
+                    if (element.isFirstUpdate) {
+                        nextState.edgeStates = { ...this.state.edgeStates};
+                        delete nextState.edgeStates[element.id];
+                    }
+                }
+                else {
+                    if (element.label)
+                        network.nodes.update({
+                            id: element.id,
+                            label: element.label[0]
+                        });
+                    else 
+                        network.nodes.update({
+                            id: element.id,
+                            x: element.x[0],
+                            y: element.y[0]
+                        });
+                    if (element.isFirstUpdate) {
+                        nextState.nodeStates = { ...this.state.nodeStates};
+                        delete nextState.nodeStates[element.id];
+                    }
+                }
                 break;
             default:
                 break;
@@ -504,6 +532,33 @@ class Sheet extends Component {
                 }
                 break;
             case MODIFY:
+                if (element.type) {
+                    network.edges.update({
+                        id: element.id,
+                        label: element.label[1]
+                    });
+                    if (element.isFirstUpdate) {
+                        nextState.edgeStates = { ...this.state.edgeStates};
+                        nextState.edgeStates[element.id] = MODIFY;
+                    }
+                }
+                else {
+                    if (element.label)
+                        network.nodes.update({
+                            id: element.id,
+                            label: element.label[1]
+                        });
+                    else 
+                        network.nodes.update({
+                            id: element.id,
+                            x: element.x[1],
+                            y: element.y[1]
+                        });
+                    if (element.isFirstUpdate) {
+                        nextState.nodeStates = { ...this.state.nodeStates};
+                        nextState.nodeStates[element.id] = MODIFY;
+                    }
+                }
                 break;
             default:
                 break;
