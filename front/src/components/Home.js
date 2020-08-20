@@ -37,7 +37,6 @@ class Home extends Component {
             this.props.getChild(null, order);
             this.setState({
                 pwd: '/',
-                order: order,
                 boardId: null,
             });
         }
