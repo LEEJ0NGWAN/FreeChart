@@ -1,3 +1,4 @@
+import { BLANK } from './Sheet';
 import React, { Component } from 'react';
 
 function computePos(offset, length, limit) {
@@ -22,13 +23,16 @@ class NodeEdit extends Component {
 
     componentDidMount() {
         this.labelInput.focus();
-        this.setState({
-            label: this.props.label,
+        let nextState = {
             innerWidth: this.state.ref.current.offsetWidth,
             innerHeight: this.state.ref.current.offsetHeight,
             width: this.state.ref.current.parentNode.offsetWidth,
             height: this.state.ref.current.parentNode.offsetHeight
-        });
+        };
+        if (this.props.label !== BLANK)
+            nextState.label = this.props.label;
+
+        this.setState(nextState);
     }
 
     changer = (event) => {
