@@ -5,12 +5,18 @@ import { getChild } from '../actions/board_api';
 import { getCookie, setCookie, deleteCookie } from '../utils';
 import Sheet from './Sheet';
 import Edit from './Edit';
+import Order from './Order';
+
+const HOME = 0;
+const EDIT_MORDAL = 1;
+const ORDER_MORDAL = 2;
 
 class Home extends Component {
     state = {
         pwd: '/',
+        order: null,
         error: null,
-        popped: false,
+        context: HOME,
         boardId: null,
         sheetId: null,
         targetId: null,
@@ -23,20 +29,23 @@ class Home extends Component {
         const boardId = getCookie('boardId');
         const sheetId = getCookie('sheetId');
         const sheetTitle = getCookie('sheetTitle');
+        const order = getCookie('order');
 
         if (event){
             deleteCookie('boardId');
             deleteCookie('sheetId');
-            this.props.getChild();
+            this.props.getChild(null, order);
             this.setState({
                 pwd: '/',
-                boardId: null
+                order: order,
+                boardId: null,
             });
         }
         else {
-            await this.props.getChild(boardId);
+            await this.props.getChild(boardId, order);
 
             let nextState = {
+                order: order,
                 boardId: boardId,
                 sheetId: sheetId,
             };
@@ -117,9 +126,22 @@ class Home extends Component {
             sheetId: sheetId});
     }
 
-    togglePop = (id=null, key=null, type=null, value=null) => {
+    switchContext (target=HOME) {
+        let nextState = {};
+        nextState.context =  
+            (target < HOME || ORDER_MORDAL < target)? HOME: target;
+        if (this.state.context === EDIT_MORDAL) {
+            nextState.targetId = null;
+            nextState.targetKey = null;
+            nextState.targetType = null;
+            nextState.targetValue = "";
+        }
+        this.setState(nextState);
+    }
+
+    fetchTarget = (id=null, key=null, type=null, value=null) => {
         this.setState({
-            popped: !this.state.popped,
+            context: EDIT_MORDAL,
             targetId: (this.state.targetId)? null: id,
             targetKey: (this.state.targetKey)? null: key,
             targetType: (this.state.targetType)? null: type,
@@ -139,7 +161,7 @@ class Home extends Component {
 
     renderNewFolderIcon() {
         return (<svg className="bs-item icon"
-        onClick={()=>{this.togglePop(null,null,0);}}
+        onClick={()=>{this.fetchTarget(null,null,0);}}
         width="24" height="24" 
         fillRule="evenodd" clipRule="evenodd">
         <path d="M7 2c1.695 1.942 2.371 3 4 
@@ -161,7 +183,7 @@ class Home extends Component {
 
     renderNewFileIcon() {
         return (<svg className="bs-item icon"
-        onClick={()=>{this.togglePop(null,null,1);}}
+        onClick={()=>{this.fetchTarget(null,null,1);}}
         width="24" height="24" viewBox="0 0 24 24">
         <path d="M23 17h-3v-3h-2v3h-3v2h3v3h2v-3h3v-2zm-7 
         5v2h-15v-24h10.189c3.163 0 9.811 7.223 9.811 
@@ -173,7 +195,7 @@ class Home extends Component {
         return (<svg className="bs-item-edit" id={id}
         onClick={(e)=>{
             e.stopPropagation();
-            this.togglePop(id, key, type, title, parentId);}}
+            this.fetchTarget(id, key, type, title, parentId);}}
         width="18" height="18" viewBox="0 0 24 24">
         <path id={id} d="M12 18c1.657 0 3 1.343 3 
         3s-1.343 3-3 3-3-1.343-3-3 1.343-3 3-3zm0-9c1.657 
@@ -183,7 +205,7 @@ class Home extends Component {
     }
 
     renderBackIcon() {
-        return(<svg className="bs-item icon"
+        return (<svg className="bs-item icon"
         onClick={this.back}
         width="24" height="24" viewBox="0 0 24 24">
         <path d="M13.427 3.021h-7.427v-3.021l-6 5.39 6 
@@ -194,12 +216,20 @@ class Home extends Component {
     }
 
     renderHomeIcon() {
-        return(<svg className="bs-item icon"
+        return (<svg className="bs-item icon"
         onClick={this.initialize}
         width="24" height="24" viewBox="0 0 24 24">
         <path d="M20 7.093v-5.093h-3v2.093l3 3zm4 
         5.907l-12-12-12 12h3v10h7v-5h4v5h7v-10h3zm-5 
         8h-3v-5h-8v5h-3v-10.26l7-6.912 7 6.99v10.182z"/></svg>);
+    }
+
+    renderOrderIcon() {
+        return (<svg className="bs-item order-icon"
+        onClick={()=>this.switchContext(ORDER_MORDAL)}
+        width="24" height="24" viewBox="0 0 24 24">
+        <path d="M13 6h-13v-4h13v4zm0 4h-13v4h13v-4zm0 
+        8h-13v4h13v-4zm3-8l4 5.075 4-5.075h-8z"/></svg>);
     }
 
     renderBoards() {
@@ -297,6 +327,7 @@ class Home extends Component {
             {this.renderNewFolderIcon()}
             {this.renderNewFileIcon()}
             {this.state.boardId && this.renderHomeIcon()}
+            {this.renderOrderIcon()}
             </div> 
         )
         const boardList = (
@@ -311,14 +342,18 @@ class Home extends Component {
         )
         const selectPanel = (
             <div className="home">
-                {this.state.popped &&
+                {(this.state.context === EDIT_MORDAL) &&
                 <Edit 
-                    togglePop={this.togglePop}
+                    escape={this.switchContext.bind(this)}
                     id={this.state.targetId}
                     key_={this.state.targetKey}
                     type={this.state.targetType}
                     value={this.state.targetValue}
                     parentId={this.state.boardId}/>}
+                {(this.state.context === ORDER_MORDAL) &&
+                <Order 
+                    escape={this.switchContext.bind(this)}
+                    order={this.state.order}/>}
                 {menu}
                 {pwd}
                 {boardList}

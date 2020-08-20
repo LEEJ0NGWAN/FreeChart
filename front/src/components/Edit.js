@@ -58,7 +58,7 @@ class Edit extends Component {
             default:
                 break;
         }
-        this.props.togglePop();
+        this.props.escape();
     }
 
     renderSaveIcon() {
@@ -92,7 +92,7 @@ class Edit extends Component {
         return(
             <div 
             className="board-modal" 
-            onClick={()=>{this.props.togglePop();}}>
+            onClick={()=>{this.props.escape();}}>
                 <div
                 className="board-modal-content"
                 onClick={(e)=>{e.stopPropagation();}}
@@ -112,7 +112,7 @@ class Edit extends Component {
                     }}
                     onKeyDown={(e)=>{
                         if (e.key === "Escape")
-                            this.props.togglePop();
+                            this.props.escape();
                     }}
                     ref={(input)=>{this.labelInput = input}}/>
                     {this.renderSaveIcon()}
