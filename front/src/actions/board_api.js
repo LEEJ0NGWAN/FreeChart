@@ -11,9 +11,9 @@ export const MODIFY_BOARD = 'MODIFY_BOARD';
 export const DELETE_BOARD = 'DELETE_BOARD';
 
 
-export function getChild(id=null) {
+export function getChild(id=null, order=null) {
     return (dispatch) => {
-        let params = {id:id}
+        let params = {id:id, order:order}
         return axios.get('api/child/',{params})
         .then(res=>{
             dispatch(fetch(GET_PARENT, res.data));
