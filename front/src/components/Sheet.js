@@ -54,9 +54,11 @@ const options = {
     },
 };
 
-function truncHistory(history) {
+function truncHistory(history, pivot) {
     if (history.length > historySize)
         history.splice(0, 1);
+    else
+        history.splice(pivot);
 }
 
 function makeEvent(elementId, elementType, state, data=null) {
@@ -107,7 +109,8 @@ function eventGenerator() {
                         nextState.history[this.state.historyPivot] =
                             makeEvent(edge.id,EDGE,CREATE,edge);
                         nextState.edgeStates[edge.id] = CREATE;
-                        truncHistory(nextState.history);
+                        truncHistory(
+                            nextState.history, nextState.historyPivot);
     
                         this.setState(nextState);
                         network.edges.add(edge);
@@ -150,7 +153,8 @@ function eventGenerator() {
                 };
                 nextState.history[this.state.historyPivot] =
                     makeEvent(node.id,NODE,CREATE,node);
-                truncHistory(nextState.history);
+                truncHistory(
+                    nextState.history, nextState.historyPivot);
 
                 if (this.state.from)
                     nextState.from = null;
@@ -205,7 +209,8 @@ function eventGenerator() {
             
             nextState.history[this.state.historyPivot] =
                 makeEvent(nodeId, NODE, MODIFY, data);
-            truncHistory(nextState.history);
+            truncHistory(
+                nextState.history, nextState.historyPivot);
 
             this.setState(nextState);
         }.bind(this),
@@ -316,7 +321,7 @@ class Sheet extends Component {
 
         nextState.history[this.state.historyPivot] =
             makeEvent(elementId, elementType, MODIFY, data);
-        truncHistory(nextState.history);
+        truncHistory(nextState.history, nextState.historyPivot);
 
         this.setState(nextState);
     }
@@ -363,7 +368,7 @@ class Sheet extends Component {
 
         nextState.history[this.state.historyPivot] = 
             makeEvent(elementId, elementType, DELETE, element);
-        truncHistory(nextState.history);
+        truncHistory(nextState.history, nextState.historyPivot);
 
         this.setState(nextState);
     }
