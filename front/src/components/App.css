@@ -155,7 +155,7 @@
     margin: 5px;
 }
 
-.board-modal {
+.board-modal, .order-modal {
     position: absolute;
     z-index: 1;
     background-color: rgba(0, 0, 0, 0.25);
@@ -262,8 +262,8 @@
 
 .profile-icon {
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: 17px;
+    right: 13px;
 }
 
 .profile-modal {
@@ -293,7 +293,7 @@
     100% {
         right: 0px;
     }
-  }
+}
 
 .profile-item {
     margin: 5px;
@@ -390,5 +390,40 @@
     float: right;
     right: 40px;
     border: none;
+}
+
+.order-item {
+    position: relative;
+    width: fit-content;
+    left: 50%;
+    transform: translate(-50%, 0px);
+    padding: 5px;
+    cursor: pointer;
+}
+
+.selected {
+    border: 0.5px solid;
+    border-radius: 10px;
+}
+
+.order-modal-content {
+    position: relative;
+    float: right;
+    background-color: white;
+    width: fit-content;
+    border-radius: 10px;
+    padding: 10px;
+    animation-name: order-slide;
+    animation-duration: 0.5s;
+    animation-play-state: initial;
+}
+
+@keyframes order-slide {
+    0% {
+        top: -100%;
+    }
+    100% {
+        top: 0px;
+    }
 }
 
