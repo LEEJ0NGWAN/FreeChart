@@ -14,6 +14,8 @@ const MODIFY = 2;
 const NODE = 0;
 const EDGE = 1;
 
+export const BLANK = " ";
+
 const historySize = 15;
 
 const getSubset = 
@@ -279,48 +281,39 @@ class Sheet extends Component {
     modifyElement = (label) => {
         const network = this.state.networkRef.current;
         const {elementId, elementType} = this.state;
-
-        let data = {};
-        let preValue;
+        let elements, elementStates;
+        let data = {}, preValue, newValue;
         let nextState = {
-            historyPivot: this.nextPivot()
+            historyPivot: this.nextPivot(),
+            history: [ ...this.state.history]
         };
 
         if (elementType) {
-            preValue = network.edges._data[elementId].label;
-
-            network.edges.update({
-                id: elementId,
-                label: label
-            });
-
-            if (!this.state.edgeStates[elementId]) {
-                nextState.edgeStates = {
-                    ...this.state.edgeStates,
-                };
-                nextState.edgeStates[elementId] = MODIFY;
-                data.isFirstUpdate = true;
-            }
+            elements = network.edges;
+            elementStates = { ...this.state.edgeStates};
+            nextState.edgeStates = elementStates;
         }
         else {
-            preValue = network.nodes._data[elementId].label;
-
-            network.nodes.update({
-                id: elementId,
-                label: label
-            });
-
-            if (!this.state.nodeStates[elementId]) {
-                nextState.nodeStates = {
-                    ...this.state.nodeStates,
-                };
-                nextState.nodeStates[elementId] = MODIFY;
-                data.isFirstUpdate = true;
-            }
+            elements = network.nodes;
+            elementStates = { ...this.state.nodeStates};
+            nextState.nodeStates = elementStates;
         }
 
-        data.label = [preValue, label];
-        nextState.history = [ ...this.state.history];
+        preValue = elements._data[elementId].label;
+        newValue = label? label: BLANK;
+
+        elements.update({
+            id: elementId,
+            label: newValue
+        });
+
+        if (!elementStates[elementId]) {
+            elementStates[elementId] = MODIFY;
+            data.isFirstUpdate = true;
+        }
+
+        data.label = [preValue, newValue];
+
         nextState.history[this.state.historyPivot] =
             makeEvent(elementId, elementType, MODIFY, data);
         truncHistory(nextState.history);
