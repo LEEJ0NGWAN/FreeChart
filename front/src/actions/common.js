@@ -1,6 +1,8 @@
 export const CLEAR_ERROR = 'CLEAR_ERROR';
 export const ERROR = 'ERROR';
 export const CLEAR = 'CLEAR';
+export const REFRESH = 'REFRESH';
+export const ACK_REFRESH = 'ACK_REFRESH';
 
 export const action = (type) => {
     return {
