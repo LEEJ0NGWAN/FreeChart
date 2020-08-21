@@ -427,3 +427,20 @@
     }
 }
 
+.delete-label {
+    padding: 10px;
+    width: fit-content;
+    position: relative;
+    left: 50%;
+    transform: translate(-50%, 0px);
+}
+
+.delete-option {
+    font-size: 70%;
+    float: right;
+}
+
+.delete-select-box {
+    margin: 25px;
+}
+

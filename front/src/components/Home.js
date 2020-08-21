@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { clearError, fetch } from '../actions/common';
+import { clearError, fetch, action, ACK_REFRESH } from '../actions/common';
 import { getChild } from '../actions/board_api';
 import { getCookie, setCookie, deleteCookie } from '../utils';
 import Sheet from './Sheet';
@@ -75,6 +75,12 @@ class Home extends Component {
         }
 
         if (prevStates.order !== this.state.order) {
+            const {boardId, order} = this.state;
+            this.props.getChild(boardId, order);
+        }
+
+        if (!prevProps.refresh && this.props.refresh) {
+            this.props.action(ACK_REFRESH);
             const {boardId, order} = this.state;
             this.props.getChild(boardId, order);
         }
@@ -389,6 +395,7 @@ export default connect((state) => {
       parent: state.boardReducer.parent,
       boards: state.boardReducer.boards,
       sheets: state.sheetReducer.sheets,
+      refresh: state.commonReducer.refresh,
     };
-}, { clearError, fetch, getChild })(Home);
+}, { clearError, fetch, action, getChild })(Home);
 

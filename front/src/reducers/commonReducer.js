@@ -1,4 +1,5 @@
-import { CLEAR, ERROR, CLEAR_ERROR } from '../actions/common';
+import { CLEAR, ERROR, CLEAR_ERROR, 
+    REFRESH, ACK_REFRESH } from '../actions/common';
 
 const initialState = {};
 
@@ -12,6 +13,15 @@ export default function (state = initialState, action) {
                 error_msg: action.payload.error_msg,
                 error_code: action.payload.error_code
             };
+        case REFRESH:
+            return {
+                ...state,
+                refresh: true
+            };
+        case ACK_REFRESH:
+            let nextState = state;
+            delete nextState.refresh;
+            return nextState;
         default:
             return state;
     }
