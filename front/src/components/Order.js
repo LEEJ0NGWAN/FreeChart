@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { getCookie, setCookie, deleteCookie } from '../utils';
+import { setCookie } from '../utils';
 
 const orders = [
     '-modify_date', 'modify_date',
@@ -17,11 +17,19 @@ class Order extends Component {
     state = {
         order: null
     };
+
     componentDidMount() {
         this.setState({
             order: this.props.order? this.props.order: '-modify_date'
         });
     }
+
+    processor(order) {
+        setCookie('order', order);
+        this.setState({order: order});
+        this.props.change(order);
+    }
+
     renderOrders() {
         let orderList = [];
 
@@ -31,11 +39,13 @@ class Order extends Component {
                     'order-item selected': 'order-item';
             orderList.push(
                 <p key={index}
+                onClick={()=>this.processor(order)}
                 className={className}>{alias[index]}</p>);
-        })
+        });
 
         return orderList;
     }
+
     render() {
         return (
             <div 
