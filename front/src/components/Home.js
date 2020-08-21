@@ -67,11 +67,16 @@ class Home extends Component {
         this.initialize();
     }
 
-    componentDidUpdate() {
+    componentDidUpdate(prevProps, prevStates) {
         const {logged, history} = this.props;
         if (!logged){
             history.push('/login');
             return;
+        }
+
+        if (prevStates.order !== this.state.order) {
+            const {boardId, order} = this.state;
+            this.props.getChild(boardId, order);
         }
     }
 
@@ -145,6 +150,12 @@ class Home extends Component {
             targetKey: (this.state.targetKey)? null: key,
             targetType: (this.state.targetType)? null: type,
             targetValue: (value)? value: ""
+        });
+    }
+
+    changeOrder = (newOrder) => {
+        this.setState({
+            order: newOrder
         });
     }
 
@@ -351,6 +362,7 @@ class Home extends Component {
                     parentId={this.state.boardId}/>}
                 {(this.state.context === ORDER_MORDAL) &&
                 <Order 
+                    change={this.changeOrder.bind(this)}
                     escape={this.switchContext.bind(this)}
                     order={this.state.order}/>}
                 {menu}
