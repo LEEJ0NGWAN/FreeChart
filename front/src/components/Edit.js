@@ -7,7 +7,8 @@ import { createBoard, modifyBoard, deleteBoard } from '../actions/board_api';
 class Edit extends Component {
     state = {
         value: "",
-        ref: React.createRef()
+        mode: false,
+        deleteChild: true,
     }
 
     componentDidMount() {
@@ -53,7 +54,8 @@ class Edit extends Component {
                         this.props.id, this.props.key_);
                 else
                     await this.props.deleteBoard(
-                        this.props.id, this.props.key_);
+                        this.props.id, this.props.key_,
+                        !this.state.deleteChild);
                 break;
             default:
                 break;
@@ -75,7 +77,7 @@ class Edit extends Component {
 
     renderDeleteIcon() {
         return(<svg className="board-modal-icon"
-        onClick={()=>{this.processor('delete');}}
+        onClick={()=>this.setState({mode: true})}
         width="24" height="24" viewBox="0 0 24 24">
         <path d="M9 19c0 .552-.448 1-1 
         1s-1-.448-1-1v-10c0-.552.448-1 
@@ -88,38 +90,77 @@ class Edit extends Component {
         1.631 2h5.712zm-3 4v16h-14v-16h-2v18h18v-18h-2z"/></svg>);
     }
 
+    renderCheckIcon() {
+        return(<svg
+        onClick={()=>this.processor('delete')}
+        width="24" height="24" viewBox="0 0 24 24">
+        <path d="M20.285 2l-11.285 11.567-5.286
+        -5.011-3.714 3.716 9 8.728 15-15.285z"/></svg>);
+    }
+
+    renderCancelIcon() {
+        return(<svg style={{float: 'right'}}
+        onClick={()=>this.setState({mode: false})}
+        width="24" height="24" viewBox="0 0 24 24">
+        <path d="M24 20.188l-8.315-8.209 
+        8.2-8.282-3.697-3.697-8.212 8.318
+        -8.31-8.203-3.666 3.666 8.321 8.24
+        -8.206 8.313 3.666 3.666 8.237-8.318 
+        8.285 8.203z"/></svg>);
+    }
+
     render() {
+        const inputMode = (
+            <div
+            className="board-modal-content"
+            onClick={(e)=>{e.stopPropagation();}}>
+                <input
+                className="board-modal-edit-input"
+                name="value" 
+                type="text"
+                autoComplete="off"
+                value={this.state.value}
+                onChange={this.changer}
+                onKeyPress={(e)=>{
+                    if (e.key === "Enter") {
+                        let option = (this.props.id)? 'modify': 'create';
+                        this.processor(option);
+                    }
+                }}
+                onKeyDown={(e)=>{
+                    if (e.key === "Escape")
+                        this.props.escape();
+                }}
+                ref={(input)=>{this.labelInput = input}}/>
+                {this.renderSaveIcon()}
+                {this.props.id && this.renderDeleteIcon()}
+            </div>);
+        const deleteMode = (
+            <div
+            className="board-modal-content"
+            onClick={(e)=>{e.stopPropagation();}}>
+                <p className="delete-label">삭제하시겠습니까?</p>
+                <div className="delete-select-box">
+                {this.renderCheckIcon()}
+                {this.renderCancelIcon()}
+                </div>
+                {!this.props.type &&
+                <label className="delete-option">
+                    <input name="deleteChild"
+                    onChange={
+                        ()=>this.setState({
+                            deleteChild:!this.state.deleteChild})}
+                    type="checkbox" defaultChecked="true"/>
+                    폴더 내부 파일 제거
+                </label>}
+            </div>);
         return(
             <div 
             className="board-modal" 
             onClick={()=>{this.props.escape();}}>
-                <div
-                className="board-modal-content"
-                onClick={(e)=>{e.stopPropagation();}}
-                ref={this.state.ref}>
-                    <input
-                    className="board-modal-edit-input"
-                    name="value" 
-                    type="text"
-                    autoComplete="off"
-                    value={this.state.value}
-                    onChange={this.changer}
-                    onKeyPress={(e)=>{
-                        if (e.key === "Enter") {
-                            let option = (this.props.id)? 'modify': 'create';
-                            this.processor(option);
-                        }
-                    }}
-                    onKeyDown={(e)=>{
-                        if (e.key === "Escape")
-                            this.props.escape();
-                    }}
-                    ref={(input)=>{this.labelInput = input}}/>
-                    {this.renderSaveIcon()}
-                    {this.props.id && this.renderDeleteIcon()}
-                </div>
+                {this.state.mode? deleteMode: inputMode}
             </div>
-        )
+        );
     }
 }
 
