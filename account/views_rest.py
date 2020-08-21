@@ -144,9 +144,9 @@ class EmailVerify(View):
             )
 
             send_mail(
-                '[FreeList] 이메일 인증 링크',
+                '[FreeChart] 이메일 인증 링크',
                 '',
-                'no-reply@freelist.tk',
+                'no-reply@freechart.tk',
                 [request.user.email],
                 html_message=html
             )
@@ -218,9 +218,9 @@ class PasswordReset(View):
             )
 
             send_mail(
-                '[FreeList] 비밀번호 재설정 링크',
+                '[FreeChart] 비밀번호 재설정 링크',
                 '',
-                'no-reply@freelist.tk',
+                'no-reply@freechart.tk',
                 [email],
                 html_message=html
             )

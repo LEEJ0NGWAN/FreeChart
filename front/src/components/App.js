@@ -54,7 +54,7 @@ class App extends Component {
         4.583-2.247 6.305z"/></svg>);
     }
 
-    renderFreelistIcon() {
+    renderFreeChartIcon() {
         return (<svg className="symbol"
         width="36" height="36" viewBox="0 0 24 24">
         <path d="M5 7c2.761 0 5 2.239 5 5s-2.239 
@@ -80,8 +80,8 @@ class App extends Component {
                 <Profile togglePop={this.togglePop}/>}
                 {!this.props.logged &&
                 <div className="App-header">
-                    {this.renderFreelistIcon()}
-                    <h1 style={{display: 'inline-block'}}>FreeList</h1>
+                    {this.renderFreeChartIcon()}
+                    <h1 style={{display: 'inline-block'}}>FreeChart</h1>
                 </div>}
                 {(this.props.logged && this.state.profileIcon) && 
                 this.renderProfileIcon()}
