@@ -1,4 +1,4 @@
-import { fetch, clearError, reportError } from './common';
+import { fetch, clearError, reportError, REFRESH, action } from './common';
 import { GET_SHEETS } from './sheet_api';
 import axios from 'axios';
 axios.defaults.withCredentials = true;
@@ -94,8 +94,11 @@ export function deleteBoard(id, key, saveChild=null) {
             save_child: saveChild
         };
         return axios.delete('api/board/', {params})
-        .then(() => {
-            dispatch(fetch(DELETE_BOARD, {key:key}));
+        .then(res => {
+            if (res.data.board)
+                dispatch(fetch(DELETE_BOARD, {key:key}));
+            else
+                dispatch(action(REFRESH));
             dispatch(clearError());
         })
         .catch(err => {
