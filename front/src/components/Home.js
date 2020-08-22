@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { clearError, fetch, action, ACK_REFRESH } from '../actions/common';
-import { getChild } from '../actions/board_api';
+import { getChild, modifyBoard } from '../actions/board_api';
+import { modifySheet } from '../actions/sheet_api';
 import { getCookie, setCookie, deleteCookie } from '../utils';
 import Sheet from './Sheet';
 import Edit from './Edit';
@@ -10,6 +11,9 @@ import Order from './Order';
 const HOME = 0;
 const EDIT_MORDAL = 1;
 const ORDER_MORDAL = 2;
+
+const BOARD = 0;
+const SHEET = 1;
 
 class Home extends Component {
     state = {
@@ -23,7 +27,8 @@ class Home extends Component {
         targetKey: null,
         targetType: null,
         targetValue: null,
-        movementMode: false,
+        moveMode: false,
+        preBoardId: null,
     }
 
     initialize = async (event) => {
@@ -109,6 +114,11 @@ class Home extends Component {
         const boardId = event.target.id;
         if (!boardId)
             return;
+
+        if (this.state.moveMode && 
+            !this.state.targetType &&
+            Number(boardId)  === this.state.targetId)
+            return;
         
         const boardTitle = document
             .querySelector(`div.bs-item.board[id="${boardId}"]`)
@@ -123,7 +133,7 @@ class Home extends Component {
 
     processer = (event) => {
         const sheetId = event.target.id;
-        if (!sheetId)
+        if (!sheetId || this.state.moveMode)
             return;
 
         const sheetTitle = document
@@ -135,6 +145,24 @@ class Home extends Component {
         this.setState({
             pwd: this.state.pwd+sheetTitle,
             sheetId: sheetId});
+    }
+
+    moveMode (on=false) {
+        if (on)
+            this.setState({
+                context: HOME,
+                moveMode: true,
+                preBoardId: this.state.boardId,
+            });
+        else
+            this.setState({
+                targetId: null,
+                targetKey: null,
+                targetType: null,
+                targetValue: null,
+                moveMode: false,
+                preBoardId: null,
+             });
     }
 
     switchContext (target=HOME) {
@@ -178,7 +206,7 @@ class Home extends Component {
 
     renderNewFolderIcon() {
         return (<svg className="bs-item icon"
-        onClick={()=>{this.fetchTarget(null,null,0);}}
+        onClick={()=>{this.fetchTarget(null,null,BOARD);}}
         width="24" height="24" 
         fillRule="evenodd" clipRule="evenodd">
         <path d="M7 2c1.695 1.942 2.371 3 4 
@@ -200,7 +228,7 @@ class Home extends Component {
 
     renderNewFileIcon() {
         return (<svg className="bs-item icon"
-        onClick={()=>{this.fetchTarget(null,null,1);}}
+        onClick={()=>{this.fetchTarget(null,null,SHEET);}}
         width="24" height="24" viewBox="0 0 24 24">
         <path d="M23 17h-3v-3h-2v3h-3v2h3v3h2v-3h3v-2zm-7 
         5v2h-15v-24h10.189c3.163 0 9.811 7.223 9.811 
@@ -249,6 +277,39 @@ class Home extends Component {
         8h-13v4h13v-4zm3-8l4 5.075 4-5.075h-8z"/></svg>);
     }
 
+    renderCheckIcon() {
+        return(<svg className="bs-item icon"
+        onClick={()=>{
+            const { boardId, preBoardId, 
+                targetId, targetKey, targetType } = this.state;
+            
+            if (boardId !== preBoardId) {
+                let parentId = boardId? boardId: -1;
+                if (targetType)
+                    this.props.modifySheet(
+                        targetId,targetKey,null,parentId);
+                else
+                    this.props.modifyBoard(
+                        targetId,targetKey,null,parentId);
+            }
+            this.moveMode();
+        }}
+        width="24" height="24" viewBox="0 0 24 24">
+        <path d="M20.285 2l-11.285 11.567-5.286
+        -5.011-3.714 3.716 9 8.728 15-15.285z"/></svg>);
+    }
+
+    renderCancelIcon() {
+        return(<svg className="bs-item icon"
+        onClick={()=>this.moveMode()}
+        width="24" height="24" viewBox="0 0 24 24">
+        <path d="M24 20.188l-8.315-8.209 
+        8.2-8.282-3.697-3.697-8.212 8.318
+        -8.31-8.203-3.666 3.666 8.321 8.24
+        -8.206 8.313 3.666 3.666 8.237-8.318 
+        8.285 8.203z"/></svg>);
+    }
+
     renderBoards() {
         const {boards} = this.props;
         if (!boards)
@@ -276,7 +337,8 @@ class Home extends Component {
                     <label 
                     className="bs-title"
                     id={board.id}>{board.title}</label>
-                    {this.renderEditIcon(
+                    {!this.state.moveMode &&
+                    this.renderEditIcon(
                         board.id, key, 0, board.title, board.parent_id)}
                 </div>);
         });
@@ -310,7 +372,8 @@ class Home extends Component {
                     <label
                     className="bs-title"
                     id={sheet.id}>{sheet.title}</label>
-                    {this.renderEditIcon(
+                    {!this.state.moveMode &&
+                    this.renderEditIcon(
                         sheet.id, key, 1, sheet.title, sheet.board_id)}
                 </div>);
         });
@@ -340,12 +403,23 @@ class Home extends Component {
         )
         const menu = (
             <div className="home-menu">
-            {this.state.boardId && this.renderBackIcon()}
-            {this.renderNewFolderIcon()}
-            {this.renderNewFileIcon()}
-            {this.state.boardId && this.renderHomeIcon()}
-            {this.renderOrderIcon()}
+                {this.state.boardId && this.renderBackIcon()}
+                {this.renderNewFolderIcon()}
+                {this.renderNewFileIcon()}
+                {this.state.boardId && this.renderHomeIcon()}
+                {this.renderOrderIcon()}
             </div> 
+        )
+        const moveMenu = (
+            <div className="home-menu">
+                {this.state.boardId && this.renderBackIcon()}
+                {this.renderCheckIcon()}
+                {this.renderCancelIcon()}
+                {this.state.boardId && this.renderHomeIcon()}
+                <label className="move-label">
+                    원하는 곳으로 이동 후, 체크 버튼을 누르세요
+                </label>
+            </div>
         )
         const boardList = (
             <div className="board-list">
@@ -361,6 +435,7 @@ class Home extends Component {
             <div className="home">
                 {(this.state.context === EDIT_MORDAL) &&
                 <Edit 
+                    move={this.moveMode.bind(this)}
                     escape={this.switchContext.bind(this)}
                     id={this.state.targetId}
                     key_={this.state.targetKey}
@@ -372,7 +447,7 @@ class Home extends Component {
                     change={this.changeOrder.bind(this)}
                     escape={this.switchContext.bind(this)}
                     order={this.state.order}/>}
-                {menu}
+                {this.state.moveMode? moveMenu: menu}
                 {pwd}
                 {boardList}
                 {sheetList}
@@ -398,5 +473,6 @@ export default connect((state) => {
       sheets: state.sheetReducer.sheets,
       refresh: state.commonReducer.refresh,
     };
-}, { clearError, fetch, action, getChild })(Home);
+}, { clearError, fetch, action, 
+    getChild, modifyBoard, modifySheet })(Home);
 
