@@ -1,3 +1,4 @@
+import { API_HOST } from '../setupProxy';
 import { action, fetch, clearError, reportError } from './common';
 import axios from 'axios';
 axios.defaults.withCredentials = true;
@@ -12,7 +13,7 @@ export const CLEAR_EMAIL_VALIDITY = 'CLEAR_EMAIL_VALIDITY';
 export function login(email, password) {
     return (dispatch) => {
         return axios.post(
-            'api/account/login/',
+            `${API_HOST}/account/login/`,
             {
                 email: email,
                 password: password
@@ -29,7 +30,7 @@ export function login(email, password) {
 
 export function logout() {
     return (dispatch) => {
-        return axios.post('api/account/logout/')
+        return axios.post(`${API_HOST}/account/logout/`)
         .then(res => {
             dispatch(action(LOGOUT));
             dispatch(clearError());
@@ -46,7 +47,7 @@ export function check(email) {
             email: email
         };
         
-        return axios.post('api/account/check/', data)
+        return axios.post(`${API_HOST}/account/check/`, data)
         .then(res => {
             dispatch(fetch(CHECK_EMAIL_VALIDITY, res.data));
             dispatch(clearError());
@@ -66,7 +67,7 @@ export function register_(email, username=null, password) {
         if (username)
             data.username = username;
         
-        return axios.post('api/user/', data)
+        return axios.post(`${API_HOST}/user/`, data)
         .then(res => {
             dispatch(fetch(LOGIN, res.data));
             dispatch(clearError());
@@ -80,7 +81,7 @@ export function register_(email, username=null, password) {
 export function passwordReset(email) {
     return (dispatch) => {
         return axios.post(
-            'api/account/password/reset/', { email: email })
+            `${API_HOST}/account/password/reset/`, { email: email })
         .then(res => {
             dispatch(clearError());
         })
@@ -92,7 +93,7 @@ export function passwordReset(email) {
 
 export function checkSession() {
     return (dispatch) => {
-        return axios.get('api/user/')
+        return axios.get(`${API_HOST}/user/`)
         .then(res => {
             dispatch(fetch(USER, res.data.user));
             dispatch(clearError());
@@ -105,7 +106,7 @@ export function checkSession() {
 
 export function modifyUsername(username) {
     return (dispatch) => {
-        return axios.put('api/user/',{username: username})
+        return axios.put(`${API_HOST}/user/`,{username: username})
         .then(res => {
             dispatch(fetch(USER, res.data.user));
             dispatch(clearError());
@@ -118,7 +119,7 @@ export function modifyUsername(username) {
 
 export function modifyPassword(password) {
     return (dispatch) => {
-        return axios.put('api/user/',{password: password})
+        return axios.put(`${API_HOST}/user/`,{password: password})
         .then(res => {
             dispatch(fetch(USER, res.data.user));
             dispatch(clearError());
@@ -135,7 +136,7 @@ export function deleteUser(id, password) {
             id: id,
             password: password
         };
-        return axios.post('api/account/delete/', params)
+        return axios.post(`${API_HOST}/account/delete/`, params)
         .then(()=> {
             dispatch(action(LOGOUT));
         })

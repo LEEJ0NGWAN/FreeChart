@@ -48,6 +48,7 @@ DJANGO_APPS = [
 EXTERNAL_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
+    'corsheaders',
 ]
 
 PROJECT_APPS = [
@@ -66,6 +67,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 # 세션 엔진을 디폴트 벡엔드 디비에서 클라이언트 브라우저 쿠키로 변경
@@ -194,4 +196,12 @@ EMAIL_HOST_PASSWORD = email_setting.EMAIL_HOST_PASSWORD
 # REDIS setting
 REDIS_HOST = 'localhost'
 REDIS_PORT = 6379
+
+# CORS
+CORS_ORIGIN_ALLOW_ALL = False
+CORS_ALLOW_CREDENTIALS = True
+CORS_ORIGIN_WHITELIST = [
+    'http://localhost:3000',
+    'http://localhost:5000',
+]
 

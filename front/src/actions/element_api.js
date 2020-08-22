@@ -1,3 +1,4 @@
+import { API_HOST } from '../setupProxy';
 import { action, fetch, clearError, reportError } from './common';
 import axios from 'axios';
 axios.defaults.withCredentials = true;
@@ -9,7 +10,7 @@ export const ELEMENTS = 'ELEMENTS';
 export function getElement(sheetId) {
     return (dispatch) => {
         let params = {sheet_id: sheetId};
-        return axios.get('api/sheet/element/', {params})
+        return axios.get(`${API_HOST}/sheet/element/`, {params})
         .then(res => {
             dispatch(fetch(ELEMENTS, res.data));
             dispatch(clearError());
@@ -23,7 +24,7 @@ export function getElement(sheetId) {
 export function editElement(sheetId, nodes, edges, nodeStates, edgeStates) {
     return (dispatch) => {
         return axios.post(
-            'api/sheet/element/',
+            `${API_HOST}/sheet/element/`,
             {
                 sheet_id: sheetId,
                 nodes: nodes, edges:edges,
