@@ -1,4 +1,4 @@
-import { fetch, clearError, reportError } from './common';
+import { fetch, clearError, reportError, REFRESH, action } from './common';
 import axios from 'axios';
 axios.defaults.withCredentials = true;
 
@@ -48,15 +48,22 @@ export function createSheet(title=null, boardId=null) {
 
 export function modifySheet(id, key, title=null, boardId=null) {
     return (dispatch) => {
-        return axios.put('api/sheet/', {
-            id: id, title: title, board_id: boardId })
-        .then(() => {
-            dispatch(
-                fetch(MODIFY_SHEET, {
-                    key: key, 
-                    title: title, 
-                    board_id: boardId
-                }));
+        let params = {id: id};
+        if (title)
+            params.title = title;
+        if (boardId)
+            params.board_id = (boardId > 0)? boardId: null; // -1: root
+
+        return axios.put('api/sheet/', params)
+        .then(res => {
+            if (title)
+                dispatch(
+                    fetch(MODIFY_SHEET, {
+                        key: key, 
+                        ...res.data.sheet
+                    }));
+            else
+                dispatch(action(REFRESH));
             dispatch(clearError());
         })
         .catch(err => {
