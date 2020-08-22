@@ -50,7 +50,7 @@ class Home extends Component {
             await this.props.getChild(boardId, order);
 
             let nextState = {
-                order: order,
+                order: order? order: '-modify_date',
                 boardId: boardId,
                 sheetId: sheetId,
             };
@@ -80,7 +80,8 @@ class Home extends Component {
             return;
         }
 
-        if (prevStates.order !== this.state.order) {
+        if (prevStates.order &&
+            prevStates.order !== this.state.order) {
             const {boardId, order} = this.state;
             this.props.getChild(boardId, order);
         }
@@ -89,6 +90,22 @@ class Home extends Component {
             this.props.action(ACK_REFRESH);
             const {boardId, order} = this.state;
             this.props.getChild(boardId, order);
+        }
+
+        if (this.state.targetId) {
+            const className = this.state.targetType? '.sheet': '.board';
+            let e = document.querySelector(
+                `${className} [id="${this.state.targetId}"]`);
+            if (e)
+                e.parentNode.style.backgroundColor = 'antiqueWhite';
+        }
+
+        if (prevStates.targetId && !this.state.targetId) {
+            const className = prevStates.targetType? '.sheet': '.board';
+            let e = document.querySelector(
+                `${className} [id="${prevStates.targetId}"]`);
+            if (e)
+                e.parentNode.style.backgroundColor = 'white';
         }
     }
 
