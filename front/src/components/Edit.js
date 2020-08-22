@@ -27,7 +27,7 @@ class Edit extends Component {
     processor = async (mode) => {
         switch(mode) {
             case 'create':
-                if(this.state.value) {
+                if (this.state.value) {
                     if (this.props.type)
                         await this.props.createSheet(
                             this.state.value, this.props.parentId);
@@ -37,7 +37,9 @@ class Edit extends Component {
                 }
                 break;
             case 'modify':
-                if(this.state.value !== this.props.value) {
+                if (this.state.value !== this.props.value) {
+                    if (!this.state.value.length)
+                        return;
                     if (this.props.type)
                         await this.props.modifySheet(
                             this.props.id, this.props.key_, 
@@ -111,6 +113,7 @@ class Edit extends Component {
 
     renderMoveIcon() {
         return (<svg className="board-modal-icon"
+        onClick={()=>this.props.move(true)}
         width="24" height="24" viewBox="0 0 24 24">
         <path d="M24 12l-6-5v4h-5v-5h4l-5-6-5 
         6h4v5h-5v-4l-6 5 6 5v-4h5v5h-4l5 6 
