@@ -173,6 +173,7 @@
     padding: 5px;
     border-radius: 5px;
     border: 2px solid black;
+    text-align: center;
 }
 
 .board-modal-edit-input {
@@ -184,10 +185,7 @@
 }
 
 .board-modal-icon {
-    position: relative;
-    left: calc(50% - 30px);
-    top: 5px;
-    margin: 5px;
+    margin: 10px;
 }
 
 .login-input {
