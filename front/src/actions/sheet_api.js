@@ -1,4 +1,4 @@
-import { API_HOST } from '../setupProxy';
+import { API_HOST } from './setupProxy';
 import { fetch, clearError, reportError, REFRESH, action } from './common';
 import axios from 'axios';
 axios.defaults.withCredentials = true;

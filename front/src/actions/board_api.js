@@ -1,4 +1,4 @@
-import { API_HOST } from '../setupProxy';
+import { API_HOST } from './setupProxy';
 import { fetch, clearError, reportError, REFRESH, action } from './common';
 import { GET_SHEETS } from './sheet_api';
 import axios from 'axios';
