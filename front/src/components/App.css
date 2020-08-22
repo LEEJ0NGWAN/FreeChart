@@ -400,8 +400,7 @@
 }
 
 .selected {
-    border: 0.5px solid;
-    border-radius: 10px;
+    background-color: antiquewhite;
 }
 
 .order-modal-content {
@@ -440,5 +439,12 @@
 
 .delete-select-box {
     margin: 25px;
+}
+
+.move-label {
+    font-size: 50%;
+    position: absolute;
+    top: 0px;
+    left: 0px;
 }
 
