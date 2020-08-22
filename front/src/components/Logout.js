@@ -11,6 +11,7 @@ class Logout extends Component {
         deleteCookie('boardId');
         deleteCookie('sheetId');
         deleteCookie('sheetTitle');
+        deleteCookie('order');
         
         this.props.logout();
         history.push('/login');
