@@ -30,6 +30,13 @@ export function clearError() {
 }
 
 export function reportError(err) {
+    if (!err.response)
+        return {
+            type: ERROR,
+            payload: {
+                error_code: 500
+            }
+        };
     return {
         type: ERROR,
         payload: {
