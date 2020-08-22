@@ -173,6 +173,7 @@
     padding: 5px;
     border-radius: 5px;
     border: 2px solid black;
+    text-align: center;
 }
 
 .board-modal-edit-input {
@@ -184,10 +185,7 @@
 }
 
 .board-modal-icon {
-    position: relative;
-    left: calc(50% - 30px);
-    top: 5px;
-    margin: 5px;
+    margin: 10px;
 }
 
 .login-input {
@@ -402,8 +400,7 @@
 }
 
 .selected {
-    border: 0.5px solid;
-    border-radius: 10px;
+    background-color: antiquewhite;
 }
 
 .order-modal-content {
@@ -442,5 +439,12 @@
 
 .delete-select-box {
     margin: 25px;
+}
+
+.move-label {
+    font-size: 50%;
+    position: absolute;
+    top: 0px;
+    left: 0px;
 }
 

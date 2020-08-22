@@ -72,13 +72,15 @@ export function modifyBoard(id, key, title=null, parentId=null) {
             params.parent_id = (parentId > 0)? parentId: null; // -1: root
 
         return axios.put('api/board/', params)
-        .then(() => {
-            dispatch(
-                fetch(MODIFY_BOARD, {
-                    key: key, 
-                    title: title,
-                    parent_id: parentId
-                }));
+        .then(res => {
+            if (title)
+                dispatch(
+                    fetch(MODIFY_BOARD, {
+                        key: key, 
+                        ...res.data.board,
+                    }));
+            else
+                dispatch(action(REFRESH));
             dispatch(clearError());
         })
         .catch(err => {
