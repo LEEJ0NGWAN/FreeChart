@@ -91,7 +91,7 @@ class Edit extends Component {
     }
 
     renderCheckIcon() {
-        return(<svg
+        return(<svg className="board-modal-icon"
         onClick={()=>this.processor('delete')}
         width="24" height="24" viewBox="0 0 24 24">
         <path d="M20.285 2l-11.285 11.567-5.286
@@ -99,7 +99,7 @@ class Edit extends Component {
     }
 
     renderCancelIcon() {
-        return(<svg style={{float: 'right'}}
+        return(<svg className="board-modal-icon"
         onClick={()=>this.setState({mode: false})}
         width="24" height="24" viewBox="0 0 24 24">
         <path d="M24 20.188l-8.315-8.209 
@@ -107,6 +107,14 @@ class Edit extends Component {
         -8.31-8.203-3.666 3.666 8.321 8.24
         -8.206 8.313 3.666 3.666 8.237-8.318 
         8.285 8.203z"/></svg>);
+    }
+
+    renderMoveIcon() {
+        return (<svg className="board-modal-icon"
+        width="24" height="24" viewBox="0 0 24 24">
+        <path d="M24 12l-6-5v4h-5v-5h4l-5-6-5 
+        6h4v5h-5v-4l-6 5 6 5v-4h5v5h-4l5 6 
+        5-6h-4v-5h5v4z"/></svg>);
     }
 
     render() {
@@ -133,6 +141,7 @@ class Edit extends Component {
                 }}
                 ref={(input)=>{this.labelInput = input}}/>
                 {this.renderSaveIcon()}
+                {this.props.id && this.renderMoveIcon()}
                 {this.props.id && this.renderDeleteIcon()}
             </div>);
         const deleteMode = (

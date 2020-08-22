@@ -23,6 +23,7 @@ class Home extends Component {
         targetKey: null,
         targetType: null,
         targetValue: null,
+        movementMode: false,
     }
 
     initialize = async (event) => {
