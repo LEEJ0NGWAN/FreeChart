@@ -1,3 +1,4 @@
+import { API_HOST } from '../setupProxy';
 import { fetch, clearError, reportError, REFRESH, action } from './common';
 import { GET_SHEETS } from './sheet_api';
 import axios from 'axios';
@@ -14,7 +15,7 @@ export const DELETE_BOARD = 'DELETE_BOARD';
 export function getChild(id=null, order=null) {
     return (dispatch) => {
         let params = {id:id, order:order}
-        return axios.get('api/child/',{params})
+        return axios.get(`${API_HOST}/child/`,{params})
         .then(res=>{
             dispatch(fetch(GET_PARENT, res.data));
             dispatch(fetch(GET_BOARDS, res.data));
@@ -32,7 +33,7 @@ export function getBoard(id=null) {
         let params = {};
         if (id)
             params.id = id;
-        return axios.get('api/board/', {params})
+        return axios.get(`${API_HOST}/board/`, {params})
         .then(res => {
             if (res.data.board)
                 dispatch(fetch(GET_BOARD, res.data));
@@ -49,7 +50,7 @@ export function getBoard(id=null) {
 
 export function createBoard(title=null, parentId=null) {
     return (dispatch) => {
-        return axios.post('api/board/', {
+        return axios.post(`${API_HOST}/board/`, {
             title: title, 
             parent_id: parentId
         })
@@ -71,7 +72,7 @@ export function modifyBoard(id, key, title=null, parentId=null) {
         if (parentId)
             params.parent_id = (parentId > 0)? parentId: null; // -1: root
 
-        return axios.put('api/board/', params)
+        return axios.put(`${API_HOST}/board/`, params)
         .then(res => {
             if (title)
                 dispatch(
@@ -95,7 +96,7 @@ export function deleteBoard(id, key, saveChild=null) {
             id: id,
             save_child: saveChild
         };
-        return axios.delete('api/board/', {params})
+        return axios.delete(`${API_HOST}/board/`, {params})
         .then(res => {
             if (res.data.board)
                 dispatch(fetch(DELETE_BOARD, {key:key}));

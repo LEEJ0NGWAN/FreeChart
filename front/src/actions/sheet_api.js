@@ -1,3 +1,4 @@
+import { API_HOST } from '../setupProxy';
 import { fetch, clearError, reportError, REFRESH, action } from './common';
 import axios from 'axios';
 axios.defaults.withCredentials = true;
@@ -15,7 +16,7 @@ export function getSheet(id=null, board_id=null) {
             params.id = id;
         if (board_id)
             params.board_id = board_id;
-        return axios.get('api/sheet/', {params})
+        return axios.get(`${API_HOST}/sheet/`, {params})
         .then(res => {
             if (res.data.sheet)
                 dispatch(fetch(GET_SHEET, res.data));
@@ -31,7 +32,7 @@ export function getSheet(id=null, board_id=null) {
 
 export function createSheet(title=null, boardId=null) {
     return (dispatch) => {
-        return axios.post('api/sheet/',
+        return axios.post(`${API_HOST}/sheet/`,
         {
             title: title,
             board_id: boardId
@@ -54,7 +55,7 @@ export function modifySheet(id, key, title=null, boardId=null) {
         if (boardId)
             params.board_id = (boardId > 0)? boardId: null; // -1: root
 
-        return axios.put('api/sheet/', params)
+        return axios.put(`${API_HOST}/sheet/`, params)
         .then(res => {
             if (title)
                 dispatch(
@@ -75,7 +76,7 @@ export function modifySheet(id, key, title=null, boardId=null) {
 export function deleteSheet(id, key) {
     return (dispatch) => {
         let params = {id: id};
-        return axios.delete('api/sheet/', {params})
+        return axios.delete(`${API_HOST}/sheet/`, {params})
         .then(() => {
             dispatch(fetch(DELETE_SHEET, {key:key}));
             dispatch(clearError());
