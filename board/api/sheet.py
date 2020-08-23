@@ -7,69 +7,72 @@ from rest_framework.status import (
     HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN,
     HTTP_404_NOT_FOUND, HTTP_409_CONFLICT
 )
-from board.models import Board, Sheet
+from board.models import Sheet
 from utils.serialize import serialize
 
 @method_decorator(csrf_exempt, name='dispatch')
-class BoardController(View):
+class SheetController(View):
     def get(self, request):
         if not request.user.is_authenticated:
             return JsonResponse({}, status=HTTP_401_UNAUTHORIZED)
         data = request.GET
 
         if 'id' in data:
-            board = Board.objects\
+            sheet = Sheet.objects\
                 .filter(
                     id=data['id'],
                     owner_id=request.user.id,
                     deleted=False).first()
-
-            if not board:
+            
+            if not sheet:
                 return JsonResponse({}, status=HTTP_404_NOT_FOUND)
             
             return JsonResponse(serialize({
-                'board': board
+                'sheet': sheet
             }))
-        
+
         order = data.get('order', '-modify_date')
         if order not in [
             '-modify_date', '-create_date','-title',
             'modify_date','create_date','title']:
             order = '-modify_date'
-
-        if 'parent_id' in data:
-            boards = Board.objects\
+        
+        if 'board_id' in data:
+            sheets = Sheet.objects\
                 .filter(
+                    board_id=data['board_id'],
                     owner_id=request.user.id,
-                    parent_id=data['parent_id'],
                     deleted=False)\
                 .order_by(order).all()
         
         else:
-            boards = Board.objects\
+            sheets = Sheet.objects\
                 .filter(
                     owner_id=request.user.id,
                     deleted=False)\
                 .order_by(order).all()
-
+        
+        if not sheets:
+            return JsonResponse({}, status=HTTP_404_NOT_FOUND)
+        
         return JsonResponse(serialize({
-            'boards': boards
+            'sheets': sheets
         }))
-
+        
     def post(self, request):
         if not request.user.is_authenticated:
             return JsonResponse({}, status=HTTP_401_UNAUTHORIZED)
         
         data = json.loads(request.body.decode("utf-8"))
         
-        new_board = Board.objects.create(
+        new_sheet = Sheet.objects.create(
             title=data.get('title'),
-            owner_id=request.user.id,
-            parent_id=data.get('parent_id')
+            board_id=data.get('board_id'),
+            owner_id=request.user.id
         )
 
         return JsonResponse(serialize({
-            'board': new_board
+            'sheet': new_sheet
         }))
 
     def put(self, request):
@@ -81,25 +84,25 @@ class BoardController(View):
         if 'id' not in data:
             return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
         
-        board = Board.objects\
+        sheet = Sheet.objects\
             .filter(
                 id=data.get('id'),
                 owner_id=request.user.id,
                 deleted=False).first()
         
-        if not board:
+        if not sheet:
             return JsonResponse({}, status=HTTP_404_NOT_FOUND)
-        
-        if 'title' in data:
-            board.title = data['title']
-        
-        if 'parent_id' in data:
-            board.parent_id = data['parent_id']
 
-        board.save()
+        if 'title' in data:
+            sheet.title = data.get('title')
+        
+        if 'board_id' in data:
+            sheet.board_id = data.get('board_id')
+        
+        sheet.save()
 
         return JsonResponse(serialize({
-            'board': board
+            'sheet': sheet
         }))
 
     def delete(self, request):
@@ -107,47 +110,23 @@ class BoardController(View):
             return JsonResponse({}, status=HTTP_401_UNAUTHORIZED)
         
         data = request.GET
-        
+
         if 'id' not in data:
             return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
         
-        board = Board.objects\
+        sheet = Sheet.objects\
             .filter(
                 id=data['id'],
                 owner_id=request.user.id,
                 deleted=False).first()
         
-        if not board:
+        if not sheet:
             return JsonResponse({}, status=HTTP_404_NOT_FOUND)
         
-        board.deleted = True
-        board.save()
-
-        if data.get('save_child'):
-            boards = Board.objects\
-                .filter(
-                    parent=board,
-                    deleted=False).all()
-
-            sheets = Sheet.objects\
-                .filter(
-                    board=board,
-                    deleted=False).all()
-            
-            response = serialize({
-                'parent': board,
-                'boards': boards,
-                'sheets': sheets
-            }, 
-            change_parent=True,
-            new_parent_id=board.parent_id)
-
-            boards.update(parent_id=board.parent_id)
-            sheets.update(board_id=board.parent_id)
-
-            return JsonResponse(response)
+        sheet.deleted = True
+        sheet.save()
 
         return JsonResponse(serialize({
-            'board': board
+            'sheet': sheet
         }))
 
