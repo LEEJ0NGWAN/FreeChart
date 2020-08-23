@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { action } from '../actions/common';
-import { createSheet, modifySheet, deleteSheet } from '../actions/sheet_api';
-import { createBoard, modifyBoard, deleteBoard } from '../actions/board_api';
+import { createSheet, modifySheet, 
+    deleteSheet, copySheet } from '../actions/sheet_api';
+import { createBoard, 
+    modifyBoard, deleteBoard } from '../actions/board_api';
 
 class Edit extends Component {
     state = {
@@ -58,6 +60,10 @@ class Edit extends Component {
                     await this.props.deleteBoard(
                         this.props.id, this.props.key_,
                         !this.state.deleteChild);
+                break;
+            case 'copy':
+                if (this.props.type && this.props.id)
+                    await this.props.copySheet(this.props.id);
                 break;
             default:
                 break;
@@ -120,6 +126,19 @@ class Edit extends Component {
         5-6h-4v-5h5v4z"/></svg>);
     }
 
+    renderCopyIcon() {
+        return (<svg className="board-modal-icon"
+        onClick={()=>this.processor('copy')}
+        width="24" height="24" viewBox="0 0 24 24">
+        <path d="M15.143 13.244l.837-2.244 2.698 
+        5.641-5.678 2.502.805-2.23s-8.055-3.538
+        -7.708-10.913c2.715 5.938 9.046 7.244 
+        9.046 7.244zm8.857-7.244v18h-18v-6h-6v
+        -18h18v6h6zm-2 2h-12.112c-.562-.578-1.08
+        -1.243-1.521-2h7.633v-4h-14v14h4v-3.124c.6.961 
+        1.287 1.823 2 2.576v6.548h14v-14z"/></svg>);
+    }
+
     render() {
         const inputMode = (
             <div
@@ -134,7 +153,8 @@ class Edit extends Component {
                 onChange={this.changer}
                 onKeyPress={(e)=>{
                     if (e.key === "Enter") {
-                        let option = (this.props.id)? 'modify': 'create';
+                        let option = 
+                            (this.props.id)? 'modify': 'create';
                         this.processor(option);
                     }
                 }}
@@ -145,6 +165,9 @@ class Edit extends Component {
                 ref={(input)=>{this.labelInput = input}}/>
                 {this.renderSaveIcon()}
                 {this.props.id && this.renderMoveIcon()}
+                {Boolean(
+                    this.props.id && this.props.type) && 
+                    this.renderCopyIcon()}
                 {this.props.id && this.renderDeleteIcon()}
             </div>);
         const deleteMode = (
@@ -182,5 +205,5 @@ export default connect((state) => {
         success: state.boardReducer.success
     };
 }, { action, createBoard, modifyBoard, deleteBoard, 
-    createSheet, modifySheet, deleteSheet })(Edit);
+    createSheet, modifySheet, deleteSheet, copySheet })(Edit);
 
