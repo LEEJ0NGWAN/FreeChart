@@ -1,5 +1,6 @@
 import json
 import datetime
+from uuid import UUID
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
@@ -8,7 +9,7 @@ from rest_framework.status import (
     HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN,
     HTTP_404_NOT_FOUND, HTTP_409_CONFLICT
 )
-from board.models import ( Board, Sheet )
+from board.models import ( Board, Sheet, Node, Edge )
 from utils.serialize import serialize
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -76,15 +77,60 @@ class SheetCopy(View):
         if not sheet:
             return JsonResponse({}, status=HTTP_404_NOT_FOUND)
         
-        title_ = sheet.title + '(복사본) ' + str(datetime.datetime.now())
+        title_ = \
+            sheet.title +'(복사본) '+ str(datetime.datetime.now())[:19]
 
-        copied = Sheet.objects.create(
+        copied_sheet = Sheet.objects.create(
             title=title_,
             board_id=sheet.board_id,
             owner_id=request.user.id
         )
 
-        return JsonResponse(serialize({
-            'sheet': copied
-        }))
+        node_values = Node.objects\
+            .filter(
+                sheet_id=sheet.id,
+                deleted=False)\
+            .values('id','label','x','y')
+
+        edge_values = Edge.objects\
+            .filter(
+                sheet_id=sheet.id,
+                deleted=False)\
+            .values('label','node_from','node_to')
+        
+        node_parse = {}
+
+        new_nodes, new_edges = [], []
+        new_nodes_app = new_nodes.append
+        new_edges_app = new_edges.append
+        
+        for val in node_values:
+            node = Node(
+                sheet_id=copied_sheet.id, 
+                label=val['label'],
+                x=val['x'],
+                y=val['y'])
+            
+            new_nodes_app(node)
+            node_parse[str(val['id'])] = node.id
+        
+        for val in edge_values:
+            from_id = str(val['node_from'])
+            to_id = str(val['node_to'])
+
+            if from_id not in node_parse\
+            or to_id not in node_parse:
+                continue
+
+            edge = Edge(
+                sheet_id=copied_sheet.id,
+                label=val['label'],
+                node_from_id=node_parse[from_id],
+                node_to_id=node_parse[to_id])
+            new_edges_app(edge)
+
+        Node.objects.bulk_create(new_nodes)
+        Edge.objects.bulk_create(new_edges)
+
+        return JsonResponse({})
 
