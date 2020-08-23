@@ -1,4 +1,5 @@
 import json
+import datetime
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
@@ -54,5 +55,36 @@ class ChildController(View):
             'parent': parent,
             'boards': boards,
             'sheets': sheets
+        }))
+
+@method_decorator(csrf_exempt, name='dispatch')
+class SheetCopy(View):
+    def post(self, request):
+        if not request.user.is_authenticated:
+            return JsonResponse({}, status=HTTP_401_UNAUTHORIZED)
+        data = json.loads(request.body.decode("utf-8"))
+
+        if 'sheet_id' not in data:
+            return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
+        
+        sheet = Sheet.objects\
+            .filter(
+                id=data['sheet_id'],
+                owner_id=request.user.id,
+                deleted=False).first()
+        
+        if not sheet:
+            return JsonResponse({}, status=HTTP_404_NOT_FOUND)
+        
+        title_ = sheet.title + '(복사본) ' + str(datetime.datetime.now())
+
+        copied = Sheet.objects.create(
+            title=title_,
+            board_id=sheet.board_id,
+            owner_id=request.user.id
+        )
+
+        return JsonResponse(serialize({
+            'sheet': copied
         }))
 
