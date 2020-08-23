@@ -87,3 +87,17 @@ export function deleteSheet(id, key) {
     };
 }
 
+export function copySheet(id) {
+    return (dispatch) => {
+        let params = {sheet_id: id}
+        return axios.post(`${API_HOST}/sheet/copy/`, params)
+        .then(()=> {
+            dispatch(action(REFRESH));
+            dispatch(clearError());
+        })
+        .catch(err => {
+            dispatch(reportError(err));
+        });
+    }
+}
+
