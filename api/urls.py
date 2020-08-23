@@ -1,8 +1,9 @@
 from django.urls import path
 from account.api.user import UserController
-from board.api.board import (
-    BoardController, SheetController, ElementController, ChildController
-)
+from board.api.board import BoardController
+from board.api.sheet import SheetController
+from board.api.element import ElementController
+from board.views_rest import ChildController
 
 urlpatterns = [
     path(
