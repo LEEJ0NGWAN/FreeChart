@@ -3,7 +3,7 @@ from account.api.user import UserController
 from board.api.board import BoardController
 from board.api.sheet import SheetController
 from board.api.element import ElementController
-from board.views_rest import ChildController
+from board.views_rest import ChildController, SheetCopy
 
 urlpatterns = [
     path(
@@ -25,7 +25,10 @@ urlpatterns = [
     path(
         'child/',
         ChildController.as_view(),
-        name='ChildView'
-    )
+        name='ChildView'),
+    path(
+        'sheet/copy/',
+        SheetCopy.as_view(),
+        name='SheetCopyView')
 ]
 
