@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { clearError, fetch, action, ACK_REFRESH } from '../actions/common';
 import { getChild, modifyBoard } from '../actions/board_api';
-import { modifySheet } from '../actions/sheet_api';
+import { modifySheet, updateSheet } from '../actions/sheet_api';
 import { getCookie, setCookie, deleteCookie } from '../utils';
 import Sheet from './Sheet';
 import Edit from './Edit';
@@ -153,15 +153,20 @@ class Home extends Component {
         if (!sheetId || this.state.moveMode)
             return;
 
-        const sheetTitle = document
-            .querySelector(`div.bs-item.sheet[id="${sheetId}"]`)
-            .getAttribute('title');
+        const sheet = 
+            document.querySelector(
+                `div.bs-item.sheet[id="${sheetId}"]`);
+        
+        const sheetTitle = sheet.getAttribute('title');
+        const sheetKey = sheet.getAttribute('tabindex');
 
         setCookie('sheetId', sheetId);
         setCookie('sheetTitle', sheetTitle);
         this.setState({
             pwd: this.state.pwd+sheetTitle,
-            sheetId: sheetId});
+            sheetId: sheetId,
+            sheetKey: sheetKey,
+        });
     }
 
     moveMode (on=false) {
@@ -375,6 +380,7 @@ class Home extends Component {
                 className="bs-item sheet"
                 onClick={this.processer}
                 title={sheet.title}
+                tabIndex={key}
                 key={sheet.id}
                 id={sheet.id}>
                     {this.renderFileIcon(sheet.id)}
@@ -474,6 +480,9 @@ class Home extends Component {
             <Sheet
             pwd={this.state.pwd}
             sheetId={this.state.sheetId}
+            update={()=>
+                this.props.updateSheet(
+                    this.state.sheetId, this.state.sheetKey)}
             escape={this.escape.bind(this)}
             toggleProfile={this.props.toggleProfile}/>
         )
@@ -491,5 +500,5 @@ export default connect((state) => {
       refresh: state.commonReducer.refresh,
     };
 }, { clearError, fetch, action, 
-    getChild, modifyBoard, modifySheet })(Home);
+    getChild, modifyBoard, modifySheet, updateSheet })(Home);
 
