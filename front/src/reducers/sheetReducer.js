@@ -27,9 +27,11 @@ export default function (state = initialState, action) {
                 ]
             };
         case MODIFY_SHEET:
-            const {key, title} = action.payload;
+            const {key, title, modify_date} = action.payload;
 
-            state.sheets[key].title = title;
+            let sheet = state.sheets[key];
+            sheet.title = title;
+            sheet.modify_date = modify_date;
 
             return {
                 ...state,
