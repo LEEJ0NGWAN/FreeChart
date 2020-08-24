@@ -97,7 +97,14 @@ function eventGenerator() {
                             id: uuid(),
                             from: this.state.from,
                             to: nodeId,
-                            label: ""
+                            label: BLANK,
+                            arrows: {
+                                to: {
+                                    enabled: this.state.arrow
+                                }
+                            },
+                            dashes: this.state.dashes,
+                            width: this.state.width,
                         };
     
                         let nextState = {
@@ -134,6 +141,13 @@ function eventGenerator() {
                     this.setState(nextState);
                 }
             }
+            else if (!nodes.length && edges.length) {
+                const edgeId = edges[0];
+                const {x, y} = event.pointer.DOM;
+                const edgeData = network.edges._data[edgeId];
+
+                this.setElementInfo(edgeId,EDGE,edgeData,x,y);
+            }
         }.bind(this),
         doubleClick: function(event) {
             const network = this.state.networkRef.current;
@@ -167,17 +181,17 @@ function eventGenerator() {
             else if (!nodes.length && edges.length) {
                 const edgeId = edges[0];
                 const {x, y} = event.pointer.DOM;
-                const label = network.edges._data[edgeId].label;
+                const edgeData = network.edges._data[edgeId];
 
-                this.setElementInfo(edgeId,EDGE,x,y,label);
+                this.setElementInfo(edgeId,EDGE,edgeData,x,y);
             }
             else {
                 const nodeId = nodes[0];
                 const {x, y} = event.pointer.DOM;
-                const label = network.nodes._data[nodeId].label;
+                const nodeData = network.nodes._data[nodeId];
                 const {edges} = event;
 
-                this.setElementInfo(nodeId,NODE,x,y,label,edges);
+                this.setElementInfo(nodeId,NODE,nodeData,x,y,edges);
             }
         }.bind(this),
         dragEnd: function(event) {
@@ -228,6 +242,9 @@ class Sheet extends Component {
         edgeStates: {},
         from: null,
         to: {},
+        dashes: false,
+        arrow: true,
+        width: 3
     };
 
     prevPivot = () => {
@@ -246,13 +263,13 @@ class Sheet extends Component {
     }
 
     setElementInfo = 
-    (elementId, elementType, x=null, y=null, label=null, edges=null) => {        
+    (elementId, elementType, elementData=null, x=null, y=null, edges=null) => {        
         let nextState = {
             popped: !this.state.popped,
             elementId: elementId,
             elementType: elementType,
+            elementData: elementData,
             x: x, y: y,
-            label: label,
             edges: edges
         };
 
@@ -373,6 +390,56 @@ class Sheet extends Component {
         this.setState(nextState);
     }
 
+    modifyEdge = (label=null, dashes=null, arrow=null, width=null) => {
+        if (!label && !dashes && !arrow && !width)
+            return;
+
+        const network = this.state.networkRef.current;
+        const {elementId, elementData} = this.state;
+        let nextState = {
+            historyPivot: this.nextPivot(),
+            history: [ ...this.state.history],
+            edgeStates: { ...this.state.edgeStates},
+        };
+
+        let data = {}, edge = {id: elementId};
+
+        if (label !== null) {
+            edge.label = label;
+            data.label = [elementData.label, label];
+        }
+
+        if (dashes !== null) {
+            edge.dashes = dashes;
+            data.dashes = [elementData.dashes, dashes];
+        }
+        
+        if (arrow !== null) {
+            edge.arrows = {
+                to: {
+                    enabled: arrow }};
+            data.arrows = [elementData.arrows, edge.arrows];
+        }
+        
+        if (width !== null) {
+            edge.width = width;
+            data.width = [elementData.width, width];
+        }
+
+        network.edges.update(edge);
+
+        if (!nextState.edgeStates[elementId]) {
+            nextState.edgeStates[elementId] = MODIFY;
+            data.isFirstUpdate = true;
+        }
+
+        nextState.history[this.state.historyPivot] =
+            makeEvent(elementId, EDGE, MODIFY, data);
+        truncHistory(nextState.history, nextState.historyPivot);
+
+        this.setState(nextState);
+    }
+
     save = async () => {
         const {sheetId} = this.props;
         const {nodeStates, edgeStates} = this.state;
@@ -441,17 +508,12 @@ class Sheet extends Component {
                 delete elementStates[element.id];
                 break;
             case MODIFY:
-                if (element.label)
-                    elements.update({
-                        id: element.id,
-                        label: element.label[0]
-                    });
-                else
-                    elements.update({
-                        id: element.id,
-                        x: element.x[0],
-                        y: element.y[0]
-                    });
+                let data = {id: element.id};
+                Object.keys(element).forEach((key)=>{
+                    if (key !== 'id' && key !== 'isFirstUpdate')
+                        data[key] = element[key][0];
+                });
+                elements.update(data);
                 if (element.isFirstUpdate)
                     delete elementStates[element.id];
                 break;
@@ -492,17 +554,12 @@ class Sheet extends Component {
                 elementStates[element.id] = CREATE;
                 break;
             case MODIFY:
-                if (element.label)
-                    elements.update({
-                        id: element.id,
-                        label: element.label[1]
-                    });
-                else
-                    elements.update({
-                        id: element.id,
-                        x: element.x[1],
-                        y: element.y[1]
-                    });
+                let data = {id: element.id};
+                Object.keys(element).forEach((key)=>{
+                    if (key !== 'id' && key !== 'isFirstUpdate')
+                        data[key] = element[key][1];
+                });
+                elements.update(data);
                 if (element.isFirstUpdate)
                     elementStates[element.id] = MODIFY;
                 break;
@@ -617,7 +674,6 @@ class Sheet extends Component {
                 {this.renderRefreshIcon()}
                 {this.renderRedoIcon()}
                 {this.renderUndoIcon()}
-                
             </div>
         )
         return (
@@ -627,11 +683,13 @@ class Sheet extends Component {
                 {this.state.popped && 
                 <ElementEdit 
                 togglePop={this.togglePop}
+                modifyEdge={this.modifyEdge}
                 modify={this.modifyElement}
                 delete={this.deleteElement}
+                type={this.state.elementType}
+                data={this.state.elementData}
                 x={this.state.x}
-                y={this.state.y}
-                label={this.state.label}/>}
+                y={this.state.y}/>}
                 {this.state.graph &&
                 <Graph
                 ref={this.state.networkRef}
