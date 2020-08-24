@@ -101,3 +101,22 @@ export function copySheet(id) {
     }
 }
 
+export function updateSheet(id, key) {
+    return (dispatch) => {
+        let params = {id: id};
+
+        return axios.put(`${API_HOST}/sheet/`, params)
+        .then(res => {
+            dispatch(
+                fetch(MODIFY_SHEET, {
+                    key: key, 
+                    ...res.data.sheet
+                }));
+            dispatch(clearError());
+        })
+        .catch(err => {
+            dispatch(reportError(err));
+        });
+    };
+}
+
