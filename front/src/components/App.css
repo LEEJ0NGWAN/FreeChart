@@ -138,6 +138,7 @@
     padding: 5px;
     border-radius: 5px;
     border: 2px solid black;
+    text-align: center;
 }
 
 .element-modal-edit-input {
@@ -150,7 +151,6 @@
 
 .element-modal-icon {
     position: relative;
-    left: calc(50% - 30px);
     top: 5px;
     margin: 5px;
 }
@@ -446,5 +446,27 @@
     position: absolute;
     top: 0px;
     left: 0px;
+}
+
+.element-modal-edge-option-box {
+    display: inline-flex;
+    margin-bottom: 5px;
+}
+
+.edge-option-item {
+    display: flex;
+    position: relative;
+    margin: 5px;
+    padding: 5px;
+    padding-top: 20px;
+    border: 0.5px solid;
+    border-radius: 5px;
+}
+
+.edge-option-label {
+    position: absolute;
+    top: 1px;
+    left: 1px;
+    font-size: 50%;
 }
 

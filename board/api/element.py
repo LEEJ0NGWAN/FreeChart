@@ -106,18 +106,33 @@ class ElementController(View):
                     sheet_id=sheet_id,
                     label=edge['label'],
                     node_from_id=edge['from'],
-                    node_to_id=edge['to']))
+                    node_to_id=edge['to'],
+                    dashes=edge['dashes'],
+                    width=edge['width'],
+                    arrow=edge['arrows']['to']['enabled']))
             else:
                 edge = data['edges'][edge_id]
                 edges[UUID(edge_id)].label = edge['label']
                 edges[UUID(edge_id)].node_from_id = edge['from']
                 edges[UUID(edge_id)].node_to_id = edge['to']
+                edges[UUID(edge_id)].dashes = edge['dashes']
+                edges[UUID(edge_id)].width = edge['width']
+                edges[UUID(edge_id)].arrow = edge['arrows']['to']['enabled']
                 edges[UUID(edge_id)].modify = now
         
         edges = list(edges.values())
         Edge.objects.bulk_update(
             edges,
-            ['node_from_id', 'node_to_id', 'deleted', 'modify', 'label'])
+            [
+                'node_from_id',
+                'node_to_id',
+                'deleted',
+                'modify',
+                'dashes',
+                'arrow',
+                'width',
+                'label',
+            ])
         Edge.objects.bulk_create(new_edges)
 
         return JsonResponse({})

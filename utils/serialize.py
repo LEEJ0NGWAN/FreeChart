@@ -163,6 +163,13 @@ def edge_parse(edge, **kwargs):
         'label': edge.label,
         'from': edge.node_from_id,
         'to': edge.node_to_id,
+        'dashes': edge.dashes,
+        'arrows': {
+            'to': {
+                'enabled': edge.arrow,
+            }
+        },
+        'width': edge.width,
     }
 
     return serialize(result, **kwargs)

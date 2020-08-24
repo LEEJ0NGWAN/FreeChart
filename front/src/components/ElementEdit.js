@@ -26,11 +26,20 @@ class NodeEdit extends Component {
         let nextState = {
             innerWidth: this.state.ref.current.offsetWidth,
             innerHeight: this.state.ref.current.offsetHeight,
-            width: this.state.ref.current.parentNode.offsetWidth,
-            height: this.state.ref.current.parentNode.offsetHeight
+            outerWidth: this.state.ref.current.parentNode.offsetWidth,
+            outerHeight: this.state.ref.current.parentNode.offsetHeight,
         };
-        if (this.props.label !== BLANK)
-            nextState.label = this.props.label;
+        const {label, width, arrows, dashes} = this.props.data;
+
+        if (label !== BLANK)
+            nextState.label = label;
+        
+        if (width)
+            nextState.width = width;
+        if (arrows)
+            nextState.arrows = arrows;
+        if (dashes !== undefined)
+            nextState.dashes = dashes;
 
         this.setState(nextState);
     }
@@ -41,12 +50,48 @@ class NodeEdit extends Component {
         this.setState(nextState);
     }
 
+    optionSwitcher = (event) => {
+        const {name} = event.target;
+        let nextState = {};
+
+        switch (name) {
+            case 'dashes':
+                nextState.dashes = !this.state.dashes;
+                break;
+            case 'arrows':
+                nextState.arrows = {
+                    to:{enabled:!this.state.arrows.to.enabled}};
+                break;
+            default:
+                break;
+        }
+
+        this.setState(nextState);
+    }
+
     processor = (event) => {
         switch(event.target.getAttribute('name')) {
             case 'label':
             case 'modify':
-                if(this.state.label !== this.props.label)
-                    this.props.modify(this.state.label);
+                const {label} = this.state;
+                let _label = label? label: BLANK;
+                if (this.props.type) {
+                    const pre = this.props.data;
+                    const {width, dashes, arrows} = this.state;
+                    const arrow = arrows.to.enabled;
+
+                    let label_ = (_label !== pre.label)? _label: null;
+                    let width_ = (width !== pre.width)? width: null;
+                    let dashes_ = (dashes !== pre.dashes)? dashes: null;
+                    let arrow_ = 
+                        (arrow !== pre.arrows.to.enabled)? arrow: null;
+                    
+                    this.props.modifyEdge(label_,dashes_,arrow_,width_);
+                }
+                else {
+                    if (_label !== this.props.data.label)
+                        this.props.modify(_label);
+                }
                 break;
             case 'delete':
                 this.props.delete();
@@ -86,13 +131,65 @@ class NodeEdit extends Component {
         1.631 2h5.712zm-3 4v16h-14v-16h-2v18h18v-18h-2z"/></svg>);
     }
 
+    renderLeftIcon() {
+        return(<svg
+        onClick={()=>{
+            if (1 < this.state.width)
+            this.setState({width:this.state.width-1})}}
+        width="18" height="18" viewBox="0 0 24 24">
+        <path d="M3 12l18-12v24z"/></svg>);
+    }
+
+    renderRightIcon() {
+        return(<svg
+        onClick={()=>{
+            if (this.state.width < 9)
+            this.setState({width:this.state.width+1})}}
+        width="18" height="18" viewBox="0 0 24 24">
+        <path d="M21 12l-18 12v-24z"/></svg>);
+    }
+
     render() {
-        const {innerWidth, innerHeight, width, height} = this.state;
+        const {innerWidth, innerHeight, outerWidth, outerHeight} = this.state;
         const {x, y} = this.props;
 
-        let x_ = computePos(x,innerWidth,width);
-        let y_ = computePos(y,innerHeight,height);
+        let x_ = computePos(x,innerWidth,outerWidth);
+        let y_ = computePos(y,innerHeight,outerHeight);
 
+        const edgeOption = (
+            <div className="element-modal-edge-option-box">
+                <div title="width" className="edge-option-item">
+                    <label className="edge-option-label">
+                        굵기
+                    </label>
+                    {this.renderLeftIcon()}
+                    <label>
+                        {this.state.width}
+                    </label>
+                    {this.renderRightIcon()}
+                </div>
+                <div title="dashes" className="edge-option-item">
+                    <label className="edge-option-label">
+                        모양
+                    </label>
+                    <label style={{fontSize:'70%'}}>
+                        <input 
+                        name="dashes" type="checkbox"
+                        onChange={this.optionSwitcher}
+                        defaultChecked={this.state.dashes}/>
+                        점선
+                    </label>
+                    {Boolean(this.state.arrows) &&
+                    <label style={{fontSize:'70%'}}>
+                        <input 
+                        name="arrows" type="checkbox"
+                        onChange={this.optionSwitcher}
+                        defaultChecked={this.state.arrows.to.enabled}/>
+                        화살표
+                    </label>}
+                </div>
+            </div>
+        )
         return(
             <div 
             className="element-modal" 
@@ -105,6 +202,7 @@ class NodeEdit extends Component {
                     top: y_+'px',
                     left: x_+'px'
                 }}>
+                    {Boolean(this.props.type) && edgeOption}
                     <input
                     name="label" 
                     type="text"
