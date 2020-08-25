@@ -27,9 +27,9 @@ const DEFAULT_EDGE_WIDTH = 3;
 const DEFAULT_EDGE_ARROW = true;
 const DEFAULT_EDGE_DASHES = false;
 
-const SELECTED_NODE_COLOR = '#faebd7'; // antiquewhite;
+const SELECTED_NODE_COLOR = '#faebd7'; //antique white;
 
-const SELECTED_NODE_TOOLTIP = "새로운 선을 그리기 위한 목적지 노드를 선택하세요";
+const SELECTED_NODE_TOOLTIP = "새로운 선을 그리기 위한 목적지 노드를 길게 눌러주세요";
 
 const getSubset = 
     (obj, ...keys) => keys.reduce(
@@ -46,11 +46,7 @@ const style = {
 };
 
 const options = {
-    nodes: {
-        color: DEFAULT_NODE_COLOR
-    },
     edges: {
-        color: "#000000",
         arrows: {
             from: {
                 enabled: true,
