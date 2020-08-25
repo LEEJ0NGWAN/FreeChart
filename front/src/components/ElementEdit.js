@@ -13,6 +13,20 @@ const EDGE_MAX_WIDTH = 9;
 const NODE_MIN_FONT = 8;
 const NODE_MAX_FONT = 20;
 
+const SHAPE_INFO = {
+    'text': '(없음)',
+    'ellipse': '타원',
+    'circle': '원',
+    'database': 'DB',
+    'box': '박스',
+    'diamond': '다이아몬드',
+    'star': '별',
+    'triangle': '삼각형',
+    'triangleDown': '역삼각형',
+    'hexagon': '헥사곤',
+    'square': '사각형'
+};
+
 function computePos(offset, length, limit) {
     let offset_ = offset;
     let l_ = offset-Math.round(length/2);
@@ -124,9 +138,10 @@ class NodeEdit extends Component {
                         newVal = 
                             (preVal.to.enabled === newVal.to.enabled)?
                                 preVal: newVal;
-                    else if (key === 'font')
+                    else if (key === 'font') {
+                        pre[key] = String(preVal);
                         newVal = String(newVal);
-
+                    }
                     if (newVal !== preVal)
                         data[key] = newVal;
                 });
@@ -184,6 +199,29 @@ class NodeEdit extends Component {
         <path d="M21 12l-18 12v-24z"/></svg>);
     }
 
+    renderNodeShapeList() {
+        let shapeList = [];
+        Object.keys(SHAPE_INFO).forEach((key)=>{
+            const className = (key === this.state.data.shape)?
+                'selected node-shape-item': 'node-shape-item';
+            shapeList.push(
+                <p className={className} key={key}
+                onClick={()=>{
+                    this.setState({
+                        data: {
+                            ...this.state.data,
+                            shape: key,
+                        }
+                    })
+                }}>
+                    {SHAPE_INFO[key]}
+                </p>
+            );
+        });
+
+        return shapeList;
+    }
+
     renderDetailOption() {
         return (
         <div
@@ -193,7 +231,10 @@ class NodeEdit extends Component {
             this.setState({detailMode: OFF})}}>
             {(this.state.detailMode === NODE_SHAPE) &&
             <div className="node-shape-box">
-                shape
+                <label className="node-shape-label">
+                    모양
+                </label>
+                {this.renderNodeShapeList()}
             </div>}
             {(this.state.detailMode === NODE_COLOR) &&
             <div className="node-color-box">
@@ -227,7 +268,7 @@ class NodeEdit extends Component {
                     <label className="edge-option-label">
                         모양
                     </label>
-                    {this.state.data.shape}
+                    {SHAPE_INFO[this.state.data.shape]}
                     {/* {Boolean(this.state.data.arrows) &&
                     <label style={{fontSize:'70%'}}>
                         <input 
