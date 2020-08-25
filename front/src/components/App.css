@@ -1,4 +1,12 @@
 
+label {
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: -moz-none;
+    -o-user-select: none;
+    user-select: none;
+}
+
 .App-header {
     position: absolute;
     top: 15%;
@@ -522,5 +530,11 @@
     position: absolute;
     top: 5%; left: 50%;
     transform: translate(-50%, 0px);
+}
+
+.tooltip-label {
+    position: absolute;
+    top: 0px; left: 0px;
+    font-size: 50%;
 }
 
