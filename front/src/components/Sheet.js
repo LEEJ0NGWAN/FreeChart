@@ -27,6 +27,8 @@ const DEFAULT_EDGE_WIDTH = 3;
 const DEFAULT_EDGE_ARROW = true;
 const DEFAULT_EDGE_DASHES = false;
 
+const SELECTED_NODE_COLOR = '#faebd7'; // antiquewhite;
+
 
 const getSubset = 
     (obj, ...keys) => keys.reduce(
@@ -48,6 +50,16 @@ const options = {
     },
     edges: {
         color: "#000000",
+        arrows: {
+            from: {
+                enabled: true,
+                type: "circle",
+                scaleFactor: 0
+            },
+            to: {
+                scaleFactor: 0.8
+            }
+        },
         arrowStrikethrough: false,
         width: DEFAULT_EDGE_WIDTH,
         smooth: {
@@ -576,6 +588,28 @@ class Sheet extends Component {
             this.redoIcon.onclick =
                 (historyPivot !== history.length)?
                     this.redo: null;
+        }
+
+        if (!prevStates.from && this.state.from) {
+            const fromId = this.state.from;
+            const network = this.state.networkRef.current;
+            const color = network.nodes._data[fromId].color;
+            network.nodes.update({
+                id: fromId,
+                color: SELECTED_NODE_COLOR,
+                color_: color
+            });
+        }
+
+        if (prevStates.from && !this.state.from) {
+            const fromId = prevStates.from;
+            const network = this.state.networkRef.current;
+            const color = network.nodes._data[fromId].color_;
+            network.nodes.update({
+                id: fromId,
+                color: color,
+                color_: undefined
+            });
         }
     }
 
