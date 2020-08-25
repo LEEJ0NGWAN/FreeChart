@@ -300,11 +300,15 @@ class Sheet extends Component {
         this.graphInitializer();
     }
 
-    modifyElement = (label) => {
+    modifyElement = (data) => {
+        const keys = Object.keys(data);
+        if (!keys.length)
+            return;
+
         const network = this.state.networkRef.current;
-        const {elementId, elementType} = this.state;
+        const {elementId, elementData, elementType} = this.state;
         let elements, elementStates;
-        let data = {}, preValue, newValue;
+        let element = {id:elementId}, info = {};
         let nextState = {
             historyPivot: this.nextPivot(),
             history: [ ...this.state.history]
@@ -321,23 +325,20 @@ class Sheet extends Component {
             nextState.nodeStates = elementStates;
         }
 
-        preValue = elements._data[elementId].label;
-        newValue = label? label: BLANK;
-
-        elements.update({
-            id: elementId,
-            label: newValue
+        keys.forEach((key)=>{
+            element[key] = data[key];
+            info[key] = [elementData[key], data[key]];
         });
+
+        elements.update(element);
 
         if (!elementStates[elementId]) {
             elementStates[elementId] = MODIFY;
-            data.isFirstUpdate = true;
+            info.isFirstUpdate = true;
         }
 
-        data.label = [preValue, newValue];
-
         nextState.history[this.state.historyPivot] =
-            makeEvent(elementId, elementType, MODIFY, data);
+            makeEvent(elementId, elementType, MODIFY, info);
         truncHistory(nextState.history, nextState.historyPivot);
 
         this.setState(nextState);
@@ -385,56 +386,6 @@ class Sheet extends Component {
 
         nextState.history[this.state.historyPivot] = 
             makeEvent(elementId, elementType, DELETE, element);
-        truncHistory(nextState.history, nextState.historyPivot);
-
-        this.setState(nextState);
-    }
-
-    modifyEdge = (label=null, dashes=null, arrow=null, width=null) => {
-        if (!label && !dashes && !arrow && !width)
-            return;
-
-        const network = this.state.networkRef.current;
-        const {elementId, elementData} = this.state;
-        let nextState = {
-            historyPivot: this.nextPivot(),
-            history: [ ...this.state.history],
-            edgeStates: { ...this.state.edgeStates},
-        };
-
-        let data = {}, edge = {id: elementId};
-
-        if (label !== null) {
-            edge.label = label;
-            data.label = [elementData.label, label];
-        }
-
-        if (dashes !== null) {
-            edge.dashes = dashes;
-            data.dashes = [elementData.dashes, dashes];
-        }
-        
-        if (arrow !== null) {
-            edge.arrows = {
-                to: {
-                    enabled: arrow }};
-            data.arrows = [elementData.arrows, edge.arrows];
-        }
-        
-        if (width !== null) {
-            edge.width = width;
-            data.width = [elementData.width, width];
-        }
-
-        network.edges.update(edge);
-
-        if (!nextState.edgeStates[elementId]) {
-            nextState.edgeStates[elementId] = MODIFY;
-            data.isFirstUpdate = true;
-        }
-
-        nextState.history[this.state.historyPivot] =
-            makeEvent(elementId, EDGE, MODIFY, data);
         truncHistory(nextState.history, nextState.historyPivot);
 
         this.setState(nextState);
@@ -685,7 +636,6 @@ class Sheet extends Component {
                 {this.state.popped && 
                 <ElementEdit 
                 togglePop={this.togglePop}
-                modifyEdge={this.modifyEdge}
                 modify={this.modifyElement}
                 delete={this.deleteElement}
                 type={this.state.elementType}
