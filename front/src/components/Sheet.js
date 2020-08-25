@@ -29,6 +29,7 @@ const DEFAULT_EDGE_DASHES = false;
 
 const SELECTED_NODE_COLOR = '#faebd7'; // antiquewhite;
 
+const SELECTED_NODE_TOOLTIP = "새로운 선을 그리기 위한 목적지 노드를 선택하세요";
 
 const getSubset = 
     (obj, ...keys) => keys.reduce(
@@ -257,6 +258,7 @@ class Sheet extends Component {
         edgeStates: {},
         from: null,
         to: {},
+        tooltipMessage: ""
     };
 
     prevPivot = () => {
@@ -599,6 +601,9 @@ class Sheet extends Component {
                 color: SELECTED_NODE_COLOR,
                 color_: color
             });
+            this.setState({
+                tooltipMessage: SELECTED_NODE_TOOLTIP
+            });
         }
 
         if (prevStates.from && !this.state.from) {
@@ -610,6 +615,9 @@ class Sheet extends Component {
                 color: color,
                 color_: undefined
             });
+            this.setState({
+                tooltipMessage: ""
+            })
         }
     }
 
@@ -666,6 +674,11 @@ class Sheet extends Component {
 
     render() {
         const {historyPivot} = this.state;
+        const tooltip = (
+            <label className="tooltip-label">
+                {this.state.tooltipMessage}
+            </label>
+        )
         const pwd = (
             <label className="pwd">
                 {(this.props.pwd.length <= 50)? this.props.pwd:
@@ -684,6 +697,7 @@ class Sheet extends Component {
         )
         return (
             <div>
+                {tooltip}
                 {menu}
                 {pwd}
                 {this.state.popped && 
