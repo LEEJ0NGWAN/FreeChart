@@ -18,10 +18,11 @@ function computePos(offset, length, limit) {
 class NodeEdit extends Component {
     state = {
         label: "",
-        ref: React.createRef()
+        ref: React.createRef(),
     }
 
     componentDidMount() {
+        this.keyPressed = {};
         this.labelInput.focus();
         let nextState = {
             innerWidth: this.state.ref.current.offsetWidth,
@@ -203,22 +204,25 @@ class NodeEdit extends Component {
                     left: x_+'px'
                 }}>
                     {Boolean(this.props.type) && edgeOption}
-                    <input
+                    <textarea
                     name="label" 
-                    type="text"
                     autoComplete="off"
                     value={this.state.label}
                     className="element-modal-edit-input"
                     onChange={this.changer}
-                    onKeyPress={(e)=>{
-                        if (e.key === "Enter")
+                    onKeyDown={e=>{
+                        this.keyPressed[e.key] = true;
+                        if (!this.keyPressed.Shift && 
+                            this.keyPressed.Enter)
                             this.processor(e);
-                    }}
-                    onKeyDown={(e)=>{
                         if (e.key === "Escape")
                             this.props.togglePop();
                     }}
-                    ref={(input)=>{this.labelInput = input}}/>
+                    onKeyUp={e=>{
+                        delete this.keyPressed[e.key];
+                    }}
+                    ref={(input)=>{this.labelInput = input}}>
+                    </textarea>
                     {this.renderSaveIcon()}
                     {this.renderDeleteIcon()}
                 </div>
