@@ -1,5 +1,6 @@
 import { BLANK } from './Sheet';
 import React, { Component } from 'react';
+import { ChromePicker } from 'react-color';
 
 const OFF = 0;
 const NODE_SHAPE = 1;
@@ -98,6 +99,15 @@ class NodeEdit extends Component {
 
         nextState.data[this.variateTarget] += (mod)? 1: -1;
         this.setState(nextState);
+    }
+
+    colorChanger = (color) => {
+        this.setState({
+            data: {
+                ...this.state.data,
+                color: color.hex
+            }
+        });
     }
 
     optionSwitcher = (event) => {
@@ -237,8 +247,12 @@ class NodeEdit extends Component {
                 {this.renderNodeShapeList()}
             </div>}
             {(this.state.detailMode === NODE_COLOR) &&
-            <div className="node-color-box">
-                color
+            <div className="color-box"
+            onClick={e=>e.stopPropagation()}>
+                <ChromePicker
+                color={this.state.data.color}
+                onChange={this.colorChanger}
+                disableAlpha={true}/>
             </div>}
         </div>);
     }
@@ -251,40 +265,41 @@ class NodeEdit extends Component {
         let y_ = computePos(y,innerHeight,outerHeight);
 
         const nodeOption = (
-            <div className="element-modal-edge-option-box">
-                <div title="font" className="edge-option-item">
-                    <label className="edge-option-label">
+            <div className="element-option-box">
+                <div title="font" className="element-option-item">
+                    <label className="element-option-label">
                         폰트 크기
                     </label>
                     {this.renderLeftIcon()}
-                    <label>
-                        {this.state.data.font}
-                    </label>
+                    {this.state.data.font}
                     {this.renderRightIcon()}
                 </div>
                 <div title="shape" 
-                className="edge-option-item"
+                className="element-option-item"
                 onClick={()=>this.setState({detailMode: NODE_SHAPE})}>
-                    <label className="edge-option-label">
+                    <label className="element-option-label">
                         모양
                     </label>
-                    {SHAPE_INFO[this.state.data.shape]}
-                    {/* {Boolean(this.state.data.arrows) &&
-                    <label style={{fontSize:'70%'}}>
-                        <input 
-                        name="arrows" type="checkbox"
-                        onChange={this.optionSwitcher}
-                        defaultChecked={
-                            this.state.data.arrows.to.enabled}/>
-                        색깔
-                    </label>} */}
+                    <label style={{fontSize: '50%'}}>
+                        {SHAPE_INFO[this.state.data.shape]}</label>
+                </div>
+                <div title="shape" 
+                className="element-option-item"
+                onClick={()=>this.setState({detailMode: NODE_COLOR})}>
+                    <label className="element-option-label">
+                        색
+                    </label>
+                    <div className="node-color-sample"
+                    style={{backgroundColor:this.state.data.color}}/>
+                    <label style={{fontSize: '50%'}}>
+                        {this.state.data.color}</label>
                 </div>
             </div>
         )
         const edgeOption = (
-            <div className="element-modal-edge-option-box">
-                <div title="width" className="edge-option-item">
-                    <label className="edge-option-label">
+            <div className="element-option-box">
+                <div title="width" className="element-option-item">
+                    <label className="element-option-label">
                         굵기
                     </label>
                     {this.renderLeftIcon()}
@@ -293,8 +308,8 @@ class NodeEdit extends Component {
                     </label>
                     {this.renderRightIcon()}
                 </div>
-                <div title="dashes" className="edge-option-item">
-                    <label className="edge-option-label">
+                <div title="dashes" className="element-option-item">
+                    <label className="element-option-label">
                         모양
                     </label>
                     {Boolean(this.state.data.arrows) &&
