@@ -17,7 +17,7 @@ function computePos(offset, length, limit) {
 
 class NodeEdit extends Component {
     state = {
-        label: "",
+        data: {label: ""},
         ref: React.createRef(),
     }
 
@@ -25,43 +25,38 @@ class NodeEdit extends Component {
         this.keyPressed = {};
         this.labelInput.focus();
         let nextState = {
+            data: this.props.data,
             innerWidth: this.state.ref.current.offsetWidth,
             innerHeight: this.state.ref.current.offsetHeight,
             outerWidth: this.state.ref.current.parentNode.offsetWidth,
             outerHeight: this.state.ref.current.parentNode.offsetHeight,
         };
-        const {label, width, arrows, dashes} = this.props.data;
+        const {label} = this.props.data;
 
-        if (label !== BLANK)
-            nextState.label = label;
-        
-        if (width)
-            nextState.width = width;
-        if (arrows)
-            nextState.arrows = arrows;
-        if (dashes !== undefined)
-            nextState.dashes = dashes;
+        if (label === BLANK)
+            delete nextState.data.label;
 
         this.setState(nextState);
     }
 
     changer = (event) => {
-        let nextState = {};
-        nextState[event.target.name] = event.target.value;
+        let nextState = {data: {...this.state.data}};
+        nextState.data[event.target.name] = event.target.value;
         this.setState(nextState);
     }
 
     optionSwitcher = (event) => {
         const {name} = event.target;
-        let nextState = {};
+        let nextState = {
+            data: { ...this.state.data}};
 
         switch (name) {
             case 'dashes':
-                nextState.dashes = !this.state.dashes;
+                nextState.data.dashes = !this.state.data.dashes;
                 break;
             case 'arrows':
-                nextState.arrows = {
-                    to:{enabled:!this.state.arrows.to.enabled}};
+                nextState.data.arrows = {
+                    to:{enabled:!this.state.data.arrows.to.enabled}};
                 break;
             default:
                 break;
@@ -74,25 +69,27 @@ class NodeEdit extends Component {
         switch(event.target.getAttribute('name')) {
             case 'label':
             case 'modify':
-                const {label} = this.state;
-                let _label = label? label: BLANK;
-                if (this.props.type) {
-                    const pre = this.props.data;
-                    const {width, dashes, arrows} = this.state;
-                    const arrow = arrows.to.enabled;
+                const now = this.state.data;
+                const pre = this.props.data;
+                const keys = Object.keys(pre);
 
-                    let label_ = (_label !== pre.label)? _label: null;
-                    let width_ = (width !== pre.width)? width: null;
-                    let dashes_ = (dashes !== pre.dashes)? dashes: null;
-                    let arrow_ = 
-                        (arrow !== pre.arrows.to.enabled)? arrow: null;
+                let data = {};
+
+                keys.forEach((key)=>{
+                    let newVal = now[key];
+                    let preVal = pre[key];
+                    if (key === 'label')
+                        newVal = now.label || BLANK;
+                    else if (key === 'arrows')
+                        newVal = 
+                            (preVal.to.enabled === newVal.to.enabled)?
+                                preVal: newVal;
                     
-                    this.props.modifyEdge(label_,dashes_,arrow_,width_);
-                }
-                else {
-                    if (_label !== this.props.data.label)
-                        this.props.modify(_label);
-                }
+                    if (newVal !== preVal)
+                        data[key] = newVal;
+                });
+
+                this.props.modify(data);
                 break;
             case 'delete':
                 this.props.delete();
@@ -135,8 +132,12 @@ class NodeEdit extends Component {
     renderLeftIcon() {
         return(<svg
         onClick={()=>{
-            if (1 < this.state.width)
-            this.setState({width:this.state.width-1})}}
+            if (1 < this.state.data.width)
+                this.setState({
+                    data: {
+                        ...this.state.data,
+                        width: this.state.data.width-1}});
+        }}
         width="18" height="18" viewBox="0 0 24 24">
         <path d="M3 12l18-12v24z"/></svg>);
     }
@@ -144,8 +145,12 @@ class NodeEdit extends Component {
     renderRightIcon() {
         return(<svg
         onClick={()=>{
-            if (this.state.width < 9)
-            this.setState({width:this.state.width+1})}}
+            if (this.state.data.width < 9)
+                this.setState({
+                    data: {
+                        ...this.state.data,
+                        width: this.state.data.width+1}});
+        }}
         width="18" height="18" viewBox="0 0 24 24">
         <path d="M21 12l-18 12v-24z"/></svg>);
     }
@@ -165,7 +170,7 @@ class NodeEdit extends Component {
                     </label>
                     {this.renderLeftIcon()}
                     <label>
-                        {this.state.width}
+                        {this.state.data.width}
                     </label>
                     {this.renderRightIcon()}
                 </div>
@@ -177,15 +182,16 @@ class NodeEdit extends Component {
                         <input 
                         name="dashes" type="checkbox"
                         onChange={this.optionSwitcher}
-                        defaultChecked={this.state.dashes}/>
+                        defaultChecked={this.state.data.dashes}/>
                         점선
                     </label>
-                    {Boolean(this.state.arrows) &&
+                    {Boolean(this.state.data.arrows) &&
                     <label style={{fontSize:'70%'}}>
                         <input 
                         name="arrows" type="checkbox"
                         onChange={this.optionSwitcher}
-                        defaultChecked={this.state.arrows.to.enabled}/>
+                        defaultChecked={
+                            this.state.data.arrows.to.enabled}/>
                         화살표
                     </label>}
                 </div>
@@ -207,7 +213,7 @@ class NodeEdit extends Component {
                     <textarea
                     name="label" 
                     autoComplete="off"
-                    value={this.state.label}
+                    value={this.state.data.label}
                     className="element-modal-edit-input"
                     onChange={this.changer}
                     onKeyDown={e=>{
