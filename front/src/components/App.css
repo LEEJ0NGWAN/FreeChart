@@ -1,4 +1,12 @@
 
+label {
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: -moz-none;
+    -o-user-select: none;
+    user-select: none;
+}
+
 .App-header {
     position: absolute;
     top: 15%;
@@ -448,12 +456,12 @@
     left: 0px;
 }
 
-.element-modal-edge-option-box {
+.element-option-box {
     display: inline-flex;
     margin-bottom: 5px;
 }
 
-.edge-option-item {
+.element-option-item {
     display: flex;
     position: relative;
     margin: 5px;
@@ -463,10 +471,70 @@
     border-radius: 5px;
 }
 
-.edge-option-label {
+.element-option-label {
     position: absolute;
     top: 1px;
     left: 1px;
+    font-size: 50%;
+}
+
+.detail-modal {
+    position: absolute;
+    z-index: 3;
+    background-color: rgba(0, 0, 0, 0.25);
+    left: 0px; right: 0px;
+    height: 100%;
+    border-radius: 0.25em;
+}
+
+.node-shape-box {
+    background-color: white;
+    position: absolute;
+    border: 0.5px solid;
+    border-radius: 5px;
+    top: 5%;
+    left: 50%;
+    transform: translate(-50%, 0px);
+    z-index: 4;
+    overflow: auto;
+    text-align: center;
+    padding: 10px;
+    width: 50%;
+}
+
+.node-shape-label {
+    position: absolute;
+    transform: translate(-50%, 0px);
+    left: 50%;
+    top: 0px;
+    width: 90%;
+    font-size: 50%;
+    color: gray;
+    border-bottom: 0.5px solid;
+}
+
+.node-shape-item {
+    cursor: pointer;   
+}
+
+.node-color-sample {
+    position: absolute;
+    top: 0px; right: 0px;
+    width: 20px; height: 20px;
+    border-radius: 5px;
+}
+
+.color-box {
+    z-index: 4;
+    width: fit-content;
+    position: absolute;
+    top: 5%; left: 50%;
+    transform: translate(-50%, 0px);
+}
+
+.tooltip-label {
+    position: absolute;
+    top: 0px; left: 0px;
     font-size: 50%;
 }
 

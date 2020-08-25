@@ -78,15 +78,23 @@ class ElementController(View):
                 sheet_id=sheet_id,
                 label=data['nodes'][node_id]['label'],
                 x=data['nodes'][node_id]['x'],
-                y=data['nodes'][node_id]['y']))
+                y=data['nodes'][node_id]['y'],
+                font=data['nodes'][node_id]['font'],
+                shape=data['nodes'][node_id]['shape'],
+                color=data['nodes'][node_id]['color']))
             else:
                 nodes[UUID(node_id)].label = data['nodes'][node_id]['label']
                 nodes[UUID(node_id)].x = data['nodes'][node_id]['x']
                 nodes[UUID(node_id)].y = data['nodes'][node_id]['y']
+                nodes[UUID(node_id)].font = data['nodes'][node_id]['font']
+                nodes[UUID(node_id)].shape = data['nodes'][node_id]['shape']
+                nodes[UUID(node_id)].color = data['nodes'][node_id]['color']
                 nodes[UUID(node_id)].modify = now
 
         nodes = list(nodes.values())
-        Node.objects.bulk_update(nodes,['label','deleted','modify','x','y'])
+        Node.objects.bulk_update(
+            nodes,
+            ['label','deleted','modify','x','y','font','shape','color'])
         Node.objects.bulk_create(new_nodes)
 
         new_edges = list()

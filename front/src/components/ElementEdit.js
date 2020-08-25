@@ -1,5 +1,32 @@
 import { BLANK } from './Sheet';
 import React, { Component } from 'react';
+import { ChromePicker } from 'react-color';
+
+const OFF = 0;
+const NODE_SHAPE = 1;
+const NODE_COLOR = 2;
+
+const ADD = true;
+const SUB = false;
+
+const EDGE_MIN_WIDTH = 1;
+const EDGE_MAX_WIDTH = 9;
+const NODE_MIN_FONT = 8;
+const NODE_MAX_FONT = 20;
+
+const SHAPE_INFO = {
+    'text': '(없음)',
+    'ellipse': '타원',
+    'circle': '원',
+    'database': 'DB',
+    'box': '박스',
+    'diamond': '다이아몬드',
+    'star': '별',
+    'triangle': '삼각형',
+    'triangleDown': '역삼각형',
+    'hexagon': '헥사곤',
+    'square': '사각형'
+};
 
 function computePos(offset, length, limit) {
     let offset_ = offset;
@@ -17,50 +44,84 @@ function computePos(offset, length, limit) {
 
 class NodeEdit extends Component {
     state = {
-        label: "",
-        ref: React.createRef()
+        detailMode: OFF,
+        data: {label: ""},
+        ref: React.createRef(),
     }
 
     componentDidMount() {
+        this.keyPressed = {};
         this.labelInput.focus();
         let nextState = {
+            data: this.props.data,
             innerWidth: this.state.ref.current.offsetWidth,
             innerHeight: this.state.ref.current.offsetHeight,
             outerWidth: this.state.ref.current.parentNode.offsetWidth,
             outerHeight: this.state.ref.current.parentNode.offsetHeight,
         };
-        const {label, width, arrows, dashes} = this.props.data;
 
-        if (label !== BLANK)
-            nextState.label = label;
-        
-        if (width)
-            nextState.width = width;
-        if (arrows)
-            nextState.arrows = arrows;
-        if (dashes !== undefined)
-            nextState.dashes = dashes;
+        if (this.props.type) {
+            this.variateTarget = 'width';
+            this.variateMinLim = EDGE_MIN_WIDTH;
+            this.variateMaxLim = EDGE_MAX_WIDTH;
+        }
+        else {
+            this.variateTarget = 'font';
+            this.variateMinLim = NODE_MIN_FONT;
+            this.variateMaxLim = NODE_MAX_FONT;
+            nextState.data.font = Number(nextState.data.font);
+        }
+
+        const {label} = this.props.data;
+
+        if (label === BLANK)
+            nextState.data.label = "";
 
         this.setState(nextState);
     }
 
     changer = (event) => {
-        let nextState = {};
-        nextState[event.target.name] = event.target.value;
+        let nextState = {data: {...this.state.data}};
+        nextState.data[event.target.name] = event.target.value;
         this.setState(nextState);
+    }
+
+    variator = (mod=ADD) => {
+        let nextState = {data: { ...this.state.data}};
+
+        if (mod &&
+            this.variateMaxLim === nextState.data[this.variateTarget])
+            return;
+        
+        if (!mod &&
+            this.variateMinLim === nextState.data[this.variateTarget])
+            return;
+
+        nextState.data[this.variateTarget] += (mod)? 1: -1;
+        this.setState(nextState);
+    }
+
+    colorChanger = (color) => {
+        this.setState({
+            data: {
+                ...this.state.data,
+                color: color.hex
+            }
+        });
     }
 
     optionSwitcher = (event) => {
         const {name} = event.target;
-        let nextState = {};
+        let nextState = {
+            data: { ...this.state.data}};
 
         switch (name) {
             case 'dashes':
-                nextState.dashes = !this.state.dashes;
+                nextState.data.dashes = !this.state.data.dashes;
                 break;
             case 'arrows':
-                nextState.arrows = {
-                    to:{enabled:!this.state.arrows.to.enabled}};
+                nextState.data.arrows = {
+                    to:{enabled:!this.state.data.arrows.to.enabled}};
                 break;
             default:
                 break;
@@ -73,25 +134,28 @@ class NodeEdit extends Component {
         switch(event.target.getAttribute('name')) {
             case 'label':
             case 'modify':
-                const {label} = this.state;
-                let _label = label? label: BLANK;
-                if (this.props.type) {
-                    const pre = this.props.data;
-                    const {width, dashes, arrows} = this.state;
-                    const arrow = arrows.to.enabled;
+                const now = this.state.data;
+                const pre = this.props.data;
+                const keys = Object.keys(pre);
+                let data = {};
 
-                    let label_ = (_label !== pre.label)? _label: null;
-                    let width_ = (width !== pre.width)? width: null;
-                    let dashes_ = (dashes !== pre.dashes)? dashes: null;
-                    let arrow_ = 
-                        (arrow !== pre.arrows.to.enabled)? arrow: null;
-                    
-                    this.props.modifyEdge(label_,dashes_,arrow_,width_);
-                }
-                else {
-                    if (_label !== this.props.data.label)
-                        this.props.modify(_label);
-                }
+                keys.forEach((key)=>{
+                    let newVal = now[key];
+                    let preVal = pre[key];
+                    if (key === 'label')
+                        newVal = now.label || BLANK;
+                    else if (key === 'arrows')
+                        newVal = 
+                            (preVal.to.enabled === newVal.to.enabled)?
+                                preVal: newVal;
+                    else if (key === 'font') {
+                        pre[key] = String(preVal);
+                        newVal = String(newVal);
+                    }
+                    if (newVal !== preVal)
+                        data[key] = newVal;
+                });
+                this.props.modify(data);
                 break;
             case 'delete':
                 this.props.delete();
@@ -133,20 +197,64 @@ class NodeEdit extends Component {
 
     renderLeftIcon() {
         return(<svg
-        onClick={()=>{
-            if (1 < this.state.width)
-            this.setState({width:this.state.width-1})}}
+        onClick={()=>this.variator(SUB)}
         width="18" height="18" viewBox="0 0 24 24">
         <path d="M3 12l18-12v24z"/></svg>);
     }
 
     renderRightIcon() {
         return(<svg
-        onClick={()=>{
-            if (this.state.width < 9)
-            this.setState({width:this.state.width+1})}}
+        onClick={()=>this.variator(ADD)}
         width="18" height="18" viewBox="0 0 24 24">
         <path d="M21 12l-18 12v-24z"/></svg>);
+    }
+
+    renderNodeShapeList() {
+        let shapeList = [];
+        Object.keys(SHAPE_INFO).forEach((key)=>{
+            const className = (key === this.state.data.shape)?
+                'selected node-shape-item': 'node-shape-item';
+            shapeList.push(
+                <p className={className} key={key}
+                onClick={()=>{
+                    this.setState({
+                        data: {
+                            ...this.state.data,
+                            shape: key,
+                        }
+                    })
+                }}>
+                    {SHAPE_INFO[key]}
+                </p>
+            );
+        });
+
+        return shapeList;
+    }
+
+    renderDetailOption() {
+        return (
+        <div
+        className="detail-modal"
+        onClick={e=>{
+            e.stopPropagation();
+            this.setState({detailMode: OFF})}}>
+            {(this.state.detailMode === NODE_SHAPE) &&
+            <div className="node-shape-box">
+                <label className="node-shape-label">
+                    모양
+                </label>
+                {this.renderNodeShapeList()}
+            </div>}
+            {(this.state.detailMode === NODE_COLOR) &&
+            <div className="color-box"
+            onClick={e=>e.stopPropagation()}>
+                <ChromePicker
+                color={this.state.data.color}
+                onChange={this.colorChanger}
+                disableAlpha={true}/>
+            </div>}
+        </div>);
     }
 
     render() {
@@ -156,35 +264,69 @@ class NodeEdit extends Component {
         let x_ = computePos(x,innerWidth,outerWidth);
         let y_ = computePos(y,innerHeight,outerHeight);
 
+        const nodeOption = (
+            <div className="element-option-box">
+                <div title="font" className="element-option-item">
+                    <label className="element-option-label">
+                        폰트 크기
+                    </label>
+                    {this.renderLeftIcon()}
+                    {this.state.data.font}
+                    {this.renderRightIcon()}
+                </div>
+                <div title="shape" 
+                className="element-option-item"
+                onClick={()=>this.setState({detailMode: NODE_SHAPE})}>
+                    <label className="element-option-label">
+                        모양
+                    </label>
+                    <label style={{fontSize: '50%'}}>
+                        {SHAPE_INFO[this.state.data.shape]}</label>
+                </div>
+                <div title="shape" 
+                className="element-option-item"
+                onClick={()=>this.setState({detailMode: NODE_COLOR})}>
+                    <label className="element-option-label">
+                        색
+                    </label>
+                    <div className="node-color-sample"
+                    style={{backgroundColor:this.state.data.color}}/>
+                    <label style={{fontSize: '50%'}}>
+                        {this.state.data.color}</label>
+                </div>
+            </div>
+        )
         const edgeOption = (
-            <div className="element-modal-edge-option-box">
-                <div title="width" className="edge-option-item">
-                    <label className="edge-option-label">
+            <div className="element-option-box">
+                <div title="width" className="element-option-item">
+                    <label className="element-option-label">
                         굵기
                     </label>
                     {this.renderLeftIcon()}
                     <label>
-                        {this.state.width}
+                        {this.state.data.width}
                     </label>
                     {this.renderRightIcon()}
                 </div>
-                <div title="dashes" className="edge-option-item">
-                    <label className="edge-option-label">
+                <div title="dashes" className="element-option-item">
+                    <label className="element-option-label">
                         모양
                     </label>
+                    {Boolean(this.state.data.arrows) &&
                     <label style={{fontSize:'70%'}}>
                         <input 
                         name="dashes" type="checkbox"
                         onChange={this.optionSwitcher}
-                        defaultChecked={this.state.dashes}/>
+                        defaultChecked={this.state.data.dashes}/>
                         점선
-                    </label>
-                    {Boolean(this.state.arrows) &&
+                    </label>}
+                    {Boolean(this.state.data.arrows) &&
                     <label style={{fontSize:'70%'}}>
                         <input 
                         name="arrows" type="checkbox"
                         onChange={this.optionSwitcher}
-                        defaultChecked={this.state.arrows.to.enabled}/>
+                        defaultChecked={
+                            this.state.data.arrows.to.enabled}/>
                         화살표
                     </label>}
                 </div>
@@ -194,6 +336,8 @@ class NodeEdit extends Component {
             <div 
             className="element-modal" 
             onClick={()=>{this.props.togglePop();}}>
+                {Boolean(this.state.detailMode) &&
+                this.renderDetailOption()}
                 <div
                 className="element-modal-content"
                 onClick={(e)=>{e.stopPropagation();}}
@@ -202,23 +346,27 @@ class NodeEdit extends Component {
                     top: y_+'px',
                     left: x_+'px'
                 }}>
-                    {Boolean(this.props.type) && edgeOption}
-                    <input
+                    {Boolean(this.props.type)?
+                    edgeOption: nodeOption}
+                    <textarea
                     name="label" 
-                    type="text"
                     autoComplete="off"
-                    value={this.state.label}
+                    value={this.state.data.label}
                     className="element-modal-edit-input"
                     onChange={this.changer}
-                    onKeyPress={(e)=>{
-                        if (e.key === "Enter")
+                    onKeyDown={e=>{
+                        this.keyPressed[e.key] = true;
+                        if (!this.keyPressed.Shift && 
+                            this.keyPressed.Enter)
                             this.processor(e);
-                    }}
-                    onKeyDown={(e)=>{
                         if (e.key === "Escape")
                             this.props.togglePop();
                     }}
-                    ref={(input)=>{this.labelInput = input}}/>
+                    onKeyUp={e=>{
+                        delete this.keyPressed[e.key];
+                    }}
+                    ref={(input)=>{this.labelInput = input}}>
+                    </textarea>
                     {this.renderSaveIcon()}
                     {this.renderDeleteIcon()}
                 </div>

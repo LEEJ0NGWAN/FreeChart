@@ -36,6 +36,9 @@ class Node(models.Model):
     deleted = models.BooleanField(default=False, null=False)
     x = models.IntegerField(null=True)
     y = models.IntegerField(null=True)
+    font = models.CharField(max_length=20, default='14')
+    shape = models.CharField(max_length=20, default='ellipse')
+    color = models.CharField(max_length=8, default='#dddddd')
 
 class Edge(models.Model):
     class Meta:

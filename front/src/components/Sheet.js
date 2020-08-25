@@ -18,6 +18,19 @@ export const BLANK = " ";
 
 const historySize = 15;
 
+const DEFAULT_NODE_SHAPE = 'ellipse';
+const DEFAULT_NODE_COLOR = '#dddddd';
+const DEFAULT_NODE_FONT = '14';
+const DEFAULT_NODE_NAME = '새로운 노드';
+
+const DEFAULT_EDGE_WIDTH = 3;
+const DEFAULT_EDGE_ARROW = true;
+const DEFAULT_EDGE_DASHES = false;
+
+const SELECTED_NODE_COLOR = '#faebd7'; //antique white;
+
+const SELECTED_NODE_TOOLTIP = "새로운 선을 그리기 위한 목적지 노드를 길게 눌러주세요";
+
 const getSubset = 
     (obj, ...keys) => keys.reduce(
         (a, c) => ({ ...a, [c]: obj[c] }), {});
@@ -33,13 +46,19 @@ const style = {
 };
 
 const options = {
-    nodes: {
-        shape: "circle",
-    },
     edges: {
-        color: "#000000",
+        arrows: {
+            from: {
+                enabled: true,
+                type: "circle",
+                scaleFactor: 0
+            },
+            to: {
+                scaleFactor: 0.8
+            }
+        },
         arrowStrikethrough: false,
-        width: 3,
+        width: DEFAULT_EDGE_WIDTH,
         smooth: {
             type: "continuous",
             forceDirection: "none"
@@ -97,14 +116,7 @@ function eventGenerator() {
                             id: uuid(),
                             from: this.state.from,
                             to: nodeId,
-                            label: BLANK,
-                            arrows: {
-                                to: {
-                                    enabled: this.state.arrow
-                                }
-                            },
-                            dashes: this.state.dashes,
-                            width: this.state.width,
+                            ...this.edgePreset,
                         };
     
                         let nextState = {
@@ -156,8 +168,8 @@ function eventGenerator() {
                 const {x, y} = event.pointer.canvas;
                 let node = {
                     id: uuid(),
-                    label: '새로운 노드',
-                    x: x, y: y
+                    x: x, y: y,
+                    ...this.nodePreset,
                 };
 
                 let nextState = {
@@ -242,9 +254,7 @@ class Sheet extends Component {
         edgeStates: {},
         from: null,
         to: {},
-        dashes: false,
-        arrow: true,
-        width: 3
+        tooltipMessage: ""
     };
 
     prevPivot = () => {
@@ -294,17 +304,40 @@ class Sheet extends Component {
         });
     }
 
+    presetInitializer = () => {
+        this.nodePreset = {
+            font: DEFAULT_NODE_FONT,
+            shape: DEFAULT_NODE_SHAPE,
+            color: DEFAULT_NODE_COLOR,
+            label: DEFAULT_NODE_NAME,
+        };
+
+        this.edgePreset = {
+            label: BLANK,
+            dashes: DEFAULT_EDGE_DASHES,
+            arrows: {
+                to: {
+                    enabled: DEFAULT_EDGE_ARROW}},
+            width: DEFAULT_EDGE_WIDTH,
+        };
+    }
+
     initializer = async () => {
         this.props.toggleProfile(false);
         await this.fetchElements();
         this.graphInitializer();
+        this.presetInitializer();
     }
 
-    modifyElement = (label) => {
+    modifyElement = (data) => {
+        const keys = Object.keys(data);
+        if (!keys.length)
+            return;
+
         const network = this.state.networkRef.current;
-        const {elementId, elementType} = this.state;
+        const {elementId, elementData, elementType} = this.state;
         let elements, elementStates;
-        let data = {}, preValue, newValue;
+        let element = {id:elementId}, info = {};
         let nextState = {
             historyPivot: this.nextPivot(),
             history: [ ...this.state.history]
@@ -321,23 +354,20 @@ class Sheet extends Component {
             nextState.nodeStates = elementStates;
         }
 
-        preValue = elements._data[elementId].label;
-        newValue = label? label: BLANK;
-
-        elements.update({
-            id: elementId,
-            label: newValue
+        keys.forEach((key)=>{
+            element[key] = data[key];
+            info[key] = [elementData[key], data[key]];
         });
+
+        elements.update(element);
 
         if (!elementStates[elementId]) {
             elementStates[elementId] = MODIFY;
-            data.isFirstUpdate = true;
+            info.isFirstUpdate = true;
         }
 
-        data.label = [preValue, newValue];
-
         nextState.history[this.state.historyPivot] =
-            makeEvent(elementId, elementType, MODIFY, data);
+            makeEvent(elementId, elementType, MODIFY, info);
         truncHistory(nextState.history, nextState.historyPivot);
 
         this.setState(nextState);
@@ -385,56 +415,6 @@ class Sheet extends Component {
 
         nextState.history[this.state.historyPivot] = 
             makeEvent(elementId, elementType, DELETE, element);
-        truncHistory(nextState.history, nextState.historyPivot);
-
-        this.setState(nextState);
-    }
-
-    modifyEdge = (label=null, dashes=null, arrow=null, width=null) => {
-        if (!label && !dashes && !arrow && !width)
-            return;
-
-        const network = this.state.networkRef.current;
-        const {elementId, elementData} = this.state;
-        let nextState = {
-            historyPivot: this.nextPivot(),
-            history: [ ...this.state.history],
-            edgeStates: { ...this.state.edgeStates},
-        };
-
-        let data = {}, edge = {id: elementId};
-
-        if (label !== null) {
-            edge.label = label;
-            data.label = [elementData.label, label];
-        }
-
-        if (dashes !== null) {
-            edge.dashes = dashes;
-            data.dashes = [elementData.dashes, dashes];
-        }
-        
-        if (arrow !== null) {
-            edge.arrows = {
-                to: {
-                    enabled: arrow }};
-            data.arrows = [elementData.arrows, edge.arrows];
-        }
-        
-        if (width !== null) {
-            edge.width = width;
-            data.width = [elementData.width, width];
-        }
-
-        network.edges.update(edge);
-
-        if (!nextState.edgeStates[elementId]) {
-            nextState.edgeStates[elementId] = MODIFY;
-            data.isFirstUpdate = true;
-        }
-
-        nextState.history[this.state.historyPivot] =
-            makeEvent(elementId, EDGE, MODIFY, data);
         truncHistory(nextState.history, nextState.historyPivot);
 
         this.setState(nextState);
@@ -607,6 +587,34 @@ class Sheet extends Component {
                 (historyPivot !== history.length)?
                     this.redo: null;
         }
+
+        if (!prevStates.from && this.state.from) {
+            const fromId = this.state.from;
+            const network = this.state.networkRef.current;
+            const color = network.nodes._data[fromId].color;
+            network.nodes.update({
+                id: fromId,
+                color: SELECTED_NODE_COLOR,
+                color_: color
+            });
+            this.setState({
+                tooltipMessage: SELECTED_NODE_TOOLTIP
+            });
+        }
+
+        if (prevStates.from && !this.state.from) {
+            const fromId = prevStates.from;
+            const network = this.state.networkRef.current;
+            const color = network.nodes._data[fromId].color_;
+            network.nodes.update({
+                id: fromId,
+                color: color,
+                color_: undefined
+            });
+            this.setState({
+                tooltipMessage: ""
+            })
+        }
     }
 
     renderBackIcon() {
@@ -662,6 +670,11 @@ class Sheet extends Component {
 
     render() {
         const {historyPivot} = this.state;
+        const tooltip = (
+            <label className="tooltip-label">
+                {this.state.tooltipMessage}
+            </label>
+        )
         const pwd = (
             <label className="pwd">
                 {(this.props.pwd.length <= 50)? this.props.pwd:
@@ -680,12 +693,12 @@ class Sheet extends Component {
         )
         return (
             <div>
+                {tooltip}
                 {menu}
                 {pwd}
                 {this.state.popped && 
                 <ElementEdit 
                 togglePop={this.togglePop}
-                modifyEdge={this.modifyEdge}
                 modify={this.modifyElement}
                 delete={this.deleteElement}
                 type={this.state.elementType}

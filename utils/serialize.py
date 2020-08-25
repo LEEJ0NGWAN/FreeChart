@@ -152,6 +152,9 @@ def node_parse(node, **kwargs):
         'label': node.label,
         'x': node.x,
         'y': node.y,
+        'font': node.font,
+        'shape': node.shape,
+        'color': node.color,
     }
 
     return serialize(result, **kwargs)
