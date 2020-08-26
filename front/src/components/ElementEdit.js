@@ -122,8 +122,7 @@ class NodeEdit extends Component {
             case 'arrows':
                 nextState.data.arrows = {
                     to:{
-                        scaleFactor:
-                        Number(!this.state.data.arrows.to.scaleFactor)}};
+                        enabled: !this.state.data.arrows.to.enabled}};
                 break;
             default:
                 break;
@@ -148,8 +147,8 @@ class NodeEdit extends Component {
                         newVal = now.label || BLANK;
                     else if (key === 'arrows')
                         newVal = 
-                            (preVal.to.scaleFactor === 
-                                newVal.to.scaleFactor)?
+                            (preVal.to.enabled === 
+                                newVal.to.enabled)?
                                 preVal: newVal;
                     else if (key === 'font') {
                         pre[key] = String(preVal);
@@ -329,7 +328,7 @@ class NodeEdit extends Component {
                         name="arrows" type="checkbox"
                         onChange={this.optionSwitcher}
                         defaultChecked={
-                            this.state.data.arrows.to.scaleFactor}/>
+                            this.state.data.arrows.to.enabled}/>
                         화살표
                     </label>}
                 </div>
