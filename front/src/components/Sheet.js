@@ -24,6 +24,7 @@ const DEFAULT_NODE_FONT = '14';
 const DEFAULT_NODE_NAME = '새로운 노드';
 
 const DEFAULT_EDGE_WIDTH = 3;
+const DEFAULT_EDGE_ARROW = true;
 const DEFAULT_EDGE_DASHES = false;
 
 const SELECTED_NODE_COLOR = '#faebd7'; //antique white;
@@ -44,13 +45,30 @@ const style = {
     borderRadius: '0.25em'
 };
 
-const options = {
-    nodes: {
-        font: DEFAULT_NODE_FONT,
-        label: DEFAULT_NODE_NAME,
-        shape: DEFAULT_NODE_SHAPE,
-        color: DEFAULT_NODE_COLOR,
+const nodePreset = {
+    font: DEFAULT_NODE_FONT,
+    label: DEFAULT_NODE_NAME,
+    shape: DEFAULT_NODE_SHAPE,
+    color: DEFAULT_NODE_COLOR,
+}
+
+const edgePreset = {
+    arrow: DEFAULT_EDGE_ARROW,
+    arrows: {
+        to: {
+            enabled: true,
+            imageHeight: 1,
+            imageWidth: 1,
+            scaleFactor: 1,
+            type: 'arrow'
+        }
     },
+    label: BLANK,
+    width: DEFAULT_EDGE_WIDTH,
+    dashes: DEFAULT_EDGE_DASHES,
+};
+
+const options = {
     edges: {
         arrowStrikethrough: false,
         arrows: {
@@ -61,12 +79,6 @@ const options = {
                 scaleFactor: 0,
                 type: "image"
             },
-            to: {
-                enabled: true,
-                imageHeight: 1,
-                imageWidth: 1,
-                scaleFactor: 1,
-            }
         },
         label: BLANK,
         width: DEFAULT_EDGE_WIDTH,
@@ -129,6 +141,7 @@ function eventGenerator() {
                             id: uuid(),
                             from: this.state.from,
                             to: nodeId,
+                            ...edgePreset,
                         };
     
                         let nextState = {
@@ -181,6 +194,8 @@ function eventGenerator() {
                 let node = {
                     id: uuid(),
                     x: x, y: y,
+                    x_: x, y_: y,
+                    ...nodePreset,
                 };
 
                 let nextState = {
