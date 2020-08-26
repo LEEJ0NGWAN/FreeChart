@@ -169,7 +169,7 @@ def edge_parse(edge, **kwargs):
         'dashes': edge.dashes,
         'arrows': {
             'to': {
-                'enabled': edge.arrow,
+                'scaleFactor': edge.arrow,
             }
         },
         'width': edge.width,
