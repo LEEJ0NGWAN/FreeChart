@@ -169,13 +169,21 @@ def edge_parse(edge, **kwargs):
         'from': edge.node_from_id,
         'to': edge.node_to_id,
         'dashes': edge.dashes,
-        'arrows': {
-            'to': {
-                'enabled': edge.arrow,
-            }
-        },
         'width': edge.width,
+        'arrow': edge.arrow,
+        'arrows': {},
     }
+
+    to = {}
+    if edge.arrow:
+        to['type'] = 'arrow'
+        to['scaleFactor'] = 1
+    
+    else:
+        to['type'] = 'image'
+        to['scaleFactor'] = 0
+    
+    result['arrows']['to'] = to
 
     return serialize(result, **kwargs)
 

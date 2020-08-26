@@ -120,9 +120,15 @@ class NodeEdit extends Component {
                 nextState.data.dashes = !this.state.data.dashes;
                 break;
             case 'arrows':
+                const {arrow} = this.state.data;
+                const arrow_ = !arrow;
+                nextState.data.arrow = arrow_;
                 nextState.data.arrows = {
-                    to:{
-                        enabled: !this.state.data.arrows.to.enabled}};
+                    to: {
+                        scaleFactor: arrow_? 1: 0,
+                        type: arrow_? 'arrow': 'image',
+                    }
+                };
                 break;
             default:
                 break;
@@ -146,10 +152,7 @@ class NodeEdit extends Component {
                     if (key === 'label')
                         newVal = now.label || BLANK;
                     else if (key === 'arrows')
-                        newVal = 
-                            (preVal.to.enabled === 
-                                newVal.to.enabled)?
-                                preVal: newVal;
+                        newVal = (pre.arrow === now.arrow)? preVal: newVal;
                     else if (key === 'font') {
                         pre[key] = String(preVal);
                         newVal = String(newVal);
@@ -328,7 +331,7 @@ class NodeEdit extends Component {
                         name="arrows" type="checkbox"
                         onChange={this.optionSwitcher}
                         defaultChecked={
-                            this.state.data.arrows.to.enabled}/>
+                            this.state.data.arrow}/>
                         화살표
                     </label>}
                 </div>
