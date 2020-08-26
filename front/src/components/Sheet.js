@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { clearError } from '../actions/common';
 import { getElement, editElement, RESET } from '../actions/element_api';
 import { action, fetch } from '../actions/common';
-import Graph from 'react-graph-vis';
+import { Network } from 'vis-network/standalone/esm/vis-network';
 import ElementEdit from './ElementEdit';
 import { v4 as uuid } from 'uuid';
 
@@ -52,20 +52,30 @@ const options = {
         color: DEFAULT_NODE_COLOR,
     },
     edges: {
+        arrowStrikethrough: false,
         arrows: {
+            from: {
+                enabled: true,
+                imageHeight: 1,
+                imageWidth: 1,
+                scaleFactor: 0,
+                type: "image"
+            },
             to: {
                 enabled: true,
+                imageHeight: 1,
+                imageWidth: 1,
+                scaleFactor: 1,
             }
         },
         label: BLANK,
         width: DEFAULT_EDGE_WIDTH,
         dashes: DEFAULT_EDGE_DASHES,
-        arrowStrikethrough: false,
         smooth: {
             type: "continuous",
             forceDirection: "none"
         },
-        color: 'rgba(0,0,0,0.85)'
+        color: 'rgba(0,0,0,0.85)',
     },
     autoResize: true,
     physics: {
@@ -106,7 +116,7 @@ function eventGenerator() {
                 this.setState({from: null});
         }.bind(this),
         hold: function(event) {
-            const network = this.state.networkRef.current;
+            const network = this.network.body.data;
             const {nodes, edges} = event;
             if (nodes.length) {
                 const nodeId = nodes[0];
@@ -119,7 +129,6 @@ function eventGenerator() {
                             id: uuid(),
                             from: this.state.from,
                             to: nodeId,
-                            // ...this.edgePreset,
                         };
     
                         let nextState = {
@@ -137,7 +146,7 @@ function eventGenerator() {
                         this.setState(nextState);
                         network.edges.add(edge);
                     }
-                    network.Network.unselectAll();
+                    this.network.unselectAll();
                 }
                 else {
                     let nextState = {
@@ -146,7 +155,7 @@ function eventGenerator() {
                     };
                     
                     edges.forEach((edgeId)=>{
-                        const edge = network.edges._data[edgeId];
+                        const edge = network.edges._data.get(edgeId);
 
                         if (edge.from === nodeId) {
                             nextState.to[edge.to] = true;
@@ -159,13 +168,13 @@ function eventGenerator() {
             else if (!nodes.length && edges.length) {
                 const edgeId = edges[0];
                 const {x, y} = event.pointer.DOM;
-                const edgeData = network.edges._data[edgeId];
+                const edgeData = network.edges._data.get(edgeId);
 
                 this.setElementInfo(edgeId,EDGE,edgeData,x,y);
             }
         }.bind(this),
         doubleClick: function(event) {
-            const network = this.state.networkRef.current;
+            const network = this.network.body.data;
             const {nodes, edges} = event;
             if (!nodes.length && !edges.length) {
                 const {x, y} = event.pointer.canvas;
@@ -195,14 +204,14 @@ function eventGenerator() {
             else if (!nodes.length && edges.length) {
                 const edgeId = edges[0];
                 const {x, y} = event.pointer.DOM;
-                const edgeData = network.edges._data[edgeId];
+                const edgeData = network.edges._data.get(edgeId);
 
                 this.setElementInfo(edgeId,EDGE,edgeData,x,y);
             }
             else {
                 const nodeId = nodes[0];
                 const {x, y} = event.pointer.DOM;
-                const nodeData = network.nodes._data[nodeId];
+                const nodeData = network.nodes._data.get(nodeId);
                 const {edges} = event;
 
                 this.setElementInfo(nodeId,NODE,nodeData,x,y,edges);
@@ -214,12 +223,12 @@ function eventGenerator() {
                 return;
 
             const {x, y} = event.pointer.canvas;
-            const network = this.state.networkRef.current;
-            const _x = network.nodes._data[nodeId].x;
-            const _y = network.nodes._data[nodeId].y;
+            const network = this.network.body.data;
+            const _x = network.nodes._data.get(nodeId).x;
+            const _y = network.nodes._data.get(nodeId).y;
 
-            network.nodes._data[nodeId].x = x;
-            network.nodes._data[nodeId].y = y;
+            network.nodes._data.get(nodeId).x_ = x;
+            network.nodes._data.get(nodeId).y_ = y;
 
             let nextState = {
                 nodeStates: {
@@ -298,11 +307,21 @@ class Sheet extends Component {
 
     graphInitializer = () => {
         const {nodes, edges} = this.props;
-        this.setState({
-            graph: {
-                nodes: nodes,
-                edges: edges
-            }
+
+        const data = {
+            nodes: nodes,
+            edges: edges
+        }
+
+        const {networkRef} = this.state;
+        this.network = new Network(networkRef.current, data, options);
+        this.network.redraw();
+    }
+
+    eventInitializer = () => {
+        const events = eventGenerator.bind(this)();
+        Object.keys(events).forEach((key)=>{
+            this.network.on(key, events[key]);
         });
     }
 
@@ -310,6 +329,7 @@ class Sheet extends Component {
         this.props.toggleProfile(false);
         await this.fetchElements();
         this.graphInitializer();
+        this.eventInitializer();
     }
 
     modifyElement = (data) => {
@@ -317,7 +337,7 @@ class Sheet extends Component {
         if (!keys.length)
             return;
 
-        const network = this.state.networkRef.current;
+        const network = this.network.body.data;
         const {elementId, elementData, elementType} = this.state;
         let elements, elementStates;
         let element = {id:elementId}, info = {};
@@ -358,7 +378,7 @@ class Sheet extends Component {
 
     deleteElement = () => {
         const {elementId, elementType} = this.state;
-        const network = this.state.networkRef.current;
+        const network = this.network.body.data;
 
         let nextState = {
             history: [ ...this.state.history],
@@ -404,14 +424,15 @@ class Sheet extends Component {
     }
 
     save = async () => {
+        const network = this.network.body.data;
         const {sheetId} = this.props;
         const {nodeStates, edgeStates} = this.state;
 
         const nodes = getSubset(
-            this.state.networkRef.current.nodes._data, 
+            Object.fromEntries(network.nodes._data.entries()), 
             ...Object.keys(nodeStates));
         const edges = getSubset(
-            this.state.networkRef.current.edges._data, 
+            Object.fromEntries(network.edges._data.entries()),
             ...Object.keys(edgeStates));
         
         this.props.update();
@@ -421,7 +442,7 @@ class Sheet extends Component {
     }
 
     reset = () => {
-        const {nodes, edges} = this.state.networkRef.current;
+        const {nodes, edges} = this.network.body.data;
 
         this.setState({
             nodeStates: {},
@@ -430,8 +451,8 @@ class Sheet extends Component {
             historyPivot: 0,
             from: null,
         });
-        this.props.action(RESET);
 
+        this.props.action(RESET);
         nodes.clear();
         edges.clear();
         nodes.add(this.props.nodes);
@@ -440,7 +461,7 @@ class Sheet extends Component {
 
     undo = () => {
         let nextState = {historyPivot: this.prevPivot()};
-        const network = this.state.networkRef.current;
+        const network = this.network.body.data;
         const {history} = this.state;
         const element = history[nextState.historyPivot];
         let elements, elementStates;
@@ -490,7 +511,7 @@ class Sheet extends Component {
 
     redo = () => {
         let nextState = {historyPivot: this.nextPivot()};
-        const network = this.state.networkRef.current;
+        const network = this.network.body.data;
         const {history} = this.state;
         let element = history[this.state.historyPivot];
         let elements, elementStates;
@@ -573,8 +594,8 @@ class Sheet extends Component {
 
         if (!prevStates.from && this.state.from) {
             const fromId = this.state.from;
-            const network = this.state.networkRef.current;
-            const color = network.nodes._data[fromId].color;
+            const network = this.network.body.data;
+            const color = network.nodes._data.get(fromId).color;
             network.nodes.update({
                 id: fromId,
                 color: SELECTED_NODE_COLOR,
@@ -587,8 +608,8 @@ class Sheet extends Component {
 
         if (prevStates.from && !this.state.from) {
             const fromId = prevStates.from;
-            const network = this.state.networkRef.current;
-            const color = network.nodes._data[fromId].color_;
+            const network = this.network.body.data;
+            const color = network.nodes._data.get(fromId).color_;
             network.nodes.update({
                 id: fromId,
                 color: color,
@@ -688,13 +709,9 @@ class Sheet extends Component {
                 data={this.state.elementData}
                 x={this.state.x}
                 y={this.state.y}/>}
-                {this.state.graph &&
-                <Graph
+                <div title="network"
                 ref={this.state.networkRef}
-                graph={this.state.graph} 
-                options={options} 
-                events={eventGenerator.bind(this)()}
-                style={style}/>}
+                style={style}/>
             </div>
         )
     }
