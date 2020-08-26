@@ -24,7 +24,7 @@ const DEFAULT_NODE_FONT = '14';
 const DEFAULT_NODE_NAME = '새로운 노드';
 
 const DEFAULT_EDGE_WIDTH = 3;
-const DEFAULT_EDGE_ARROW = true;
+const DEFAULT_EDGE_ARROW = 1;
 const DEFAULT_EDGE_DASHES = false;
 
 const SELECTED_NODE_COLOR = '#faebd7'; //antique white;
@@ -46,19 +46,27 @@ const style = {
 };
 
 const options = {
+    nodes: {
+        font: DEFAULT_NODE_FONT,
+        label: DEFAULT_NODE_NAME,
+        shape: DEFAULT_NODE_SHAPE,
+        color: DEFAULT_NODE_COLOR,
+    },
     edges: {
         arrows: {
             from: {
                 enabled: true,
-                type: "circle",
+                type: "arrow",
                 scaleFactor: 0
             },
             to: {
-                scaleFactor: 0.8
+                scaleFactor: DEFAULT_EDGE_ARROW
             }
         },
-        arrowStrikethrough: false,
+        label: BLANK,
         width: DEFAULT_EDGE_WIDTH,
+        dashes: DEFAULT_EDGE_DASHES,
+        arrowStrikethrough: false,
         smooth: {
             type: "continuous",
             forceDirection: "none"
@@ -116,7 +124,7 @@ function eventGenerator() {
                             id: uuid(),
                             from: this.state.from,
                             to: nodeId,
-                            ...this.edgePreset,
+                            // ...this.edgePreset,
                         };
     
                         let nextState = {
@@ -169,7 +177,6 @@ function eventGenerator() {
                 let node = {
                     id: uuid(),
                     x: x, y: y,
-                    ...this.nodePreset,
                 };
 
                 let nextState = {
@@ -304,29 +311,10 @@ class Sheet extends Component {
         });
     }
 
-    presetInitializer = () => {
-        this.nodePreset = {
-            font: DEFAULT_NODE_FONT,
-            shape: DEFAULT_NODE_SHAPE,
-            color: DEFAULT_NODE_COLOR,
-            label: DEFAULT_NODE_NAME,
-        };
-
-        this.edgePreset = {
-            label: BLANK,
-            dashes: DEFAULT_EDGE_DASHES,
-            arrows: {
-                to: {
-                    enabled: DEFAULT_EDGE_ARROW}},
-            width: DEFAULT_EDGE_WIDTH,
-        };
-    }
-
     initializer = async () => {
         this.props.toggleProfile(false);
         await this.fetchElements();
         this.graphInitializer();
-        this.presetInitializer();
     }
 
     modifyElement = (data) => {
