@@ -24,7 +24,6 @@ const DEFAULT_NODE_FONT = '14';
 const DEFAULT_NODE_NAME = '새로운 노드';
 
 const DEFAULT_EDGE_WIDTH = 3;
-const DEFAULT_EDGE_ARROW = 1;
 const DEFAULT_EDGE_DASHES = false;
 
 const SELECTED_NODE_COLOR = '#faebd7'; //antique white;
@@ -54,13 +53,8 @@ const options = {
     },
     edges: {
         arrows: {
-            from: {
-                enabled: true,
-                type: "arrow",
-                scaleFactor: 0
-            },
             to: {
-                scaleFactor: DEFAULT_EDGE_ARROW
+                enabled: true,
             }
         },
         label: BLANK,
@@ -71,6 +65,7 @@ const options = {
             type: "continuous",
             forceDirection: "none"
         },
+        color: 'rgba(0,0,0,0.85)'
     },
     autoResize: true,
     physics: {

@@ -117,7 +117,7 @@ class ElementController(View):
                     node_to_id=edge['to'],
                     dashes=edge['dashes'],
                     width=edge['width'],
-                    arrow=edge['arrows']['to']['scaleFactor']))
+                    arrow=edge['arrows']['to']['enabled']))
             else:
                 edge = data['edges'][edge_id]
                 edges[UUID(edge_id)].label = edge['label']
@@ -125,7 +125,7 @@ class ElementController(View):
                 edges[UUID(edge_id)].node_to_id = edge['to']
                 edges[UUID(edge_id)].dashes = edge['dashes']
                 edges[UUID(edge_id)].width = edge['width']
-                edges[UUID(edge_id)].arrow = edge['arrows']['to']['scaleFactor']
+                edges[UUID(edge_id)].arrow = edge['arrows']['to']['enabled']
                 edges[UUID(edge_id)].modify = now
         
         edges = list(edges.values())

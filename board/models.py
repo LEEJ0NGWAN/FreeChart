@@ -61,6 +61,6 @@ class Edge(models.Model):
     modify = models.DateTimeField(auto_now=True, verbose_name='수정 날짜')
     deleted = models.BooleanField(default=False, null=False)
     dashes = models.BooleanField(default=False)
-    arrow = models.IntegerField(default=1)
+    arrow = models.BooleanField(default=True)
     width = models.IntegerField(default=3)
 
