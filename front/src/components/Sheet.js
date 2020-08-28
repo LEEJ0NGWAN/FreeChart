@@ -79,6 +79,13 @@ const options = {
                 scaleFactor: 0,
                 type: "image"
             },
+            to: {
+                enabled: true,
+                imageHeight: 1,
+                imageWidth: 1,
+                scaleFactor: 0,
+                type: "arrow"
+            },
         },
         label: BLANK,
         width: DEFAULT_EDGE_WIDTH,
