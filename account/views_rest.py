@@ -17,7 +17,7 @@ from rest_framework.status import (
     HTTP_404_NOT_FOUND, HTTP_406_NOT_ACCEPTABLE, HTTP_409_CONFLICT
 )
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.authentication import JWTAuthentication
+
 from account.models import User
 from utils.serialize import serialize
 from django.core.mail import send_mail
@@ -25,60 +25,65 @@ from utils import id_generator, redis
 
 now = datetime.datetime.now
 
-# deprecated
-# @api_view(["POST"])
-# @csrf_exempt
-# def login(request):
-#     """
-#     {string} email
-#     {string} password
-#     """
+@method_decorator(csrf_exempt, name='dispatch')
+class Login(View):
+    def post(self, request):
 
-#     data = json.loads(request.body.decode("utf-8"))
-#     email = data.get('email')
-#     password = data.get('password')
+        """
+        {string} email
+        {string} password
+        """
 
-#     if (email is None or password is None)\
-#     or (email == '' or password == ''):
-#         return JsonResponse({
-#             'error': 'email or password error'
-#         }, status=HTTP_400_BAD_REQUEST)
+        data = json.loads(request.body.decode("utf-8"))
+        email = data.get('email')
+        password = data.get('password')
 
-#     try:
-#         user = User.objects.get(email=email)
-#     except:
-#         user = None
+        if (email is None or password is None)\
+        or (email == '' or password == ''):
+            return JsonResponse({
+                'error': 'email or password error'
+            }, status=HTTP_400_BAD_REQUEST)
 
-#     if not user:
-#         return JsonResponse({
-#             'error': 'no user'
-#         }, status=HTTP_404_NOT_FOUND)
+        try:
+            user = User.objects.get(email=email)
+        except:
+            user = None
 
-#     if not user.check_password(password):
-#         return JsonResponse({
-#             'error': 'incorrect password'
-#         }, status=HTTP_400_BAD_REQUEST)
+        if not user:
+            return JsonResponse({
+                'error': 'no user'
+            }, status=HTTP_404_NOT_FOUND)
+
+        if not user.check_password(password):
+            return JsonResponse({
+                'error': 'incorrect password'
+            }, status=HTTP_400_BAD_REQUEST)
     
-#     user = authenticate(username=email, password=password)
+        # legacy
+        # user = authenticate(username=email, password=password)
 
-#     SESSION_KEY = '_auth_user_id'
-#     BACKEND_SESSION_KEY = '_auth_user_backend'
-#     HASH_SESSION_KEY = '_auth_user_hash'
+        # SESSION_KEY = '_auth_user_id'
+        # BACKEND_SESSION_KEY = '_auth_user_backend'
+        # HASH_SESSION_KEY = '_auth_user_hash'
 
-#     key = user._meta.pk.value_to_string(user)
+        # key = user._meta.pk.value_to_string(user)
 
-#     session_auth_hash = user.get_session_auth_hash()
-    
-#     request.session[SESSION_KEY] = key
-#     request.session[BACKEND_SESSION_KEY] = user.backend
-#     request.session[HASH_SESSION_KEY] = session_auth_hash
-#     request.session.save()
+        # session_auth_hash = user.get_session_auth_hash()
+        
+        # request.session[SESSION_KEY] = key
+        # request.session[BACKEND_SESSION_KEY] = user.backend
+        # request.session[HASH_SESSION_KEY] = session_auth_hash
+        # request.session.save()
 
-#     request.user = user
+        # request.user = user
 
-#     return JsonResponse(serialize({
-#         'user': user
-#     }))
+        refresh = RefreshToken.for_user(user)
+
+        return JsonResponse(serialize({
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+            'user': user
+        }))
 
 # deprecated
 # @method_decorator(csrf_exempt, name='dispatch')
@@ -278,10 +283,11 @@ class UserCreate(View):
         else:
             return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
         
-        return JsonResponse({
+        return JsonResponse(serialize({
             'refresh': str(refresh),
-            'access': str(refresh.access_token)
-        })
+            'access': str(refresh.access_token),
+            'user': serialize(new_user)
+        }))
 
 @method_decorator(csrf_exempt, name='dispatch')
 class UserDelete(APIView):
@@ -311,9 +317,10 @@ class UserDelete(APIView):
 
         return JsonResponse({})
 
-# @method_decorator(csrf_exempt, name='dispatch')
+@method_decorator(csrf_exempt, name='dispatch')
 class Auth(APIView):
     def post(self, request):
+        # from rest_framework_simplejwt.authentication import JWTAuthentication
         # jwt = JWTAuthentication()
         # header          = jwt.get_header(request)
         # raw_token       = jwt.get_raw_token(header)
