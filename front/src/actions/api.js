@@ -1,7 +1,8 @@
-import { API_HOST } from './setupProxy';
+import axios_ from "./axiosApi";
+// import axios from 'axios';
+// axios.defaults.withCredentials = true;
+
 import { action, fetch, clearError, reportError } from './common';
-import axios from 'axios';
-axios.defaults.withCredentials = true;
 
 export const USER = 'USER';
 export const LOGIN = 'LOGIN';
@@ -12,14 +13,18 @@ export const CLEAR_EMAIL_VALIDITY = 'CLEAR_EMAIL_VALIDITY';
 
 export function login(email, password) {
     return (dispatch) => {
-        return axios.post(
-            `${API_HOST}/account/login/`,
+        return axios_.post(
+            `/account/login/`,
             {
                 email: email,
                 password: password
             })
             .then(res => {
-                dispatch(fetch(LOGIN, res.data));
+                axios_.defaults.headers['Authorization'] = 
+                    "JWT " + res.data.access;
+                localStorage.setItem('access_token', res.data.access);
+                localStorage.setItem('refresh_token', res.data.refresh);
+                dispatch(fetch(LOGIN, {user: res.data.user}));
                 dispatch(clearError());
             })
             .catch(err => {
@@ -30,15 +35,19 @@ export function login(email, password) {
 
 export function logout() {
     return (dispatch) => {
-        return axios.post(`${API_HOST}/account/logout/`)
-        .then(res => {
-            dispatch(action(LOGOUT));
-            dispatch(clearError());
-        })
-        .catch(err => {
-            dispatch(reportError(err));
-        });
-    };
+        dispatch(action(LOGOUT));
+        dispatch(clearError());
+    }
+    // return (dispatch) => {
+    //     return axios_.post(`/account/logout/`)
+    //     .then(res => {
+    //         dispatch(action(LOGOUT));
+    //         dispatch(clearError());
+    //     })
+    //     .catch(err => {
+    //         dispatch(reportError(err));
+    //     });
+    // };
 }
 
 export function check(email) {
@@ -47,7 +56,7 @@ export function check(email) {
             email: email
         };
         
-        return axios.post(`${API_HOST}/account/check/`, data)
+        return axios_.post(`/account/check/`, data)
         .then(res => {
             dispatch(fetch(CHECK_EMAIL_VALIDITY, res.data));
             dispatch(clearError());
@@ -67,7 +76,7 @@ export function register_(email, username=null, password) {
         if (username)
             data.username = username;
         
-        return axios.post(`${API_HOST}/user/`, data)
+        return axios_.post(`/user/`, data)
         .then(res => {
             dispatch(fetch(LOGIN, res.data));
             dispatch(clearError());
@@ -80,8 +89,8 @@ export function register_(email, username=null, password) {
 
 export function passwordReset(email) {
     return (dispatch) => {
-        return axios.post(
-            `${API_HOST}/account/password/reset/`, { email: email })
+        return axios_.post(
+            `/account/password/reset/`, { email: email })
         .then(res => {
             dispatch(clearError());
         })
@@ -93,7 +102,7 @@ export function passwordReset(email) {
 
 export function checkSession() {
     return (dispatch) => {
-        return axios.get(`${API_HOST}/user/`)
+        return axios_.get(`/user/`)
         .then(res => {
             dispatch(fetch(USER, res.data.user));
             dispatch(clearError());
@@ -106,7 +115,7 @@ export function checkSession() {
 
 export function modifyUsername(username) {
     return (dispatch) => {
-        return axios.put(`${API_HOST}/user/`,{username: username})
+        return axios_.put(`/user/`,{username: username})
         .then(res => {
             dispatch(fetch(USER, res.data.user));
             dispatch(clearError());
@@ -119,7 +128,7 @@ export function modifyUsername(username) {
 
 export function modifyPassword(password) {
     return (dispatch) => {
-        return axios.put(`${API_HOST}/user/`,{password: password})
+        return axios_.put(`/user/`,{password: password})
         .then(res => {
             dispatch(fetch(USER, res.data.user));
             dispatch(clearError());
@@ -136,7 +145,7 @@ export function deleteUser(id, password) {
             id: id,
             password: password
         };
-        return axios.post(`${API_HOST}/account/delete/`, params)
+        return axios_.post(`/account/delete/`, params)
         .then(()=> {
             dispatch(action(LOGOUT));
         })
