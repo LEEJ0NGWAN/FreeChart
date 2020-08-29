@@ -12,7 +12,7 @@ class Logout extends Component {
         deleteCookie('sheetId');
         deleteCookie('sheetTitle');
         deleteCookie('order');
-        
+        localStorage.clear();        
         this.props.logout();
         history.push('/login');
     }
