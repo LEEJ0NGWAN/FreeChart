@@ -7,11 +7,12 @@ from rest_framework.status import (
     HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN,
     HTTP_404_NOT_FOUND, HTTP_409_CONFLICT
 )
+from rest_framework.views import APIView
 from board.models import Sheet
 from utils.serialize import serialize
 
 @method_decorator(csrf_exempt, name='dispatch')
-class SheetController(View):
+class SheetController(APIView):
     def get(self, request):
         if not request.user.is_authenticated:
             return JsonResponse({}, status=HTTP_401_UNAUTHORIZED)

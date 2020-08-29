@@ -110,7 +110,7 @@ def user_parse(user, **kwargs):
         'id': user.id,
         'email': user.email,
         'username': user.username,
-        'email_verified': user.email_verified
+        # 'email_verified': user.email_verified
     }
 
     return serialize(result, **kwargs)

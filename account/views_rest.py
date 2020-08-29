@@ -3,19 +3,20 @@ import datetime
 from django.contrib.auth import (
     authenticate, login, logout, update_session_auth_hash
 )
-
+from rest_framework.views import APIView
 from rest_framework.decorators import api_view
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
 from django.http import JsonResponse
 from django.template import loader
-
+from rest_framework import permissions
 from rest_framework.status import (
     HTTP_200_OK,
     HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN,
     HTTP_404_NOT_FOUND, HTTP_406_NOT_ACCEPTABLE, HTTP_409_CONFLICT
 )
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from account.models import User
 from utils.serialize import serialize
@@ -24,68 +25,75 @@ from utils import id_generator, redis
 
 now = datetime.datetime.now
 
-@api_view(["POST"])
-@csrf_exempt
-def login(request):
-    """
-    {string} email
-    {string} password
-    """
-
-    data = json.loads(request.body.decode("utf-8"))
-    email = data.get('email')
-    password = data.get('password')
-
-    if (email is None or password is None)\
-    or (email == '' or password == ''):
-        return JsonResponse({
-            'error': 'email or password error'
-        }, status=HTTP_400_BAD_REQUEST)
-
-    try:
-        user = User.objects.get(email=email)
-    except:
-        user = None
-
-    if not user:
-        return JsonResponse({
-            'error': 'no user'
-        }, status=HTTP_404_NOT_FOUND)
-
-    if not user.check_password(password):
-        return JsonResponse({
-            'error': 'incorrect password'
-        }, status=HTTP_400_BAD_REQUEST)
-    
-    user = authenticate(username=email, password=password)
-
-    SESSION_KEY = '_auth_user_id'
-    BACKEND_SESSION_KEY = '_auth_user_backend'
-    HASH_SESSION_KEY = '_auth_user_hash'
-
-    key = user._meta.pk.value_to_string(user)
-
-    session_auth_hash = user.get_session_auth_hash()
-    
-    request.session[SESSION_KEY] = key
-    request.session[BACKEND_SESSION_KEY] = user.backend
-    request.session[HASH_SESSION_KEY] = session_auth_hash
-    request.session.save()
-
-    request.user = user
-
-    return JsonResponse(serialize({
-        'user': user
-    }))
-
 @method_decorator(csrf_exempt, name='dispatch')
-class Logout(View):
+class Login(View):
     def post(self, request):
-        if not request.user.is_authenticated:
-            return JsonResponse({}, status=HTTP_401_UNAUTHORIZED)
 
-        logout(request)
-        return JsonResponse({})
+        """
+        {string} email
+        {string} password
+        """
+
+        data = json.loads(request.body.decode("utf-8"))
+        email = data.get('email')
+        password = data.get('password')
+
+        if (email is None or password is None)\
+        or (email == '' or password == ''):
+            return JsonResponse({
+                'error': 'email or password error'
+            }, status=HTTP_400_BAD_REQUEST)
+
+        try:
+            user = User.objects.get(email=email)
+        except:
+            user = None
+
+        if not user:
+            return JsonResponse({
+                'error': 'no user'
+            }, status=HTTP_404_NOT_FOUND)
+
+        if not user.check_password(password):
+            return JsonResponse({
+                'error': 'incorrect password'
+            }, status=HTTP_400_BAD_REQUEST)
+    
+        # legacy
+        # user = authenticate(username=email, password=password)
+
+        # SESSION_KEY = '_auth_user_id'
+        # BACKEND_SESSION_KEY = '_auth_user_backend'
+        # HASH_SESSION_KEY = '_auth_user_hash'
+
+        # key = user._meta.pk.value_to_string(user)
+
+        # session_auth_hash = user.get_session_auth_hash()
+        
+        # request.session[SESSION_KEY] = key
+        # request.session[BACKEND_SESSION_KEY] = user.backend
+        # request.session[HASH_SESSION_KEY] = session_auth_hash
+        # request.session.save()
+
+        # request.user = user
+
+        refresh = RefreshToken.for_user(user)
+
+        return JsonResponse(serialize({
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+            'user': user
+        }))
+
+# deprecated
+# @method_decorator(csrf_exempt, name='dispatch')
+# class Logout(View):
+#     def post(self, request):
+#         if not request.user.is_authenticated:
+#             return JsonResponse({}, status=HTTP_401_UNAUTHORIZED)
+
+#         logout(request)
+#         return JsonResponse({})
 
 @method_decorator(csrf_exempt, name='dispatch')
 class EmailVerify(View):
@@ -156,8 +164,8 @@ class EmailVerify(View):
 @method_decorator(csrf_exempt, name='dispatch')
 class PasswordReset(View):
     def post(self, request):
-        if request.user.is_authenticated:
-            return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
+        # if request.user.is_authenticated:
+        #     return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
 
         if request.POST:
             data = request.POST
@@ -245,10 +253,47 @@ class Check(View):
         return JsonResponse(serialize(res))
 
 @method_decorator(csrf_exempt, name='dispatch')
-class UserDelete(View):
+class UserCreate(View):
     def post(self, request):
-        if not request.user.is_authenticated:
-            return JsonResponse({}, status=HTTP_401_UNAUTHORIZED)
+        data = json.loads(request.body.decode("utf-8"))
+
+        if 'password' not in data:
+            return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
+
+        if 'email' in data:
+            email = data.get('email')
+            username = data.get('username', email)
+            password = data.get('password', '')
+
+            if User.objects.filter(email=email).exists():
+                return JsonResponse({}, status=HTTP_409_CONFLICT)
+            
+            if User.objects.filter(username=username).exists():
+                return JsonResponse({}, status=HTTP_409_CONFLICT)
+
+            new_user = User.objects.create_user(
+                username=username,
+                email_verified=False,
+                email=email,
+                password=password,
+            )
+
+            refresh = RefreshToken.for_user(new_user)
+
+        else:
+            return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
+        
+        return JsonResponse(serialize({
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+            'user': serialize(new_user)
+        }))
+
+@method_decorator(csrf_exempt, name='dispatch')
+class UserDelete(APIView):
+    def post(self, request):
+        # if not request.user.is_authenticated:
+        #     return JsonResponse({}, status=HTTP_401_UNAUTHORIZED)
 
         data = json.loads(request.body.decode('utf-8'))
         user = request.user
@@ -269,7 +314,18 @@ class UserDelete(View):
         user.email = f'{user.email}@leave'+str(now())
         user.username = f'{user.username}@leave'+str(now())
         user.save()
-        logout(request)
-        
+
+        return JsonResponse({})
+
+@method_decorator(csrf_exempt, name='dispatch')
+class Auth(APIView):
+    def post(self, request):
+        # from rest_framework_simplejwt.authentication import JWTAuthentication
+        # jwt = JWTAuthentication()
+        # header          = jwt.get_header(request)
+        # raw_token       = jwt.get_raw_token(header)
+        # validated_token = jwt.get_validated_token(raw_token)
+        # user            = jwt.get_user(validated_token)
+
         return JsonResponse({})
 

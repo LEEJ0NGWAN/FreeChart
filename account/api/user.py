@@ -6,6 +6,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.views.generic import View
+from rest_framework.views import APIView
 from rest_framework.status import (
     HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN,
     HTTP_404_NOT_FOUND, HTTP_409_CONFLICT
@@ -14,7 +15,7 @@ from account.models import User
 from utils.serialize import serialize
 
 @method_decorator(csrf_exempt, name='dispatch')
-class UserController(View):
+class UserController(APIView):
     def get(self, request):
         if not request.user.is_authenticated:
             return JsonResponse({}, status=HTTP_401_UNAUTHORIZED)
@@ -32,40 +33,41 @@ class UserController(View):
             'user': request.user
         }))
 
-    def post(self, request):
-        if request.user.is_authenticated:
-            return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
+    # deprecated
+    # def post(self, request):
+    #     if request.user.is_authenticated:
+    #         return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
             
-        data = json.loads(request.body.decode("utf-8"))
+    #     data = json.loads(request.body.decode("utf-8"))
 
-        if 'password' not in data:
-            return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
+    #     if 'password' not in data:
+    #         return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
 
-        if 'email' in data:
-            email = data.get('email')
-            username = data.get('username', email)
-            password = data.get('password', '')
+    #     if 'email' in data:
+    #         email = data.get('email')
+    #         username = data.get('username', email)
+    #         password = data.get('password', '')
 
-            if User.objects.filter(email=email).exists():
-                return JsonResponse({}, status=HTTP_409_CONFLICT)
+    #         if User.objects.filter(email=email).exists():
+    #             return JsonResponse({}, status=HTTP_409_CONFLICT)
             
-            if User.objects.filter(username=username).exists():
-                return JsonResponse({}, status=HTTP_409_CONFLICT)
+    #         if User.objects.filter(username=username).exists():
+    #             return JsonResponse({}, status=HTTP_409_CONFLICT)
 
-            new_user = User.objects.create_user(
-                username=username,
-                email_verified=False,
-                email=email,
-                password=password,
-            )
-        else:
-            return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
+    #         new_user = User.objects.create_user(
+    #             username=username,
+    #             email_verified=False,
+    #             email=email,
+    #             password=password,
+    #         )
+    #     else:
+    #         return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
 
-        login(request, new_user)
+    #     login(request, new_user)
         
-        return JsonResponse(serialize({
-            'user': new_user,
-        }))
+    #     return JsonResponse(serialize({
+    #         'user': new_user,
+    #     }))
 
     def put(self, request):
         if not request.user.is_authenticated:
