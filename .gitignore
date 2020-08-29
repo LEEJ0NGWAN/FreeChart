@@ -2,5 +2,5 @@ venv/*
 **/.DS_Store
 *.pyc
 **/__pycache__/*
-**/email_setting.py
+# **/email_setting.py
 front/node_modules/
