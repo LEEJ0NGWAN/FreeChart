@@ -25,13 +25,17 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'v7&qt%b7f-1ikrio&puq19l*f38-)+(7gwr_s&362#4eya^k*j'
-
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+
+if MODE == 'PROD':
+    SECRET_KEY = os.environ['SECRET_KEY']
+    DEBUG = False
+else:
+    from .secret_key import SECRET_KEY as _SECRET_KEY
+    SECRET_KEY = _SECRET_KEY
+    DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-
 
 # Application definition
 
@@ -71,7 +75,7 @@ MIDDLEWARE = [
 ]
 
 # 세션 엔진을 디폴트 벡엔드 디비에서 클라이언트 브라우저 쿠키로 변경
-SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
+# SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
 # SESSION_COOKIE_SECURE = False
 
 ROOT_URLCONF = 'FreeChart.urls'
@@ -103,19 +107,13 @@ if MODE == 'PROD':
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
             'NAME': 'freechart',
-            'USER': 'freechart',
-            'PASSWORD': 'freechart',
-            'HOST': 'localhost',  # TODO: 프로덕션 디비 생성하기
+            'USER': os.environ['DB_USER'],
+            'PASSWORD': os.environ['DB_PASSWORD'],
+            'HOST': os.environ['DB_HOST'],
             'PORT': 5432,
         }
     }
-elif MODE == 'LOCAL':
-    # DATABASES = {
-    #     'default': {
-    #         'ENGINE': 'django.db.backends.sqlite3',
-    #         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    #     }
-    # }
+else:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -171,14 +169,20 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # django rest framework
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.SessionAuthentication',
-    ],
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    # 'DEFAULT_AUTHENTICATION_CLASSES': [
+    #     'rest_framework.authentication.SessionAuthentication',
+    # ],
     'DEFAULT_PAGINATION_CLASS': 'common.pagination.CommonPagination',
     'PAGE_SIZE': 10,
 }
 
-SESSION_COOKIE_AGE = 52560000
+# SESSION_COOKIE_AGE = 52560000
 
 AUTH_USER_MODEL = 'account.User'
 
@@ -190,20 +194,42 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.daum.net'
 EMAIL_USE_SSL = True
 EMAIL_PORT = 465
-EMAIL_HOST_USER = email_setting.EMAIL_HOST_USER
-EMAIL_HOST_PASSWORD = email_setting.EMAIL_HOST_PASSWORD
+
+if MODE == 'PROD':
+    EMAIL_HOST_USER = os.environ['EMAIL_HOST_USER']
+    EMAIL_HOST_PASSWORD = os.environ['EMAIL_HOST_PASSWORD']
+else:
+    EMAIL_HOST_USER = email_setting.EMAIL_HOST_USER
+    EMAIL_HOST_PASSWORD = email_setting.EMAIL_HOST_PASSWORD
 
 # REDIS setting
 REDIS_HOST = 'localhost'
 REDIS_PORT = 6379
 
 # CORS
-CORS_ORIGIN_ALLOW_ALL = False
-CORS_ALLOW_CREDENTIALS = True
-CORS_ORIGIN_WHITELIST = [
-    'http://localhost:3000',
-    'http://localhost:5000',
-    'http://freechart',
-    'http://freechart.local',
-]
+# CORS_ORIGIN_ALLOW_ALL = False
+# CORS_ALLOW_CREDENTIALS = True
+# CORS_ORIGIN_WHITELIST = [
+#     'http://localhost:3000',
+#     'http://localhost:5000',
+#     'http://freechart',
+#     'http://freechart.local',
+# ]
+
+# JWT
+from datetime import timedelta
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=14),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': False,
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+    'VERIFYING_KEY': None,
+    'AUTH_HEADER_TYPES': ('JWT',),
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+    'TOKEN_TYPE_CLAIM': 'token_type',
+}
 
