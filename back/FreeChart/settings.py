@@ -113,6 +113,17 @@ if MODE == 'PROD':
             'PORT': 5432,
         }
     }
+elif 'DEV_DB_HOST' in os.environ:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': 'freechart',
+            'USER': 'freechart',
+            'PASSWORD': 'freechart',
+            'HOST': os.environ['DEV_DB_HOST'],
+            'PORT': 5432,
+        }
+    }
 else:
     DATABASES = {
         'default': {
@@ -203,18 +214,18 @@ else:
     EMAIL_HOST_PASSWORD = email_setting.EMAIL_HOST_PASSWORD
 
 # REDIS setting
-REDIS_HOST = 'localhost'
+REDIS_HOST = 'redis'
 REDIS_PORT = 6379
 
 # CORS
-# CORS_ORIGIN_ALLOW_ALL = False
-# CORS_ALLOW_CREDENTIALS = True
-# CORS_ORIGIN_WHITELIST = [
-#     'http://localhost:3000',
-#     'http://localhost:5000',
-#     'http://freechart',
-#     'http://freechart.local',
-# ]
+CORS_ORIGIN_ALLOW_ALL = False
+CORS_ALLOW_CREDENTIALS = True
+CORS_ORIGIN_WHITELIST = [
+    'http://localhost:3000',
+    'http://localhost:5000',
+    'http://freechart',
+    'http://freechart.local',
+]
 
 # JWT
 from datetime import timedelta
