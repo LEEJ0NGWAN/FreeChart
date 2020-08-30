@@ -399,47 +399,39 @@ class Sheet extends Component {
     }
 
     deleteElement = () => {
-        const {elementId, elementType} = this.state;
         const network = this.network.body.data;
-
+        const {elementId, elementData, elementType} = this.state;
+        let elements, elementStates;
+        let info = { ...elementData};
         let nextState = {
-            history: [ ...this.state.history],
-            historyPivot: this.nextPivot()
+            historyPivot: this.nextPivot(),
+            history: [ ...this.state.history]
         };
-        let element = (elementType)? 
-        network.edges._data[elementId]:
-        network.nodes._data[elementId];
 
         if (elementType) {
-            nextState.edgeStates = { ...this.state.edgeStates};
-
-            if (nextState.edgeStates[elementId] === CREATE)
-                delete nextState.edgeStates[elementId];
-            else {
-                nextState.edgeStates[elementId] = DELETE;
-                element.isFirstUpdate =
-                    !Boolean(this.state.edgeStates[elementId]);
-            }
-
-            network.edges.remove(elementId);
+            elements = network.edges;
+            elementStates = { ...this.state.edgeStates};
+            nextState.edgeStates = elementStates;
         }
-
         else {
-            nextState.nodeStates = { ...this.state.nodeStates};
-
-            if (nextState.nodeStates[elementId] === CREATE)
-                delete nextState.nodeStates[elementId];
-            else {
-                nextState.nodeStates[elementId] = DELETE;
-                element.isFirstUpdate =
-                    !Boolean(this.state.nodeStates[elementId]);
-            }
-            
-            network.nodes.remove(elementId);
+            elements = network.nodes;
+            elementStates = { ...this.state.nodeStates};
+            nextState.nodeStates = elementStates;
         }
+
+        if (elementStates[elementId] === CREATE)
+            delete elementStates[elementId];
+        
+        else {
+            info.isFirstUpdate = 
+                !Boolean(elementStates[elementId]);
+            elementStates[elementId] = DELETE;
+        }
+
+        elements.remove(elementId);
 
         nextState.history[this.state.historyPivot] = 
-            makeEvent(elementId, elementType, DELETE, element);
+            makeEvent(elementId, elementType, DELETE, info);
         truncHistory(nextState.history, nextState.historyPivot);
 
         this.setState(nextState);
