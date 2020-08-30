@@ -76,7 +76,7 @@ export function register_(email, username=null, password) {
         if (username)
             data.username = username;
         
-        return axios_.post(`/user/`, data)
+        return axios_.post(`/account/create/`, data)
         .then(res => {
             dispatch(fetch(LOGIN, res.data));
             dispatch(clearError());
