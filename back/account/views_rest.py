@@ -8,7 +8,7 @@ from rest_framework.decorators import api_view
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseRedirect
 from django.template import loader
 from rest_framework import permissions
 from rest_framework.status import (
@@ -207,6 +207,9 @@ class PasswordReset(View):
 
             del redis[key]
             del redis[tmp_key]
+
+            return HttpResponseRedirect(
+                redirect_to='http://freechart/')
 
         else:
             token = id_generator(size=128)
