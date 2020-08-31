@@ -24,11 +24,11 @@ ENV EMAIL_HOST_PASSWORD ${EMAIL_HOST_PASSWORD}
 ENV DEV_DB_HOST ${DEV_DB_HOST}
 
 # work dir
-RUN mkdir /backend
-WORKDIR /backend
+RUN mkdir /back
+WORKDIR /back
 
 # pip install
-COPY requirements.txt /backend/
+ADD requirements.txt /back/
 RUN pip install --upgrade pip
 RUN \
  apk add --no-cache postgresql-libs && \
@@ -37,8 +37,8 @@ RUN \
  apk --purge del .build-deps
 
 # copy project
-COPY . /backend/
+ADD . /back/
 
 EXPOSE 8000
 
-ENTRYPOINT ["sh", "/backend/docker-entrypoint.sh"]
+ENTRYPOINT ["sh", "/back/docker-entrypoint.sh"]
