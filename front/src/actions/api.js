@@ -78,7 +78,11 @@ export function register_(email, username=null, password) {
         
         return axios_.post(`/account/create/`, data)
         .then(res => {
-            dispatch(fetch(LOGIN, res.data));
+            axios_.defaults.headers['Authorization'] = 
+                "JWT " + res.data.access;
+            localStorage.setItem('access_token', res.data.access);
+            localStorage.setItem('refresh_token', res.data.refresh);
+            dispatch(fetch(LOGIN, {user: res.data.user}));
             dispatch(clearError());
         })
         .catch(err => {
