@@ -102,11 +102,13 @@ WSGI_APPLICATION = 'FreeChart.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
+HOST_NAME = os.environ.get('HOST_NAME', 'freechart')
+
 if MODE == 'PROD':
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': 'freechart',
+            'NAME': os.environ['DB_NAME'],
             'USER': os.environ['DB_USER'],
             'PASSWORD': os.environ['DB_PASSWORD'],
             'HOST': os.environ['DB_HOST'],
