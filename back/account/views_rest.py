@@ -23,7 +23,10 @@ from utils.serialize import serialize
 from django.core.mail import send_mail
 from utils import id_generator, redis
 
+from FreeChart.settings import HOST_NAME
+
 now = datetime.datetime.now
+reset_url = f'http://{HOST_NAME}/api/account/password/reset/'
 
 @method_decorator(csrf_exempt, name='dispatch')
 class Login(View):
@@ -209,7 +212,7 @@ class PasswordReset(View):
             del redis[tmp_key]
 
             return HttpResponseRedirect(
-                redirect_to='http://freechart/')
+                redirect_to=f'http://{HOST_NAME}/')
 
         else:
             token = id_generator(size=128)
@@ -222,6 +225,7 @@ class PasswordReset(View):
             html = loader.render_to_string(
                 'tmp_password_template.html',
                 {
+                    'reset_url': reset_url,
                     'password': tmp_password,
                     'email': email,
                     'token': token
@@ -231,7 +235,7 @@ class PasswordReset(View):
             send_mail(
                 '[FreeChart] 비밀번호 재설정 링크',
                 '',
-                'no-reply@freechart.tk',
+                f'no-reply@{HOST_NAME}',
                 [email],
                 html_message=html
             )
