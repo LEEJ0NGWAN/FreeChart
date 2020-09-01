@@ -114,7 +114,9 @@ class Password extends Component {
                 autoComplete="off"
                 ref={(input)=>{this.emailInput = input}}
                 onKeyPress={(e)=>{
-                    if (e.key === "Enter")
+                    if (!this.state.processed &&
+                        this.state.email_pattern_validity &&
+                        e.key === "Enter")
                         this.processor();
                 }}
                 value={this.state.email}/>
