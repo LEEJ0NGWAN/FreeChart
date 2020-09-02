@@ -7,6 +7,7 @@ version: '3.7'
 services:
     psql:
         image: postgres:12.4-alpine
+        restart: always
         volumes:
             - psql_data:/var/lib/postgresql/data/
         env_file:
@@ -21,12 +22,14 @@ services:
     back:
         build:
             context: ./back
+        restart: always
         env_file:
             - ./back/.env
         depends_on:
             - psql
     nginx:
         image: nginx:latest
+        restart: always
         ports:
             - 80:8080
         volumes:
@@ -38,9 +41,11 @@ services:
             - front
     redis:
         image: "redis:alpine"
+        restart: always
         ports:
             - 6379:6379
 volumes:
     psql_data:
     front_app:
+
 
