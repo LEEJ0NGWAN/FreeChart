@@ -10,7 +10,7 @@ class Edit extends Component {
     state = {
         value: "",
         mode: false,
-        deleteChild: true,
+        saveChild: true,
     }
 
     componentDidMount() {
@@ -59,7 +59,7 @@ class Edit extends Component {
                 else
                     await this.props.deleteBoard(
                         this.props.id, this.props.key_,
-                        !this.state.deleteChild);
+                        this.state.saveChild);
                 break;
             case 'copy':
                 if (this.props.type && this.props.id)
@@ -184,9 +184,10 @@ class Edit extends Component {
                     <input name="deleteChild"
                     onChange={
                         ()=>this.setState({
-                            deleteChild:!this.state.deleteChild})}
-                    type="checkbox" defaultChecked="true"/>
-                    폴더 내부 파일 제거
+                            saveChild:!this.state.saveChild})}
+                    type="checkbox" 
+                    defaultChecked={this.state.saveChild}/>
+                    안에 있던 애들 살릴까요?
                 </label>}
             </div>);
         return(
