@@ -4,6 +4,7 @@ import { NavLink } from 'react-router-dom';
 import { clearError } from '../actions/common';
 import { 
     modifyUsername, modifyPassword, deleteUser } from '../actions/api';
+import { deleteCookie } from '../utils';
 
 function checkUsername(username) {
     let regExp =  /^[\wㄱ-ㅎㅏ-ㅣ가-힣]+$/;
@@ -150,9 +151,14 @@ class Profile extends Component {
         this.escapeEdit();
     }
 
-    signOutProcessor = () => {
+    signOutProcessor = async () => {
         this.props.deleteUser(
             this.props.user.id, this.state.editValue);
+        deleteCookie('boardId');
+        deleteCookie('sheetId');
+        deleteCookie('sheetTitle');
+        deleteCookie('order');
+        localStorage.clear();
     }
 
     renderUser() {

@@ -91,13 +91,13 @@ class SheetCopy(APIView):
             .filter(
                 sheet_id=sheet.id,
                 deleted=False)\
-            .values('id','label','x','y')
+            .values('id','label','x','y','font','shape','color')
 
         edge_values = Edge.objects\
             .filter(
                 sheet_id=sheet.id,
                 deleted=False)\
-            .values('label','node_from','node_to')
+            .values('label','node_from','node_to','dashes','width','arrow')
         
         node_parse = {}
 
@@ -110,7 +110,10 @@ class SheetCopy(APIView):
                 sheet_id=copied_sheet.id, 
                 label=val['label'],
                 x=val['x'],
-                y=val['y'])
+                y=val['y'],
+                font=val['font'],
+                shape=val['shape'],
+                color=val['color'])
             
             new_nodes_app(node)
             node_parse[str(val['id'])] = node.id
@@ -125,13 +128,109 @@ class SheetCopy(APIView):
 
             edge = Edge(
                 sheet_id=copied_sheet.id,
-                label=val['label'],
                 node_from_id=node_parse[from_id],
-                node_to_id=node_parse[to_id])
+                node_to_id=node_parse[to_id],
+                label=val['label'],
+                dashes=val['dashes'],
+                width=val['width'],
+                arrow=val['arrow'])
+
             new_edges_app(edge)
 
         Node.objects.bulk_create(new_nodes)
         Edge.objects.bulk_create(new_edges)
 
         return JsonResponse({})
+
+# util
+# @method_decorator(csrf_exempt, name='dispatch')
+# class GetDefaultData(View):
+#     def get(self, request):
+#         '''
+#         data = {
+#             sheet_name: sheet_id, # welcome Sheet
+#             sheet_name: sheet_id, # example Sheet
+#             sheet_name: sheet_id, # example Sheet
+#             ...                   # example Sheet
+#         }
+#         '''
+#         data = request.GET
+
+#         if not len(data):
+#             return JsonResponse({})
+
+#         data_file = open("./board/default_data.py", 'w')
+
+#         node_index = 0
+#         node_parse = {}
+
+#         sheet_ids = []
+#         sheet_names = {}
+
+#         node_data_info = []
+#         edge_data_info = []
+
+#         for name in data:
+#             sheet_id = int(data[name])
+#             sheet_ids.append(sheet_id)
+#             sheet_names[sheet_id] = name
+
+#         for sheet_id in sheet_ids:
+#             data_name = sheet_names[sheet_id]+'_nodes'
+#             data_file.write(data_name+' = [\n')
+#             node_data_info.append(data_name)
+
+#             node_values = Node.objects\
+#                 .filter(
+#                     sheet_id=sheet_id,
+#                     deleted=False)\
+#                 .values('id','label','x','y','font','shape','color')
+
+#             for node in node_values:
+#                 target = [
+#                     node_index, 
+#                     node['label'],
+#                     node['x'], node['y'],
+#                     node['font'],
+#                     node['shape'],
+#                     node['color'],]
+#                 data_file.write('\t'+str(target)+',\n')
+
+#                 node_parse[str(node['id'])] = node_index
+#                 node_index += 1
+                
+#             data_file.write(']\n\n')
+
+#             data_name = sheet_names[sheet_id]+'_edges'
+#             data_file.write(data_name+' = [\n')
+#             edge_data_info.append(data_name)
+
+#             edge_values = Edge.objects\
+#                 .filter(
+#                     sheet_id=sheet_id,
+#                     deleted=False)\
+#                 .values('label','node_from','node_to','dashes','width','arrow')
+
+#             for edge in edge_values:
+#                 from_id = str(edge['node_from'])
+#                 to_id = str(edge['node_to'])
+#                 target = [
+#                     edge['label'],
+#                     node_parse[from_id],
+#                     node_parse[to_id],
+#                     edge['dashes'],
+#                     edge['width'],
+#                     edge['arrow'],]
+#                 data_file.write('\t'+str(target)+',\n')
+
+#             data_file.write(']\n\n')
+        
+#         data_file.write('nodeDataSet = '+str(node_data_info)+'\n')
+#         data_file.write('edgeDataSet = '+str(edge_data_info)+'\n')
+#         data_file.write('nameList = '+str(list(data.keys()))+'\n')
+
+#         data_file.write('\n\n')
+
+
+#         return JsonResponse({})
 
