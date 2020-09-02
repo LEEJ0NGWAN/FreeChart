@@ -16,8 +16,8 @@ services:
             context: ./front
         volumes:
             - front_app:/front/build
-        environment:
-            - REACT_APP_API_HOST=http://freechart/api
+        env_file:
+            - ./front/.env
     back:
         build:
             context: ./back
@@ -36,8 +36,6 @@ services:
         depends_on:
             - back
             - front
-        environment:
-            - REACT_APP_API_HOST=http://freechart/api
     redis:
         image: "redis:alpine"
         ports:
