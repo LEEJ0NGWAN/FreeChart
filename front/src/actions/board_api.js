@@ -97,7 +97,7 @@ export function deleteBoard(id, key, saveChild=null) {
             id: id,
             save_child: saveChild
         };
-        return axios_.delete(`/board/`, {params})
+        return axios_.post(`/board/delete/`, params)
         .then(res => {
             if (res.data.board)
                 dispatch(fetch(DELETE_BOARD, {key:key}));

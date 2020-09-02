@@ -164,7 +164,7 @@ label {
 }
 
 .board-modal, .order-modal {
-    position: absolute;
+    position: fixed;
     z-index: 1;
     background-color: rgba(0, 0, 0, 0.25);
     top: 0; left: 0;
@@ -273,7 +273,7 @@ label {
 }
 
 .profile-modal {
-    position: absolute;
+    position: fixed;
     z-index: 1;
     background-color: rgba(0, 0, 0, 0.25);
     top: 0; left: 0;
@@ -340,7 +340,7 @@ label {
 
 .profile-edit-modal, .profile-sign-out-modal {
     z-index: 2;
-    position: absolute;
+    position: fixed;
     background-color: rgba(0, 0, 0, 0.25);
     top: 0; left: 0;
     width: 100%; height: 100%;
