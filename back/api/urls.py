@@ -36,3 +36,13 @@ urlpatterns = [
         name='SheetCopyView')
 ]
 
+# from board.views_rest import GetDefaultData
+
+# urlpatterns += [
+#     path(
+#         'getDefaultData/',
+#         GetDefaultData.as_view(),
+#         name='GetDefaultDataView'
+#     )
+# ]
+
