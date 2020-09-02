@@ -107,12 +107,14 @@ class BoardController(APIView):
             'board': board
         }))
 
-    def delete(self, request):
+@method_decorator(csrf_exempt, name='dispatch')
+class BoardDelete(APIView):
+    def post(self, request):
         if not request.user.is_authenticated:
             return JsonResponse({}, status=HTTP_401_UNAUTHORIZED)
         
-        data = request.GET
-        
+        data = json.loads(request.body.decode("utf-8"))
+
         if 'id' not in data:
             return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
         
@@ -124,7 +126,7 @@ class BoardController(APIView):
         
         if not board:
             return JsonResponse({}, status=HTTP_404_NOT_FOUND)
-        
+
         board.deleted = True
         board.save()
 
@@ -154,5 +156,5 @@ class BoardController(APIView):
 
         return JsonResponse(serialize({
             'board': board
-        }))
+        }))    
 

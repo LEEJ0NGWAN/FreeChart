@@ -1,6 +1,6 @@
 from django.urls import path
 from account.api.user import UserController
-from board.api.board import BoardController
+from board.api.board import BoardController, BoardDelete
 from board.api.sheet import SheetController
 from board.api.element import ElementController
 from board.views_rest import ChildController, SheetCopy
@@ -14,6 +14,10 @@ urlpatterns = [
         'board/', 
         BoardController.as_view(),
         name='BoardView'),
+    path(
+        'board/delete/',
+        BoardDelete.as_view(),
+        name='BoardDeleteView'),
     path(
         'sheet/',
         SheetController.as_view(),
