@@ -287,7 +287,7 @@ class Sheet extends Component {
         edgeStates: {},
         from: null,
         to: {},
-        tooltipMessage: ""
+        tooltipMessage: "",
     };
 
     prevPivot = () => {
@@ -345,6 +345,23 @@ class Sheet extends Component {
         Object.keys(events).forEach((key)=>{
             this.network.on(key, events[key]);
         });
+    }
+
+    backgroundInitializer = () => {
+        const ctx = this.network.canvas.getContext();
+
+        ctx.save();
+
+        ctx.globalAlpha = 1;
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.filter = "none";
+
+
+        ctx.globalCompositeOperation = "destination-over";
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+        ctx.restore();
     }
 
     initializer = async () => {
@@ -569,6 +586,18 @@ class Sheet extends Component {
         this.setState(nextState);
     }
 
+    saveFile = () => {
+        this.network.fit();
+        this.backgroundInitializer();
+        const canvas = this.network.canvas.getContext().canvas;
+        const dataURL = canvas.toDataURL('jpg');
+
+        let a  = document.createElement('a');
+        a.href = dataURL;
+        a.download = 'image.jpg';
+        a.click();
+    }
+
     componentDidMount() {
         this.initializer();
     }
@@ -686,6 +715,16 @@ class Sheet extends Component {
         2.83-2.829 12.17 11.996z"/></svg>);
     }
 
+    renderPictureIcon() {
+        return(<svg className="bs-item icon"
+        onClick={this.saveFile}
+        width="24" height="24" viewBox="0 0 24 24">
+        <path d="M5 8.5c0-.828.672-1.5 1.5-1.5s1.5.672 
+        1.5 1.5c0 .829-.672 1.5-1.5 1.5s-1.5-.671-1.5-1.5zm9 
+        .5l-2.519 4-2.481-1.96-4 5.96h14l-5-8zm8-4v14h-20v
+        -14h20zm2-2h-24v18h24v-18z"/></svg>);
+    }
+
     render() {
         const {historyPivot} = this.state;
         const tooltip = (
@@ -702,6 +741,7 @@ class Sheet extends Component {
         const menu = (
             <div className="sheet-menu">
                 {this.renderBackIcon()}
+                {this.renderPictureIcon()}
                 {Boolean(historyPivot) && 
                 this.renderSaveIcon()}
                 {this.renderRefreshIcon()}
@@ -723,7 +763,7 @@ class Sheet extends Component {
                 data={this.state.elementData}
                 x={this.state.x}
                 y={this.state.y}/>}
-                <div title="network"
+                <div
                 ref={this.state.networkRef}
                 style={style}/>
             </div>
