@@ -19,7 +19,7 @@ export const BLANK = " ";
 const historySize = 15;
 
 const DEFAULT_NODE_SHAPE = 'ellipse';
-const DEFAULT_NODE_COLOR = '#dddddd';
+const DEFAULT_NODE_COLOR = '#ffffff';
 const DEFAULT_NODE_FONT = '14';
 const DEFAULT_NODE_NAME = '새로운 노드';
 
@@ -273,11 +273,6 @@ function eventGenerator() {
 
             this.setState(nextState);
         }.bind(this),
-        zoom: function() {
-            this.setState({
-                isZoomMode: true,
-            });
-        }.bind(this),
     };
     return events;
 }
@@ -293,7 +288,6 @@ class Sheet extends Component {
         from: null,
         to: {},
         tooltipMessage: "",
-        isZoomMode: false,
     };
 
     prevPivot = () => {
@@ -603,11 +597,8 @@ class Sheet extends Component {
         a.click();
     }
 
-    zoomReset = () => {
+    viewReset = () => {
         this.network.fit();
-        this.setState({
-            isZoomMode: false
-        });
     }
 
     componentDidMount() {
@@ -737,9 +728,9 @@ class Sheet extends Component {
         -14h20zm2-2h-24v18h24v-18z"/></svg>);
     }
 
-    renderZoomResetIcon() {
+    renderViewResetIcon() {
         return(<svg className="bs-item icon"
-        onClick={this.zoomReset}
+        onClick={this.viewReset}
         width="24" height="24" 
         fillRule="evenodd" clipRule="evenodd">
         <path d="M13.818 16.646c-1.273.797-2.726 
@@ -756,7 +747,7 @@ class Sheet extends Component {
     }
 
     render() {
-        const {historyPivot, isZoomMode} = this.state;
+        const {historyPivot} = this.state;
         const tooltip = (
             <label className="tooltip-label">
                 {this.state.tooltipMessage}
@@ -772,10 +763,9 @@ class Sheet extends Component {
             <div className="sheet-menu">
                 {this.renderBackIcon()}
                 {this.renderPictureIcon()}
+                {this.renderViewResetIcon()}
                 {Boolean(historyPivot) && 
                 this.renderSaveIcon()}
-                {isZoomMode &&
-                this.renderZoomResetIcon()}
                 {this.renderRefreshIcon()}
                 {this.renderRedoIcon()}
                 {this.renderUndoIcon()}
