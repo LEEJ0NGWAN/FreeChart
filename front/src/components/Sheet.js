@@ -19,7 +19,7 @@ export const BLANK = " ";
 const historySize = 15;
 
 const DEFAULT_NODE_SHAPE = 'ellipse';
-const DEFAULT_NODE_COLOR = '#dddddd';
+const DEFAULT_NODE_COLOR = '#ffffff';
 const DEFAULT_NODE_FONT = '14';
 const DEFAULT_NODE_NAME = '새로운 노드';
 
@@ -287,7 +287,7 @@ class Sheet extends Component {
         edgeStates: {},
         from: null,
         to: {},
-        tooltipMessage: ""
+        tooltipMessage: "",
     };
 
     prevPivot = () => {
@@ -345,6 +345,23 @@ class Sheet extends Component {
         Object.keys(events).forEach((key)=>{
             this.network.on(key, events[key]);
         });
+    }
+
+    backgroundInitializer = () => {
+        const ctx = this.network.canvas.getContext();
+
+        ctx.save();
+
+        ctx.globalAlpha = 1;
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.filter = "none";
+
+
+        ctx.globalCompositeOperation = "destination-over";
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+        ctx.restore();
     }
 
     initializer = async () => {
@@ -569,6 +586,21 @@ class Sheet extends Component {
         this.setState(nextState);
     }
 
+    saveFile = () => {
+        this.backgroundInitializer();
+        const canvas = this.network.canvas.getContext().canvas;
+        const dataURL = canvas.toDataURL('jpg');
+
+        let a  = document.createElement('a');
+        a.href = dataURL;
+        a.download = 'image.jpg';
+        a.click();
+    }
+
+    viewReset = () => {
+        this.network.fit();
+    }
+
     componentDidMount() {
         this.initializer();
     }
@@ -686,6 +718,34 @@ class Sheet extends Component {
         2.83-2.829 12.17 11.996z"/></svg>);
     }
 
+    renderPictureIcon() {
+        return(<svg className="bs-item icon"
+        onClick={this.saveFile}
+        width="24" height="24" viewBox="0 0 24 24">
+        <path d="M5 8.5c0-.828.672-1.5 1.5-1.5s1.5.672 
+        1.5 1.5c0 .829-.672 1.5-1.5 1.5s-1.5-.671-1.5-1.5zm9 
+        .5l-2.519 4-2.481-1.96-4 5.96h14l-5-8zm8-4v14h-20v
+        -14h20zm2-2h-24v18h24v-18z"/></svg>);
+    }
+
+    renderViewResetIcon() {
+        return(<svg className="bs-item icon"
+        onClick={this.viewReset}
+        width="24" height="24" 
+        fillRule="evenodd" clipRule="evenodd">
+        <path d="M13.818 16.646c-1.273.797-2.726 
+        1.256-4.202 1.354l-.537-1.983c2.083-.019 
+        4.132-.951 5.49-2.724 2.135-2.79 1.824
+        -6.69-.575-9.138l-1.772 2.314-1.77-6.469h6.645l-1.877 
+        2.553c3.075 2.941 3.681 7.659 1.423 11.262l7.357 
+        7.357-2.828 2.828-7.354-7.354zm-11.024-1.124c-1.831
+        -1.745-2.788-4.126-2.794-6.522-.005-1.908.592-3.822 
+        1.84-5.452 1.637-2.138 4.051-3.366 6.549-3.529l.544 
+        1.981c-2.087.015-4.142.989-5.502 2.766-2.139 2.795
+        -1.822 6.705.589 9.154l1.774-2.317 1.778 6.397h
+        -6.639l1.861-2.478z"/></svg>);
+    }
+
     render() {
         const {historyPivot} = this.state;
         const tooltip = (
@@ -702,6 +762,8 @@ class Sheet extends Component {
         const menu = (
             <div className="sheet-menu">
                 {this.renderBackIcon()}
+                {this.renderPictureIcon()}
+                {this.renderViewResetIcon()}
                 {Boolean(historyPivot) && 
                 this.renderSaveIcon()}
                 {this.renderRefreshIcon()}
@@ -723,7 +785,7 @@ class Sheet extends Component {
                 data={this.state.elementData}
                 x={this.state.x}
                 y={this.state.y}/>}
-                <div title="network"
+                <div
                 ref={this.state.networkRef}
                 style={style}/>
             </div>
