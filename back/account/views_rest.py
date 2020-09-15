@@ -23,7 +23,7 @@ from utils.serialize import serialize
 from django.core.mail import send_mail
 from utils import id_generator, redis, SetDefaultData
 
-from FreeChart.settings import HOST_NAME
+from FreeChart.settings import HOST_NAME, EMAIL_HOST_SENDER
 
 now = datetime.datetime.now
 reset_url = f'http://{HOST_NAME}/api/account/password/reset/'
@@ -157,8 +157,8 @@ class EmailVerify(View):
             send_mail(
                 '[FreeChart] 이메일 인증 링크',
                 '',
-                'no-reply@freechart.tk',
-                [request.user.email],
+                from_email=EMAIL_HOST_SENDER,
+                recipient_list=[request.user.email],
                 html_message=html
             )
 
@@ -231,12 +231,11 @@ class PasswordReset(View):
                     'token': token
                 }
             )
-
             send_mail(
                 '[FreeChart] 비밀번호 재설정 링크',
                 '',
-                f'no-reply@{HOST_NAME}',
-                [email],
+                from_email=EMAIL_HOST_SENDER,
+                recipient_list=[email],
                 html_message=html
             )
 

@@ -102,7 +102,7 @@ WSGI_APPLICATION = 'FreeChart.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
-HOST_NAME = os.environ.get('HOST_NAME', 'freechart')
+HOST_NAME = os.environ.get('HOST_NAME', 'freechart.local')
 
 if MODE == 'PROD':
     DATABASES = {
@@ -201,22 +201,28 @@ AUTH_USER_MODEL = 'account.User'
 
 
 # SMTP setting
-# USER & PASSWORD는 email_setting.py 파일 안에 설정 후 사용합니다
-from . import email_setting
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.daum.net'
 EMAIL_USE_SSL = True
 EMAIL_PORT = 465
 
 if MODE == 'PROD':
+    EMAIL_HOST = 'smtp.daum.net'
     EMAIL_HOST_USER = os.environ['EMAIL_HOST_USER']
     EMAIL_HOST_PASSWORD = os.environ['EMAIL_HOST_PASSWORD']
+    EMAIL_HOST_SENDER = f'no-reply@{HOST_NAME}'
 else:
+    # USER & PASSWORD는 email_setting.py 파일 안에 설정 후 사용합니다
+    from . import email_setting
+    EMAIL_HOST = 'smtp.naver.com'
     EMAIL_HOST_USER = email_setting.EMAIL_HOST_USER
     EMAIL_HOST_PASSWORD = email_setting.EMAIL_HOST_PASSWORD
+    EMAIL_HOST_SENDER = email_setting.EMAIL_HOST_USER
 
 # REDIS setting
-REDIS_HOST = 'redis'
+if MODE == 'PROD':
+    REDIS_HOST = 'redis'
+else:
+    REDIS_HOST = 'localhost'
 REDIS_PORT = 6379
 
 # CORS
