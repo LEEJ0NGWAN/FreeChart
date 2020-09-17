@@ -129,8 +129,8 @@ POST와 PUT 메소드는 통상적으로 json 데이터 형식을 이용합니�
 
 ```jsx
 {
-	refresh,  // JWT 갱신 토큰
-	access,   // JWT 인증 토큰
+	refresh,	// JWT 갱신 토큰
+	access,		// JWT 인증 토큰
 	user: {
 		id,
 		email,
@@ -169,8 +169,8 @@ POST와 PUT 메소드는 통상적으로 json 데이터 형식을 이용합니�
 
 ```jsx
 {
-	token?,  // email과 같이 전달되어야 합니다.
-	email?   // token과 같이 전달되어야 합니다.
+	token?,		// email과 같이 전달되어야 합니다.
+	email?		// token과 같이 전달되어야 합니다.
 }
 ```
 
@@ -289,7 +289,7 @@ POST와 PUT 메소드는 통상적으로 json 데이터 형식을 이용합니�
 {
 	email,
 	password,
-	username?  // username이 전달되지 않으면, 사용자의 닉네임은 이메일이 됩니다.
+	username?	// username이 전달되지 않으면, 사용자의 닉네임은 이메일이 됩니다.
 }
 ```
 
@@ -297,8 +297,8 @@ POST와 PUT 메소드는 통상적으로 json 데이터 형식을 이용합니�
 
 ```jsx
 {
-	refresh,  // JWT 갱신 토큰
-	access,   // JWT 인증 토큰
+	refresh,	// JWT 갱신 토큰
+	access,		// JWT 인증 토큰
 	user: {
 		id,
 		email,
@@ -333,8 +333,8 @@ POST와 PUT 메소드는 통상적으로 json 데이터 형식을 이용합니�
 
 ```jsx
 {
-	id,      // 현재 접속된 사용자 자신의 id
-	password // 현재 접속된 사용자 자신의 패스워드
+	id,		// 현재 접속된 사용자 자신의 id
+	password	// 현재 접속된 사용자 자신의 패스워드
 }
 ```
 
@@ -418,7 +418,7 @@ jwt 토큰 인증 테스트 api
 
 ```jsx
 {
-	id?  // 사용자의 아이디를 전달하면 해당 id의 사용자를 조회합니다.
+	id?	// 사용자의 아이디를 전달하면 해당 id의 사용자를 조회합니다.
 }
 ```
 
@@ -458,8 +458,8 @@ jwt 토큰 인증 테스트 api
 
 ```jsx
 {
-	username?  // 새로운 닉네임
-	password?  // 새로운 비밀번호
+	username?	// 새로운 닉네임
+	password?	// 새로운 비밀번호
 }
 ```
 
@@ -497,9 +497,9 @@ jwt 토큰 인증 테스트 api
 
 ```jsx
 {
-	id?            // 특정 보드를 조회하고 싶을 때 전달
-	parent_id?     // 특정 보드에 포함된 보드들을 조회하고 싶을 때 전달
-  order?         // 조회될 보드들의 정렬순서입니다. (기본값: 수정일짜 내림차순)
+	id?		// 특정 보드를 조회하고 싶을 때 전달
+	parent_id?	// 특정 보드에 포함된 보드들을 조회하고 싶을 때 전달
+  	order?		// 조회될 보드들의 정렬순서입니다. (기본값: 수정일짜 내림차순)
 }
 ```
 
@@ -514,7 +514,7 @@ jwt 토큰 인증 테스트 api
 	board: {
 		id,
 		title,
-		parent_id,    // 가장 바깥에 존재하는 보드는 이 값이 null입니다.
+		parent_id,	// 가장 바깥에 존재하는 보드는 이 값이 null입니다.
 		create_date,
 		modify_date
 	}
@@ -529,7 +529,7 @@ jwt 토큰 인증 테스트 api
 		{
 			id,
 			title,
-			parent_id,    // 요청했던 특정 보드의 id값이 됩니다.
+			parent_id,	// 요청했던 특정 보드의 id값이 됩니다.
 			create_date,
 			modify_date
 		},
@@ -577,8 +577,8 @@ jwt 토큰 인증 테스트 api
 
 ```jsx
 {
-	title,         // 만들고 싶은 보드의 제목
-	parent_id?     // 부모로 삼을 특정 보드의 id
+	title,		// 만들고 싶은 보드의 제목
+	parent_id?	// 부모로 삼을 특정 보드의 id
 }
 ```
 
@@ -589,7 +589,7 @@ jwt 토큰 인증 테스트 api
 	board: {
 		id,
 		title,
-		parent_id,    // 가장 바깥에 존재하는 보드는 이 값이 null입니다.
+		parent_id,	// 가장 바깥에 존재하는 보드는 이 값이 null입니다.
 		create_date,
 		modify_date
 	}
@@ -618,9 +618,9 @@ jwt 토큰 인증 테스트 api
 
 ```jsx
 {
-	id,            // 수정할 보드의 id
-	title?,        // 새로 적용할 제목
-	parent_id?     // 새로 적용할 상위 보드의 id
+	id,		// 수정할 보드의 id
+	title?,		// 새로 적용할 제목
+parent_id?		// 새로 적용할 상위 보드의 id
 }
 ```
 
@@ -631,7 +631,7 @@ jwt 토큰 인증 테스트 api
 	board: {
 		id,
 		title,
-		parent_id,    // 가장 바깥에 존재하는 보드는 이 값이 null입니다.
+		parent_id,	// 가장 바깥에 존재하는 보드는 이 값이 null입니다.
 		create_date,
 		modify_date
 	}
@@ -667,9 +667,9 @@ jwt 토큰 인증 테스트 api
 
 ```jsx
 {
-	id,                    // 삭제 할 보드의 id
-	save_child?: boolean   // 삭제 할 보드에 포함되었던 자식(보드,쉬트)의 삭제 방지 여부
-                         // (기본값: false <- 같이 삭제)
+	id,			// 삭제 할 보드의 id
+	save_child?: boolean	// 삭제 할 보드에 포함되었던 자식(보드,쉬트)의 삭제 방지 여부
+				// (기본값: false <- 같이 삭제)
 }
 ```
 
@@ -705,7 +705,7 @@ jwt 토큰 인증 테스트 api
 		{
 			id,
 			title,
-			parent_id, // 삭제된 보드의 부모, 즉, 조부모로 연결됩니다.
+			parent_id,	// 삭제된 보드의 부모, 즉, 조부모로 연결됩니다.
 			create_date,
 			modify_date
 		},
@@ -715,7 +715,7 @@ jwt 토큰 인증 테스트 api
 		{
 			id,
 			title,
-			board_id, // 삭제된 보드의 부모, 즉, 조부모로 연결됩니다.
+			board_id,	// 삭제된 보드의 부모, 즉, 조부모로 연결됩니다.
 			create_date,
 			modify_date
 		},
@@ -760,9 +760,9 @@ jwt 토큰 인증 테스트 api
 
 ```jsx
 {
-	id?            // 특정 보드를 조회하고 싶을 때 전달
-	board_id?      // 특정 보드에 포함된 보드들을 조회하고 싶을 때 전달
-  order?         // 조회할 쉬트들의 정렬순서입니다. (기본값: 수정일짜 내림차순)
+	id?		// 특정 보드를 조회하고 싶을 때 전달
+	board_id?	// 특정 보드에 포함된 보드들을 조회하고 싶을 때 전달
+	order?		// 조회할 쉬트들의 정렬순서입니다. (기본값: 수정일짜 내림차순)
 }
 ```
 
@@ -777,7 +777,7 @@ jwt 토큰 인증 테스트 api
 	sheet: {
 		id,
 		title,
-		board_id,    // 가장 바깥에 존재하는 쉬트는 이 값이 null입니다.
+		board_id,	// 가장 바깥에 존재하는 쉬트는 이 값이 null입니다.
 		create_date,
 		modify_date
 	}
@@ -792,7 +792,7 @@ jwt 토큰 인증 테스트 api
 		{
 			id,
 			title,
-			board_id,    // 요청했던 특정 보드의 id값이 됩니다.
+			board_id,	// 요청했던 특정 보드의 id값이 됩니다.
 			create_date,
 			modify_date
 		},
@@ -840,8 +840,8 @@ jwt 토큰 인증 테스트 api
 
 ```jsx
 {
-	title,         // 만들고 싶은 쉬트의 제목
-	board_id?      // 부모로 삼을 특정 보드의 id
+	title,		// 만들고 싶은 쉬트의 제목
+	board_id?	// 부모로 삼을 특정 보드의 id
 }
 ```
 
@@ -852,7 +852,7 @@ jwt 토큰 인증 테스트 api
 	sheet: {
 		id,
 		title,
-		board_id,    // 가장 바깥에 존재하는 쉬트는 이 값이 null입니다.
+		board_id,	// 가장 바깥에 존재하는 쉬트는 이 값이 null입니다.
 		create_date,
 		modify_date
 	}
@@ -881,9 +881,9 @@ jwt 토큰 인증 테스트 api
 
 ```jsx
 {
-	id,            // 수정할 쉬트의 id
-	title?,        // 새로 적용할 제목
-	board_id?      // 새로 적용할 상위 보드의 id
+	id,		// 수정할 쉬트의 id
+	title?,		// 새로 적용할 제목
+	board_id?	// 새로 적용할 상위 보드의 id
 }
 ```
 
@@ -894,7 +894,7 @@ jwt 토큰 인증 테스트 api
 	sheet: {
 		id,
 		title,
-		board_id,    // 가장 바깥에 존재하는 쉬트는 이 값이 null입니다.
+		board_id,	// 가장 바깥에 존재하는 쉬트는 이 값이 null입니다.
 		create_date,
 		modify_date
 	}
@@ -930,7 +930,7 @@ jwt 토큰 인증 테스트 api
 
 ```jsx
 {
-	id                    // 삭제 할 쉬트의 id
+	id	// 삭제 할 쉬트의 id
 }
 ```
 
@@ -978,7 +978,7 @@ jwt 토큰 인증 테스트 api
 
 ```jsx
 {
-	sheet_id             // 복제할 쉬트의 id
+	sheet_id	// 복제할 쉬트의 id
 }
 ```
 
@@ -1019,10 +1019,10 @@ jwt 토큰 인증 테스트 api
 
 ```jsx
 {
-	id?,           // 기준이 될 보드의 id (기본값: null)
-                 // null의 경우, 가장 바깥(root)에 위치한 보드와 쉬트를 가져옵니다.
+	id?,	// 기준이 될 보드의 id (기본값: null)
+		// null의 경우, 가장 바깥(root)에 위치한 보드와 쉬트를 가져옵니다.
 
-  order?         // 조회될 자식들의 정렬순서입니다. (기본값: 수정일짜 내림차순)
+	order?	// 조회될 자식들의 정렬순서입니다. (기본값: 수정일짜 내림차순)
 }
 ```
 
@@ -1098,34 +1098,34 @@ jwt 토큰 인증 테스트 api
 
 ```jsx
 {
-  // 네트워크를 구성하는 노드와 엣지의 정보
+	// 네트워크를 구성하는 노드와 엣지의 정보
 	nodes: [
 		{
 			id,
-      label,       // 노드가 표시하는 텍스트
-      x,           // 노드의 좌표 값
-      x_,
-      y,
-      y_,
-      font: int,   // 노드의 글자 크기
-      shape,       // 노드의 모양
-      color        // 노드의 색
+			label,		// 노드가 표시하는 텍스트
+			x,		// 노드의 좌표 값
+			x_,
+			y,
+			y_,
+			font: int,	// 노드의 글자 크기
+			shape,		// 노드의 모양
+			color		// 노드의 색
 		},
 		...
 	],
 	edges: [
 		{
 			id,
-      label,                // 엣지가 표시하는 텍스트
-      from,                 // 엣지의 시작점 노드 id
-      to,                   // 엣지의 끝점 노드 id
-      dashes: boolean,      // 엣지의 점선 여부
-      width:  int,          // 엣지의 굵기
-      arrow:  boolean,      // 엣지의 끝 부분의 화살표 여부
-      arrows: {
+			label,			// 엣지가 표시하는 텍스트
+			from,			// 엣지의 시작점 노드 id
+			to,			// 엣지의 끝점 노드 id
+			dashes: boolean,	// 엣지의 점선 여부
+			width:  int,		// 엣지의 굵기
+			arrow:  boolean,	// 엣지의 끝 부분의 화살표 여부
+			arrows: {
 				to: {
-					type,             // 화살표가 있을 경우 유형 (arrow, image)
-					scaleFactor: int  // 화살표가 있을 경우 크기
+					type,			// 화살표가 있을 경우 유형 (arrow, image)
+					scaleFactor: int	// 화살표가 있을 경우 크기
 				}
 			}
 		},
@@ -1168,30 +1168,30 @@ jwt 토큰 인증 테스트 api
 	nodes: [
 		{
 			id,
-      label,       // 노드가 표시하는 텍스트
-      x,           // 노드의 좌표 값
-      x_,
-      y,
-      y_,
-      font: int,   // 노드의 글자 크기
-      shape,       // 노드의 모양
-      color        // 노드의 색
+			label,		// 노드가 표시하는 텍스트
+			x,		// 노드의 좌표 값
+			x_,
+			y,
+			y_,
+			font: int,	// 노드의 글자 크기
+			shape,		// 노드의 모양
+			color		// 노드의 색
 		},
 		...
 	],
 	edges: [
 		{
 			id,
-      label,                // 엣지가 표시하는 텍스트
-      from,                 // 엣지의 시작점 노드 id
-      to,                   // 엣지의 끝점 노드 id
-      dashes: boolean,      // 엣지의 점선 여부
-      width:  int,          // 엣지의 굵기
-      arrow:  boolean,      // 엣지의 끝 부분의 화살표 여부
-      arrows: {
+			label,			// 엣지가 표시하는 텍스트
+			from,			// 엣지의 시작점 노드 id
+			to,			// 엣지의 끝점 노드 id
+			dashes: boolean,	// 엣지의 점선 여부
+			width:  int,		// 엣지의 굵기
+			arrow:  boolean,	// 엣지의 끝 부분의 화살표 여부
+			arrows: {
 				to: {
-					type,             // 화살표가 있을 경우 유형
-					scaleFactor: int  // 화살표가 있을 경우 크기
+					type,			// 화살표가 있을 경우 유형
+					scaleFactor: int	// 화살표가 있을 경우 크기
 				}
 			}
 		},
