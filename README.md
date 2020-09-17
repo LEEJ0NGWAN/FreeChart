@@ -1,7 +1,5 @@
 # FreeChart
 
-# FreeChart
-
 [http://freechart.tk/](http://freechart.tk/)
 
 React.js, Django Rest Framework, docker로 개발된 웹 기반 네트워크 그래프 작성 애플리케이션입니다.
