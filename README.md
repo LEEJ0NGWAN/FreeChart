@@ -50,7 +50,7 @@ SPA 구현을 위해, react-router-dom 패키지를 이용하여 리액트 컴�
 
 ## Redux pattern
 
-사용자 및 로그인, 파일 데이터 등 백엔드 서버로부터 api 호출 후 얻을 수 있는 json 데이터는 각 분류 별 reducer가 다루게 되며 하나의 store에 저장합니다.
+사용자 및 그래프 데이터와 같이 백엔드 서버로부터 api 호출을 통해 얻은 후, 여러 컴포넌트에서 공통으로 사용하는 데이터는 각 종류 별 reducer가 관리하며 하나의 store에 저장합니다.
 
 react-thunk 패키지를 이용하여, api 호출과 같은 action에서 dispatch를 수행하여 정보가 비동기적으로 저장 될 수 있도록 했습니다.
 
