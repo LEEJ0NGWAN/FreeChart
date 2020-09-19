@@ -1740,6 +1740,8 @@ sudo docker-compose up
 
 ## Docker 관련 사항
 
+<img src="/README/docker.png">
+
 - 구성
 
     Docker-compose에는 다음과 같은 서비스들을 컨테이너로써 실행합니다.
