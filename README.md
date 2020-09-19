@@ -50,6 +50,8 @@ SPA 구현을 위해, react-router-dom 패키지를 이용하여 리액트 컴�
 
 ## Redux pattern
 
+<img src="/README/reducer.png" width="70%" height="70%">
+
 사용자 및 그래프 데이터와 같이 백엔드 서버로부터 api 호출을 통해 얻은 후, 여러 컴포넌트에서 공통으로 사용하는 데이터는 각 종류 별 reducer가 관리하며 하나의 store에 저장합니다.
 
 react-thunk 패키지를 이용하여, api 호출과 같은 action에서 dispatch를 수행하여 정보가 비동기적으로 저장 될 수 있도록 했습니다.
@@ -71,6 +73,8 @@ JWT 토큰은 refresh를 통해서, 일부로 로그아웃하지 않는 이상 �
 이를 통해 서버는 온전히 비즈니스 로직에만 자원을 사용할 수 있기 때문에 성능의 향상을 기대할 수 있습니다.
 
 ## Docker (with Docker-compose)
+
+<img src="/README/docker.png">
 
 컨테이너 기반으로 구동하는 방식을 통해, FreeChart 웹 애플리케이션의 각 컴포넌트들이 사용하는 자원을 최적으로 줄이고, 각 컴포넌트들의 버전을 쉽게 관리할 수 있도록 도커라이징을 적용했습니다.
 
