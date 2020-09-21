@@ -73,10 +73,6 @@ Django, Django Rest Framework를 이용하여, 데이터를 객체로 맵핑하�
 
 JWT 토큰은 refresh를 통해서, 일부로 로그아웃하지 않는 이상 사용자는 최대 2주 동안 접속이 유지될 수 있습니다. 이를 통해 사용자가 번거로운 로그인 과정 없이 지난번의 작업을 이어서 할 수 있도록 설정했습니다.
 
-또, 백엔드 django api 서버가 세션 유지를 하지 않아 완전한 stateless로 동작합니다.
-
-이를 통해 서버는 온전히 비즈니스 로직에만 자원을 사용할 수 있기 때문에 성능의 향상을 기대할 수 있습니다.
-
 ## Docker (with Docker-compose)
 
 <img src="/README/docker.png">
