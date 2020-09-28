@@ -12,7 +12,7 @@ const SUB = false;
 const EDGE_MIN_WIDTH = 1;
 const EDGE_MAX_WIDTH = 9;
 const NODE_MIN_FONT = 8;
-const NODE_MAX_FONT = 20;
+const NODE_MAX_FONT = 30;
 
 const SHAPE_INFO = {
     'text': '(없음)',
@@ -69,7 +69,6 @@ class NodeEdit extends Component {
             this.variateTarget = 'font';
             this.variateMinLim = NODE_MIN_FONT;
             this.variateMaxLim = NODE_MAX_FONT;
-            nextState.data.font = Number(nextState.data.font);
         }
 
         const {label} = this.props.data;
@@ -96,8 +95,17 @@ class NodeEdit extends Component {
         if (!mod &&
             this.variateMinLim === nextState.data[this.variateTarget])
             return;
+        
+        if (this.props.type) {
+            nextState.data[this.variateTarget] += (mod)? 1: -1;
+        }
 
-        nextState.data[this.variateTarget] += (mod)? 1: -1;
+        else {
+            const fontSize = Number(this.state.data.font);
+            const nextSize = (mod)? String(fontSize+1): String(fontSize-1);
+
+            nextState.data[this.variateTarget] = nextSize;
+        }
         this.setState(nextState);
     }
 
