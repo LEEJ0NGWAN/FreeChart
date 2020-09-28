@@ -16,9 +16,14 @@ React.js, Django Rest Framework, docker로 개발된 웹 기반 네트워크 그
 
 마인드맵, 제조 공정도, 워크 프로세스, 관계도 등의 그래프를 작성하는데 사용될 수 있습니다.
 
+<br/>
+
 <여러 디바이스에서 실행한 예제>
 
-<img src="/README/_2020-09-07__5.56.58.png" width="50%" height="50%"><img src="/README/_2020-09-07__5.48.50.png" width="20%" height="20%">
+
+<img src="/README/_2020-09-07__5.56.58.png" width="50%" height="50%">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="/README/_2020-09-07__5.48.50.png" width="20%" height="20%">
+
+<img src="/README/pc_example.jpg">
 
 ## 개발 스펙
 
@@ -67,10 +72,6 @@ Django, Django Rest Framework를 이용하여, 데이터를 객체로 맵핑하�
 클라이언트와 서버 간의 통신이 이루어질 때, 기존의 세션이나 쿠키를 사용하는 대신에 JWT 토큰을 이용하여 인증하는 방식을 적용시켰습니다.
 
 JWT 토큰은 refresh를 통해서, 일부로 로그아웃하지 않는 이상 사용자는 최대 2주 동안 접속이 유지될 수 있습니다. 이를 통해 사용자가 번거로운 로그인 과정 없이 지난번의 작업을 이어서 할 수 있도록 설정했습니다.
-
-또, 백엔드 django api 서버가 세션 유지를 하지 않아 완전한 stateless로 동작합니다.
-
-이를 통해 서버는 온전히 비즈니스 로직에만 자원을 사용할 수 있기 때문에 성능의 향상을 기대할 수 있습니다.
 
 ## Docker (with Docker-compose)
 
