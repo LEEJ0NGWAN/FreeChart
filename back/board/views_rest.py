@@ -12,6 +12,7 @@ from rest_framework.status import (
 from rest_framework.views import APIView
 from board.models import ( Board, Sheet, Node, Edge )
 from utils.serialize import serialize
+from board.default_data import (test_node_parse, test_edge_parse)
 
 @method_decorator(csrf_exempt, name='dispatch')
 class ChildController(APIView):
@@ -141,6 +142,14 @@ class SheetCopy(APIView):
         Edge.objects.bulk_create(new_edges)
 
         return JsonResponse({})
+
+@method_decorator(csrf_exempt, name='dispatch')
+class TutorialElement(View):
+    def get(self, request):
+        return JsonResponse(serialize({
+            'nodes': test_node_parse,
+            'edges': test_edge_parse,
+        }))
 
 # util
 # @method_decorator(csrf_exempt, name='dispatch')
