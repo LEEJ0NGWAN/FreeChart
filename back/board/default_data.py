@@ -122,6 +122,10 @@ coffee_edges = [
 	[' ', 54, 53, False, 3, False],
 ]
 
+nodeDataSet = ['welcome_nodes', 'freechart_nodes', 'coffee_nodes']
+edgeDataSet = ['welcome_edges', 'freechart_edges', 'coffee_edges']
+nameList = ['환영합니다!', '이 앱의 구성도', '커피 종류']
+
 test_nodes = [
 	[56, '[노드 만들기]\n\n빈 곳에 더블 클릭!', -134, -294, '15', 'text', '#ffffff'],
 	[57, '[엣지 만들기]\n\n시작을 꾹 누른 뒤, 끝을 꾹 누르기', 97, -302, '15', 'text', '#ffffff'],
@@ -141,7 +145,44 @@ test_edges = [
 	[' ', 63, 64, False, 5, True],
 ]
 
-nodeDataSet = ['welcome_nodes', 'freechart_nodes', 'coffee_nodes']
-edgeDataSet = ['welcome_edges', 'freechart_edges', 'coffee_edges']
-nameList = ['환영합니다!', '이 앱의 구성도', '커피 종류']
+test_node_parse = []
+test_edge_parse = []
+
+for node_info in test_nodes:
+	parse = {
+		'id': node_info[0],
+		'label': node_info[1],
+		'x': node_info[2],
+		'x_': node_info[2],
+		'y': node_info[3],
+		'y_': node_info[3],
+		'font': node_info[4],
+		'shape': node_info[5],
+		'color': node_info[6]
+	}
+	test_node_parse.append(parse)
+
+for edge_info in test_edges:
+	parse = {
+		'label': edge_info[0],
+		'from': edge_info[1],
+		'to': edge_info[2],
+		'dashes': edge_info[3],
+		'width': edge_info[4],
+		'arrow': edge_info[5],
+		'arrows': {}
+	}
+
+	to = {}
+
+	if parse['arrow']:
+		to['type'] = 'arrow'
+		to['scaleFactor'] = 1
+	else:
+		to['type'] = 'image'
+		to['scaleFactor'] = 0
+
+	parse['arrows']['to'] = to
+
+	test_edge_parse.append(parse)
 
