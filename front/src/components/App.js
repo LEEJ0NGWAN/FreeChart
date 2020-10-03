@@ -14,7 +14,8 @@ import './App.css';
 class App extends Component {
     state = {
         popped: false,
-        profileIcon: true
+        profileIcon: true,
+        logoIcon: true,
     }
 
     componentDidMount() {
@@ -24,6 +25,12 @@ class App extends Component {
             history.push('/login');
             return;
         }
+    }
+
+    toggleLogo = () => {
+        this.setState({
+            logoIcon: !this.state.logoIcon
+        });
     }
 
     toggleProfile = (nextState=true) => {
@@ -78,7 +85,7 @@ class App extends Component {
             <div className="App">
                 {this.state.popped && 
                 <Profile togglePop={this.togglePop}/>}
-                {!this.props.logged &&
+                {(!this.props.logged && this.state.logoIcon) &&
                 <div className="App-header">
                     {this.renderFreeChartIcon()}
                     <h1 style={{display: 'inline-block'}}>FreeChart</h1>
@@ -90,7 +97,11 @@ class App extends Component {
                     render={(props)=>
                         <Home {...props}
                         toggleProfile={this.toggleProfile.bind(this)}/>}/>
-                    <Route exact path="/login" component={Login}/>
+                    <Route exact path="/login" 
+                    render={(props)=>
+                        <Login {...props}
+                        toggleLogo={this.toggleLogo.bind(this)}/>}/>
+                    {/* <Route exact path="/login" component={Login}/> */}
                     <Route exact path="/logout" component={Logout}/>
                     <Route exact path="/register" component={Register}/>
                     <Route exact path="/password" component={Password}/>
