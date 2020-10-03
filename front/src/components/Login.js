@@ -3,12 +3,14 @@ import { connect } from 'react-redux';
 import { login } from '../actions/api';
 import { clearError } from '../actions/common';
 import { NavLink } from 'react-router-dom';
+import Sheet from './Sheet';
 
 class Login extends Component {
     state = {
         email: "",
         password: "",
         error: null,
+        testMode: false
     };
 
     changer = (event) => {
@@ -29,6 +31,20 @@ class Login extends Component {
 
         this.props.login(email, password);
         this.setState({password:""});
+    }
+
+    testor = () => {
+        this.props.toggleLogo();
+        this.setState({
+            testMode: true
+        });
+    }
+
+    escape = () => {
+        this.props.toggleLogo();
+        this.setState({
+            testMode: false
+        });
     }
 
     componentDidMount() {
@@ -96,7 +112,7 @@ class Login extends Component {
                 value={this.state.password}/>
             </div>
         )
-        return (
+        const loginPanel = (
             <div className="content-wrapper">
                 {input}
                 {error}
@@ -109,9 +125,20 @@ class Login extends Component {
                     <NavLink 
                     className="button-link"
                     to="/register">회원가입</NavLink>
+                    <p
+                    className="button-item"
+                    style={{backgroundColor:'aliceblue'}}
+                    onClick={this.testor}>체험하기</p>
                 </div>
-            </div>
-        );
+            </div>    
+        )
+        const testSheet = (
+            <Sheet
+            pwd={"체험하기"}
+            testMode={true}
+            escape={this.escape.bind(this)}/>
+        )
+        return this.state.testMode? testSheet: loginPanel;
     }
 }
 
