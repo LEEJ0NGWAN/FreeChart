@@ -1109,6 +1109,56 @@ parent_id?		// 새로 적용할 상위 보드의 id
 {}
 ```
 
+### [GET] /test/element/
+
+체험하기 용도의 테스트 데이터를 가져오는 api
+
+- request
+
+```jsx
+{}
+```
+
+- response [성공]: 200
+
+```jsx
+{
+	// 테스트 네트워크를 구성하는 노드와 엣지의 정보
+	nodes: [
+		{
+			id,
+			label,		// 노드가 표시하는 텍스트
+			x,		// 노드의 좌표 값
+			x_,
+			y,
+			y_,
+			font: int,	// 노드의 글자 크기
+			shape,		// 노드의 모양
+			color		// 노드의 색
+		},
+		...
+	],
+	edges: [
+		{
+			id,
+			label,			// 엣지가 표시하는 텍스트
+			from,			// 엣지의 시작점 노드 id
+			to,			// 엣지의 끝점 노드 id
+			dashes: boolean,	// 엣지의 점선 여부
+			width:  int,		// 엣지의 굵기
+			arrow:  boolean,	// 엣지의 끝 부분의 화살표 여부
+			arrows: {
+				to: {
+					type,			// 화살표가 있을 경우 유형 (arrow, image)
+					scaleFactor: int	// 화살표가 있을 경우 크기
+				}
+			}
+		},
+		...
+	]
+}
+```
+
 ## 6. 원소 api
 
 ### [GET] /sheet/element/
