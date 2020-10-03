@@ -8,10 +8,11 @@ export default function (state = initialState, action) {
         case CLEAR:
             return {};
         case ELEMENTS:
-            return {
+            let nextState = {
                 nodes: action.payload.nodes,
                 edges: action.payload.edges
             };
+            return nextState;
         case SAVED:
             return {
                 ...state,
@@ -19,6 +20,7 @@ export default function (state = initialState, action) {
             }
         case RESET:
             return {
+                ...state,
                 nodes: state.nodes,
                 edges: state.edges
             }

@@ -39,3 +39,13 @@ export function editElement(sheetId, nodes, edges, nodeStates, edgeStates) {
     }
 }
 
+export function testElement() {
+    return (dispatch) => {
+        return axios_.get(`/test/element/`)
+        .then(res => {
+            dispatch(fetch(ELEMENTS, res.data));
+            dispatch(clearError());
+        });
+    }
+}
+
