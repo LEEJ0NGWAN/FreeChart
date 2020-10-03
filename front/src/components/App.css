@@ -52,7 +52,14 @@ label {
 }
 
 .sheet-menu {
-    margin: 10px;
+    font-size: 50%;
+    display: inline-flex;
+    text-align: center;
+}
+
+.sheet-menu-tr {
+    position: absolute;
+    right: 0px;
 }
 
 .board-list {
@@ -74,6 +81,8 @@ label {
     margin: 5px;
     padding: 3px;
     background-color: transparent;
+    margin-bottom: 0px;
+    padding-bottom: 0px;
 }
 
 .bs-title {
@@ -376,7 +385,7 @@ label {
 
 .pwd {
     position: absolute;
-    top: 53px;
+    top: 57px;
     left: 10px;
     font-size: 50%;
     color: gray;

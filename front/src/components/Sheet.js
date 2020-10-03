@@ -761,14 +761,37 @@ class Sheet extends Component {
         )
         const menu = (
             <div className="sheet-menu">
-                {this.renderBackIcon()}
-                {this.renderPictureIcon()}
-                {this.renderViewResetIcon()}
-                {Boolean(historyPivot) && 
-                this.renderSaveIcon()}
-                {this.renderRefreshIcon()}
-                {this.renderRedoIcon()}
-                {this.renderUndoIcon()}
+                <table className="sheet-menu-tl">
+                    <tbody>
+                    <tr>
+                        <td>{this.renderBackIcon()}</td>
+                        <td>{this.renderPictureIcon()}</td>
+                        <td>{this.renderViewResetIcon()}</td>
+                        {Boolean(historyPivot) &&
+                        <td>{this.renderSaveIcon()}</td>}
+                    </tr>
+                    <tr>
+                        <td>나가기</td>
+                        <td>그림 저장</td>
+                        <td>화면 리셋</td>
+                        {Boolean(historyPivot) && <td>변경사항 저장</td>}
+                    </tr>
+                    </tbody>
+                </table>
+                <table className="sheet-menu-tr">
+                    <tbody>
+                    <tr>
+                        <td>{this.renderUndoIcon()}</td>
+                        <td>{this.renderRedoIcon()}</td>
+                        <td>{this.renderRefreshIcon()}</td>
+                    </tr>
+                    <tr>
+                        <td>뒤로</td>
+                        <td>앞으로</td>
+                        <td>리셋</td>
+                    </tr>
+                    </tbody>
+                </table>
             </div>
         )
         return (
