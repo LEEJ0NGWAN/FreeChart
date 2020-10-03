@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { clearError } from '../actions/common';
-import { getElement, editElement, RESET } from '../actions/element_api';
+import { 
+    getElement, editElement, testElement, RESET } from '../actions/element_api';
 import { action, fetch } from '../actions/common';
 import { Network } from 'vis-network/standalone/esm/vis-network';
 import ElementEdit from './ElementEdit';
@@ -365,8 +366,12 @@ class Sheet extends Component {
     }
 
     initializer = async () => {
-        this.props.toggleProfile(false);
-        await this.fetchElements();
+        if (this.props.testMode)
+            await this.props.testElement();
+        else {
+            this.props.toggleProfile(false);
+            await this.fetchElements();
+        }
         this.graphInitializer();
         this.eventInitializer();
     }
@@ -767,14 +772,15 @@ class Sheet extends Component {
                         <td>{this.renderBackIcon()}</td>
                         <td>{this.renderPictureIcon()}</td>
                         <td>{this.renderViewResetIcon()}</td>
-                        {Boolean(historyPivot) &&
+                        {(Boolean(historyPivot) && !this.props.testMode) &&
                         <td>{this.renderSaveIcon()}</td>}
                     </tr>
                     <tr>
                         <td>나가기</td>
                         <td>그림 저장</td>
                         <td>화면 리셋</td>
-                        {Boolean(historyPivot) && <td>변경사항 저장</td>}
+                        {(Boolean(historyPivot) && !this.props.testMode) &&
+                        <td>변경사항 저장</td>}
                     </tr>
                     </tbody>
                 </table>
@@ -822,6 +828,6 @@ export default connect((state) => {
         edges: state.elementReducer.edges,
         saved: state.elementReducer.saved
     };
-}, { editElement, getElement,
+}, { editElement, getElement, testElement,
      clearError, fetch, action })(Sheet);
 
