@@ -4,6 +4,9 @@ import axios_ from "./axiosApi";
 
 import { action, fetch, clearError, reportError } from './common';
 
+const ELEMENTS_API_URL = `/sheets/elements`;
+const TEST_API_URL = `/sheets/test/elements`;
+
 export const SAVED = 'SAVED';
 export const RESET = 'RESET';
 export const ELEMENTS = 'ELEMENTS';
@@ -11,7 +14,7 @@ export const ELEMENTS = 'ELEMENTS';
 export function getElement(sheetId) {
     return (dispatch) => {
         let params = {sheet_id: sheetId};
-        return axios_.get(`/sheet/element/`, {params})
+        return axios_.get(ELEMENTS_API_URL, {params})
         .then(res => {
             dispatch(fetch(ELEMENTS, res.data));
             dispatch(clearError());
@@ -24,8 +27,8 @@ export function getElement(sheetId) {
 
 export function editElement(sheetId, nodes, edges, nodeStates, edgeStates) {
     return (dispatch) => {
-        return axios_.post(
-            `/sheet/element/`,
+        return axios_.put(
+            ELEMENTS_API_URL,
             {
                 sheet_id: sheetId,
                 nodes: nodes, edges:edges,
@@ -41,7 +44,7 @@ export function editElement(sheetId, nodes, edges, nodeStates, edgeStates) {
 
 export function testElement() {
     return (dispatch) => {
-        return axios_.get(`/test/element/`)
+        return axios_.get(TEST_API_URL)
         .then(res => {
             dispatch(fetch(ELEMENTS, res.data));
             dispatch(clearError());
