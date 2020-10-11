@@ -106,14 +106,11 @@ class BoardController(APIView):
         return JsonResponse(serialize({
             'board': board
         }))
-
-@method_decorator(csrf_exempt, name='dispatch')
-class BoardDelete(APIView):
-    def post(self, request):
+    
+    def delete(self, request):
         if not request.user.is_authenticated:
             return JsonResponse({}, status=HTTP_401_UNAUTHORIZED)
-        
-        data = json.loads(request.body.decode("utf-8"))
+        data = request.GET
 
         if 'id' not in data:
             return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
@@ -156,5 +153,57 @@ class BoardDelete(APIView):
 
         return JsonResponse(serialize({
             'board': board
-        }))    
+        }))
+
+# deprecated
+# @method_decorator(csrf_exempt, name='dispatch')
+# class BoardDelete(APIView):
+#     def post(self, request):
+#         if not request.user.is_authenticated:
+#             return JsonResponse({}, status=HTTP_401_UNAUTHORIZED)
+        
+#         data = json.loads(request.body.decode("utf-8"))
+
+#         if 'id' not in data:
+#             return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
+        
+#         board = Board.objects\
+#             .filter(
+#                 id=data['id'],
+#                 owner_id=request.user.id,
+#                 deleted=False).first()
+        
+#         if not board:
+#             return JsonResponse({}, status=HTTP_404_NOT_FOUND)
+
+#         board.deleted = True
+#         board.save()
+
+#         if data.get('save_child'):
+#             boards = Board.objects\
+#                 .filter(
+#                     parent=board,
+#                     deleted=False).all()
+
+#             sheets = Sheet.objects\
+#                 .filter(
+#                     board=board,
+#                     deleted=False).all()
+            
+#             response = serialize({
+#                 'parent': board,
+#                 'boards': boards,
+#                 'sheets': sheets
+#             }, 
+#             change_parent=True,
+#             new_parent_id=board.parent_id)
+
+#             boards.update(parent_id=board.parent_id)
+#             sheets.update(board_id=board.parent_id)
+
+#             return JsonResponse(response)
+
+#         return JsonResponse(serialize({
+#             'board': board
+#         }))    
 
