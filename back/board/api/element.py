@@ -43,7 +43,7 @@ class ElementController(APIView):
             'edges': edges
         }))
 
-    def post(self, request):
+    def put(self, request):
         if not request.user.is_authenticated:
             return JsonResponse({}, status=HTTP_401_UNAUTHORIZED)
         
