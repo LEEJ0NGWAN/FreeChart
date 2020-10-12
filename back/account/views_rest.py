@@ -17,19 +17,26 @@ from rest_framework.status import (
     HTTP_404_NOT_FOUND, HTTP_406_NOT_ACCEPTABLE, HTTP_409_CONFLICT
 )
 from rest_framework_simplejwt.tokens import RefreshToken
-
 from account.models import User
 from utils.serialize import serialize
-from django.core.mail import send_mail
-from utils import id_generator, redis, SetDefaultData
-
-from FreeChart.settings import HOST_NAME, EMAIL_HOST_SENDER
-
-now = datetime.datetime.now
-reset_url = f'http://{HOST_NAME}/api/account/password/reset/'
 
 @method_decorator(csrf_exempt, name='dispatch')
-class Login(View):
+class AccountController(View):
+    # email의 사용 여부 체크
+    # true: 사용 가능
+    # false: 이미 있음
+    def get(self, request):
+        data = request.GET
+
+        if not data or 'email' not in data:
+            return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
+
+        res = {'email': True}
+
+        if User.objects.filter(email=data['email']).exists():
+            res['email'] = False
+
+        return JsonResponse(serialize(res))
     def post(self, request):
 
         """
@@ -98,240 +105,258 @@ class Login(View):
 #         logout(request)
 #         return JsonResponse({})
 
-@method_decorator(csrf_exempt, name='dispatch')
-class EmailVerify(View):
-    def post(self, request):
-        data = request.POST
+# @method_decorator(csrf_exempt, name='dispatch')
+# class EmailVerify(View):
+#     def post(self, request):
+#         data = request.POST
 
-        if data:
-            if 'token' not in data:
-                return JsonResponse({
-                    'error': 'no token'
-                }, status=HTTP_400_BAD_REQUEST)
+#         if data:
+#             if 'token' not in data:
+#                 return JsonResponse({
+#                     'error': 'no token'
+#                 }, status=HTTP_400_BAD_REQUEST)
             
-            if 'email' not in data:
-                return JsonResponse({
-                    'error': 'no email'
-                }, status=HTTP_400_BAD_REQUEST)
+#             if 'email' not in data:
+#                 return JsonResponse({
+#                     'error': 'no email'
+#                 }, status=HTTP_400_BAD_REQUEST)
             
-            email = data['email']
+#             email = data['email']
 
-            user = User.objects.filter(email=email).first()
+#             user = User.objects.filter(email=email).first()
 
-            if not user:
-                return JsonResponse({
-                    'error': 'no user'
-                }, status=HTTP_404_NOT_FOUND)
+#             if not user:
+#                 return JsonResponse({
+#                     'error': 'no user'
+#                 }, status=HTTP_404_NOT_FOUND)
 
-            key = f'VERIFY:{email}'
-            token = redis.get(key)
+#             key = f'VERIFY:{email}'
+#             token = redis.get(key)
 
-            if not token:
-                return JsonResponse({
-                    'error': 'no token'
-                }, status=HTTP_404_NOT_FOUND)
+#             if not token:
+#                 return JsonResponse({
+#                     'error': 'no token'
+#                 }, status=HTTP_404_NOT_FOUND)
             
-            if token != data.get('token'):
-                return JsonResponse({
-                    'error': 'incorrect'
-                }, status=HTTP_400_BAD_REQUEST)
+#             if token != data.get('token'):
+#                 return JsonResponse({
+#                     'error': 'incorrect'
+#                 }, status=HTTP_400_BAD_REQUEST)
             
-            user.email_verified = True
-            user.save()
+#             user.email_verified = True
+#             user.save()
 
-            del redis[key]
+#             del redis[key]
 
-        else:
-            if not request.user.is_authenticated:
-                return JsonResponse({}, status=HTTP_401_UNAUTHORIZED)
+#         else:
+#             if not request.user.is_authenticated:
+#                 return JsonResponse({}, status=HTTP_401_UNAUTHORIZED)
 
-            key = f'VERIFY:{request.user.email}'
-            token = id_generator(size=128)
-            redis.set(key, token, 180) # 3분
+#             key = f'VERIFY:{request.user.email}'
+#             token = id_generator(size=128)
+#             redis.set(key, token, 180) # 3분
 
-            html = loader.render_to_string(
-                'email_verify_template.html',
-                {'token': token, 'email': request.user.email}
-            )
+#             html = loader.render_to_string(
+#                 'email_verify_template.html',
+#                 {'token': token, 'email': request.user.email}
+#             )
 
-            send_mail(
-                '[FreeChart] 이메일 인증 링크',
-                '',
-                from_email=EMAIL_HOST_SENDER,
-                recipient_list=[request.user.email],
-                html_message=html
-            )
+#             send_mail(
+#                 '[FreeChart] 이메일 인증 링크',
+#                 '',
+#                 from_email=EMAIL_HOST_SENDER,
+#                 recipient_list=[request.user.email],
+#                 html_message=html
+#             )
 
-        return JsonResponse({})
+#         return JsonResponse({})
 
-@method_decorator(csrf_exempt, name='dispatch')
-class PasswordReset(View):
-    def post(self, request):
-        # if request.user.is_authenticated:
-        #     return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
-
-        if request.POST:
-            data = request.POST
-        else:
-            data = json.loads(request.body.decode("utf-8"))
-
-        if 'email' not in data:
-            return JsonResponse({
-                'error': 'no email'
-            }, status=HTTP_400_BAD_REQUEST)
-
-        email = data.get('email')
-
-        if not User.objects.filter(email=email).exists():
-            return JsonResponse({
-                'error': 'no user'
-            }, status=HTTP_404_NOT_FOUND)
-
-        key = f'RESET:{email}'
-        tmp_key = f'TMP:{email}'
-
-        if 'token' in data:
-            token = redis.get(key)
-            tmp_password = redis.get(tmp_key)
-
-            if not token:
-                return JsonResponse({
-                    'error': 'no token'
-                }, status=HTTP_404_NOT_FOUND)
-            
-            if token != data.get('token'):
-                return JsonResponse({
-                    'error': 'incorrect'
-                }, status=HTTP_400_BAD_REQUEST)
-
-            user = User.objects.filter(email=email).first()
-            user.set_password(tmp_password)
-            user.save()
-
-            del redis[key]
-            del redis[tmp_key]
-
-            return HttpResponseRedirect(
-                redirect_to=f'http://{HOST_NAME}/')
-
-        else:
-            token = id_generator(size=128)
-            tmp_password = id_generator(size=12)
-
-            redis.set(key, token, 180) # 3분
-            redis.set(tmp_key, tmp_password, 180)
-
-            payload = '{"email": %s, "token": %s}'%(email, token)
-            html = loader.render_to_string(
-                'tmp_password_template.html',
-                {
-                    'reset_url': reset_url,
-                    'password': tmp_password,
-                    'email': email,
-                    'token': token
-                }
-            )
-            send_mail(
-                '[FreeChart] 비밀번호 재설정 링크',
-                '',
-                from_email=EMAIL_HOST_SENDER,
-                recipient_list=[email],
-                html_message=html
-            )
-
-        return JsonResponse({})
-
-@method_decorator(csrf_exempt, name='dispatch')
-class Check(View):
-    def post(self, request):
-        data = json.loads(request.body.decode('utf-8'))
-
-        if not data or 'email' not in data:
-            return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
-
-        res = {}
-
-        if 'email' in data:
-            res['email'] = True
-            if User.objects.filter(email=data['email']).exists():
-                res['email'] = False
+# @method_decorator(csrf_exempt, name='dispatch')
+# class Password(View):
+#     def post(self, request):
+#         if request.user.is_authenticated:
+#             return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
         
-        return JsonResponse(serialize(res))
+#         data = json.loads(request.body.decode("utf-8"))
 
-@method_decorator(csrf_exempt, name='dispatch')
-class UserCreate(View):
-    def post(self, request):
-        data = json.loads(request.body.decode("utf-8"))
+#         user = request.user
 
-        if 'password' not in data:
-            return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
+#         if 'id' not in data or 'password' not in data:
+#             return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
 
-        if 'email' in data:
-            email = data.get('email')
-            username = data.get('username', email)
-            password = data.get('password', '')
-
-            if User.objects.filter(email=email).exists():
-                return JsonResponse({}, status=HTTP_409_CONFLICT)
-
-            new_user = User.objects.create_user(
-                username=username,
-                email_verified=False,
-                email=email,
-                password=password,
-            )
-
-            SetDefaultData(new_user.id)
-
-            refresh = RefreshToken.for_user(new_user)
-
-        else:
-            return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
+#         if int(data['id']) != user.id:
+#             return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
         
-        return JsonResponse(serialize({
-            'refresh': str(refresh),
-            'access': str(refresh.access_token),
-            'user': serialize(new_user)
-        }))
-
-@method_decorator(csrf_exempt, name='dispatch')
-class UserDelete(APIView):
-    def post(self, request):
-        if not request.user.is_authenticated:
-            return JsonResponse({}, status=HTTP_401_UNAUTHORIZED)
-
-        data = json.loads(request.body.decode('utf-8'))
-        user = request.user
-
-        if 'id' not in data or 'password' not in data:
-            return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
-
-        if int(data['id']) != user.id:
-            return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
+#         if not request.user.check_password(data['password']):
+#             return JsonResponse({
+#                 'error': 'password'
+#             }, status=HTTP_400_BAD_REQUEST)
         
-        if not request.user.check_password(data['password']):
-            return JsonResponse({
-                'error': 'password'
-            }, status=HTTP_400_BAD_REQUEST)
+#         return JsonResponse({})
 
-        RefreshToken.for_user(user)
-        user.is_active = False
-        user.set_unusable_password()
-        user.email = f'{user.email}@leave'+str(now())
-        user.username = f'{user.username}@leave'+str(now())
-        user.save()
+#     def put(self, request):
+#         if request.POST:
+#             data = request.POST
+#         else:
+#             data = json.loads(request.body.decode("utf-8"))
 
-        return JsonResponse({})
+#         if 'email' not in data:
+#             return JsonResponse({
+#                 'error': 'no email'
+#             }, status=HTTP_400_BAD_REQUEST)
 
-@method_decorator(csrf_exempt, name='dispatch')
-class Auth(APIView):
-    def post(self, request):
-        # from rest_framework_simplejwt.authentication import JWTAuthentication
-        # jwt = JWTAuthentication()
-        # header          = jwt.get_header(request)
-        # raw_token       = jwt.get_raw_token(header)
-        # validated_token = jwt.get_validated_token(raw_token)
-        # user            = jwt.get_user(validated_token)
+#         email = data.get('email')
 
-        return JsonResponse({})
+#         if not User.objects.filter(email=email).exists():
+#             return JsonResponse({
+#                 'error': 'no user'
+#             }, status=HTTP_404_NOT_FOUND)
+
+#         key = f'RESET:{email}'
+#         tmp_key = f'TMP:{email}'
+
+#         if 'token' in data:
+#             token = redis.get(key)
+#             tmp_password = redis.get(tmp_key)
+
+#             if not token:
+#                 return JsonResponse({
+#                     'error': 'no token'
+#                 }, status=HTTP_404_NOT_FOUND)
+            
+#             if token != data.get('token'):
+#                 return JsonResponse({
+#                     'error': 'incorrect'
+#                 }, status=HTTP_400_BAD_REQUEST)
+
+#             user = User.objects.filter(email=email).first()
+#             user.set_password(tmp_password)
+#             user.save()
+
+#             del redis[key]
+#             del redis[tmp_key]
+
+#             return HttpResponseRedirect(
+#                 redirect_to=f'http://{HOST_NAME}/')
+
+#         else:
+#             token = id_generator(size=128)
+#             tmp_password = id_generator(size=12)
+
+#             redis.set(key, token, 180) # 3분
+#             redis.set(tmp_key, tmp_password, 180)
+
+#             payload = '{"email": %s, "token": %s}'%(email, token)
+#             html = loader.render_to_string(
+#                 'tmp_password_template.html',
+#                 {
+#                     'reset_url': reset_url,
+#                     'password': tmp_password,
+#                     'email': email,
+#                     'token': token
+#                 }
+#             )
+#             send_mail(
+#                 '[FreeChart] 비밀번호 재설정 링크',
+#                 '',
+#                 from_email=EMAIL_HOST_SENDER,
+#                 recipient_list=[email],
+#                 html_message=html
+#             )
+
+#         return JsonResponse({})
+
+# @method_decorator(csrf_exempt, name='dispatch')
+# class Check(View):
+#     def post(self, request):
+#         data = json.loads(request.body.decode('utf-8'))
+
+#         if not data or 'email' not in data:
+#             return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
+
+#         res = {}
+
+#         if 'email' in data:
+#             res['email'] = True
+#             if User.objects.filter(email=data['email']).exists():
+#                 res['email'] = False
+        
+#         return JsonResponse(serialize(res))
+
+# @method_decorator(csrf_exempt, name='dispatch')
+# class UserCreate(View):
+#     def post(self, request):
+#         data = json.loads(request.body.decode("utf-8"))
+
+#         if 'password' not in data:
+#             return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
+
+#         if 'email' in data:
+#             email = data.get('email')
+#             username = data.get('username', email)
+#             password = data.get('password', '')
+
+#             if User.objects.filter(email=email).exists():
+#                 return JsonResponse({}, status=HTTP_409_CONFLICT)
+
+#             new_user = User.objects.create_user(
+#                 username=username,
+#                 email_verified=False,
+#                 email=email,
+#                 password=password,
+#             )
+
+#             SetDefaultData(new_user.id)
+
+#             refresh = RefreshToken.for_user(new_user)
+
+#         else:
+#             return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
+        
+#         return JsonResponse(serialize({
+#             'refresh': str(refresh),
+#             'access': str(refresh.access_token),
+#             'user': serialize(new_user)
+#         }))
+
+# @method_decorator(csrf_exempt, name='dispatch')
+# class UserDelete(APIView):
+#     def post(self, request):
+#         if not request.user.is_authenticated:
+#             return JsonResponse({}, status=HTTP_401_UNAUTHORIZED)
+
+#         data = json.loads(request.body.decode('utf-8'))
+#         user = request.user
+
+#         if 'id' not in data or 'password' not in data:
+#             return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
+
+#         if int(data['id']) != user.id:
+#             return JsonResponse({}, status=HTTP_400_BAD_REQUEST)
+        
+#         if not request.user.check_password(data['password']):
+#             return JsonResponse({
+#                 'error': 'password'
+#             }, status=HTTP_400_BAD_REQUEST)
+
+#         RefreshToken.for_user(user)
+#         user.is_active = False
+#         user.set_unusable_password()
+#         user.email = f'{user.email}@leave'+str(now())
+#         user.username = f'{user.username}@leave'+str(now())
+#         user.save()
+
+#         return JsonResponse({})
+
+# @method_decorator(csrf_exempt, name='dispatch')
+# class Auth(APIView):
+#     def post(self, request):
+#         # from rest_framework_simplejwt.authentication import JWTAuthentication
+#         # jwt = JWTAuthentication()
+#         # header          = jwt.get_header(request)
+#         # raw_token       = jwt.get_raw_token(header)
+#         # validated_token = jwt.get_validated_token(raw_token)
+#         # user            = jwt.get_user(validated_token)
+
+#         return JsonResponse({})
 

@@ -4,6 +4,9 @@ import axios_ from "./axiosApi";
 
 import { fetch, clearError, reportError, REFRESH, action } from './common';
 
+const SHEET_API_URL = `/sheets`;
+const COPY_API_URL = `/sheets/copies`;
+
 export const GET_SHEET = 'GET_SHEET';
 export const GET_SHEETS = 'GET_SHEETS';
 export const CREATE_SHEET = 'CREATE_SHEET';
@@ -17,7 +20,7 @@ export function getSheet(id=null, board_id=null) {
             params.id = id;
         if (board_id)
             params.board_id = board_id;
-        return axios_.get(`/sheet/`, {params})
+        return axios_.get(SHEET_API_URL, {params})
         .then(res => {
             if (res.data.sheet)
                 dispatch(fetch(GET_SHEET, res.data));
@@ -33,7 +36,7 @@ export function getSheet(id=null, board_id=null) {
 
 export function createSheet(title=null, boardId=null) {
     return (dispatch) => {
-        return axios_.post(`/sheet/`,
+        return axios_.post(SHEET_API_URL,
         {
             title: title,
             board_id: boardId
@@ -56,7 +59,7 @@ export function modifySheet(id, key, title=null, boardId=null) {
         if (boardId)
             params.board_id = (boardId > 0)? boardId: null; // -1: root
 
-        return axios_.put(`/sheet/`, params)
+        return axios_.put(SHEET_API_URL, params)
         .then(res => {
             if (title)
                 dispatch(
@@ -77,7 +80,7 @@ export function modifySheet(id, key, title=null, boardId=null) {
 export function deleteSheet(id, key) {
     return (dispatch) => {
         let params = {id: id};
-        return axios_.delete(`/sheet/`, {params})
+        return axios_.delete(SHEET_API_URL, {params})
         .then(() => {
             dispatch(fetch(DELETE_SHEET, {key:key}));
             dispatch(clearError());
@@ -91,7 +94,7 @@ export function deleteSheet(id, key) {
 export function copySheet(id) {
     return (dispatch) => {
         let params = {sheet_id: id}
-        return axios_.post(`/sheet/copy/`, params)
+        return axios_.post(COPY_API_URL, params)
         .then(()=> {
             dispatch(action(REFRESH));
             dispatch(clearError());
@@ -106,7 +109,7 @@ export function updateSheet(id, key) {
     return (dispatch) => {
         let params = {id: id};
 
-        return axios_.put(`/sheet/`, params)
+        return axios_.put(SHEET_API_URL, params)
         .then(res => {
             dispatch(
                 fetch(MODIFY_SHEET, {

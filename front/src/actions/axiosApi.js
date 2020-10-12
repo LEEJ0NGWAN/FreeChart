@@ -20,7 +20,7 @@ axios_.interceptors.response.use(
             const refresh_token = localStorage.getItem('refresh_token');
 
             return axios_
-                .post('/account/refresh/', {refresh: refresh_token})
+                .post('/accounts/token', {refresh: refresh_token})
                 .then(res => {
 
                     localStorage.setItem('access_token', res.data.access);
