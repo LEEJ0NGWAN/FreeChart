@@ -1,4 +1,4 @@
-[돌아가기](README.md#개발자-문서)
+[돌아가기](https://github.com/LEEJ0NGWAN/FreeChart#개발자-문서)
 
 ## 향후 개선 계획
 
