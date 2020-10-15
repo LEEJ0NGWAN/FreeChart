@@ -4,7 +4,7 @@
 
 api 서버 호스트를 생략하고, 하위 경로만 기술합니다.
 
-예를 들어, `/account/login/`는 `http://api서버/account/login/` 을 나타냅니다.
+예를 들어, `/users`는 `http://api서버/users` 을 나타냅니다.
 
 POST와 PUT 메소드는 통상적으로 json 데이터 형식을 이용합니다. (예외 별도 표시)
 
