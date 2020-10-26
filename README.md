@@ -23,7 +23,7 @@ React.js, Django Rest Framework, docker로 개발된 웹 기반 네트워크 그
 
 <img src="/README/ipad.png" width="50%" height="50%">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="/README/iphoneX.png" width="20%" height="20%">
 
-<img src="/README/mac.png">
+<img src="/README/MBP.png">
 
 ## 개발 스펙
 
