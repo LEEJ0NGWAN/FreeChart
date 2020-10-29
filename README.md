@@ -55,7 +55,7 @@ react-router-dom 라이브러리를 이용하여 리액트 컴포넌트 라우�
 
 ## Redux pattern
 
-<img src="/README/reducer.png" width="70%" height="70%">
+<img src="/README/reducers.png" width="70%" height="70%">
 
 사용자 및 그래프 데이터와 같이 백엔드 서버로부터 api 호출을 통해 얻은 후, 여러 컴포넌트에서 공통으로 사용하는 데이터는 각 종류 별 reducer가 관리하며 하나의 store에 저장합니다.
 
