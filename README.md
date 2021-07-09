@@ -1,6 +1,10 @@
-# FreeChart
+**+2021.07.09**
 
-[http://freechart.tk/](http://freechart.tk/)
+**AWS 요금 문제 및 도메인 유효 기간 만료로 인해, FreeChart 서비스 웹 배포는 중지하게 되었습니다.**
+
+<br/><br/>
+
+# FreeChart
 
 React.js, Django Rest Framework, docker로 개발된 웹 기반 네트워크 그래프 작성 애플리케이션입니다.
 
@@ -107,6 +111,4 @@ React.js, Django Rest Framework, docker로 개발된 웹 기반 네트워크 그
 - [Docker 관련 사항](DOCKER.md)  
 
 - [ERD](ERD.md)  
-
-- [향후 개선 계획](NEXTPLAN.md)  
 
